@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { interpretTurn } from "../ai/orchestrator.js";
 import { mergeMemory, splitMemoryForStorage } from "../engine/memoryEngine.js";
 import { runDecisionEngine } from "../engine/decisionEngine.js";
+import { findSuppliers } from "../ai/supplierSearch.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -93,11 +94,28 @@ router.post("/:projectId/messages", async (req, res) => {
     );
   }
 
+  let supplierResults = null;
+  if (interpretation.run_supplier_search) {
+    const productName = nextMemory.product_name?.value || nextMemory.objective?.value;
+    const location = nextMemory.location?.value;
+    const isImport = nextCategory === "importacao";
+    if (productName && (location || isImport)) {
+      try {
+        const result = await findSuppliers({ productName, location, isImport });
+        supplierResults = result.content;
+        await query("INSERT INTO messages (project_id, role, content) VALUES ($1, 'assistant', $2)", [project.project_id, supplierResults]);
+      } catch (e) {
+        supplierResults = `Não consegui completar a pesquisa agora: ${e.message}`;
+      }
+    }
+  }
+
   res.json({
     reply: interpretation.reply,
     category: nextCategory,
     memory: nextMemory,
     report,
+    supplierResults,
   });
 });
 

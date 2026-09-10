@@ -104,6 +104,7 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
         ...m,
         { role: "assistant", content: data.reply, type: "text" },
         ...(data.report ? [{ role: "assistant", type: "report", report: data.report }] : []),
+        ...(data.supplierResults ? [{ role: "assistant", content: data.supplierResults, type: "text" }] : []),
       ]);
       onProjectUpdate?.(data.category);
     } catch (err) {
