@@ -1,4 +1,6 @@
-// AI Orchestrator — a ÚNICA camada do sistema que chama a API da IA.
+// AI Orchestrator — a ÚNICA camada do sistema que chama a API da Anthropic.
+// Responsabilidade: interpretar, classificar, extrair dados, e devolver texto de conversa.
+// NUNCA calcula margens/lucros/percentagens — isso é do decisionEngine/calculationEngine.
 
 const SYSTEM_PROMPT = `Tu és a camada de interpretação de um consultor digital de negócios para o mercado angolano (português, incluindo linguagem informal e angolana). A tua ÚNICA função é interpretar, classificar e extrair dados — NUNCA calcules margens, lucros ou tomes a decisão final, isso é feito por um motor determinístico separado.
 
@@ -135,6 +137,9 @@ async function callGroq({ system, messages, maxTokens, jsonMode }) {
   });
   if (!response.ok) {
     const errText = await response.text();
+    if (errText.includes("rate_limit")) {
+      throw new Error("RATE_LIMIT");
+    }
     throw new Error(`Erro na API da Groq: ${response.status} ${errText}`);
   }
   const data = await response.json();
@@ -163,7 +168,17 @@ export async function interpretTurn({ userText, memory, category, history }) {
       return parsed;
     } catch (e) {
       lastError = e;
+      if (e.message === "RATE_LIMIT" && attempt === 0) {
+        await new Promise((r) => setTimeout(r, 15000));
+      }
     }
+  }
+  if (lastError?.message === "RATE_LIMIT") {
+    return {
+      reply: "Estamos com muito tráfego neste momento. Espera uns 20 segundos e tenta outra vez.",
+      category: category || "indefinido",
+      updates: {},
+    };
   }
   console.error("Falha ao interpretar após 2 tentativas:", lastError);
   return {
@@ -173,6 +188,7 @@ export async function interpretTurn({ userText, memory, category, history }) {
   };
 }
 
+// Segunda chamada, opcional — explica um relatório já calculado, sem recalcular nada.
 export async function explainReport({ report, memory }) {
   const system = `Explica em português, de forma direta e honesta, o relatório de decisão abaixo, em no máximo 3 frases,
 para um empreendedor angolano sem formação financeira. NÃO alteres nenhum número. NÃO faças novos cálculos.
