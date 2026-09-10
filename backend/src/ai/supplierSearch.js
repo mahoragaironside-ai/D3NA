@@ -53,6 +53,9 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
 
   if (!response.ok) {
     const errText = await response.text();
+    if (errText.includes("rate_limit")) {
+      throw new Error("Estamos com muito tráfego neste momento. Espera uns 20 segundos e tenta outra vez.");
+    }
     throw new Error(`Erro na pesquisa de fornecedores: ${response.status} ${errText}`);
   }
 
