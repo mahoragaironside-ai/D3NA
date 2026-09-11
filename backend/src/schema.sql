@@ -56,6 +56,12 @@ CREATE TABLE IF NOT EXISTS analyses (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ad_views_count INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ad_credits INTEGER DEFAULT 0;
 
+CREATE TABLE IF NOT EXISTS supplier_search_log (
+  log_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS subscriptions (
   subscription_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id             UUID REFERENCES users(user_id) ON DELETE CASCADE,
