@@ -162,12 +162,12 @@ function MainApp() {
       <style>{`
         :root {
           --bg: #F5F6F8; --surface: #FFFFFF; --ink: #15181F; --ink-soft: #5B6270; --border: #E3E6EB;
-          --navy: #16305C; --navy-soft: #EAF0F9; --accent: #2F6FE4; --green: #1E7A52; --green-bg: #EAF5EF;
+          --navy: #16305C; --navy-soft: #EAF0F9; --accent: #2F6FE4; --accent: #2F6FE4; --accent: #2F6FE4; --green: #1E7A52; --green-bg: #EAF5EF;
           --amber: #946B1D; --amber-bg: #FAF1E1; --red: #B03A2E; --red-bg: #FBEAE8;
         }
         [data-theme="dark"] {
           --bg: #15171C; --surface: #1D2027; --ink: #ECEEF2; --ink-soft: #9AA1AE; --border: #2B2F38;
-          --navy: #3663B0; --navy-soft: #202B40; --accent: #5B93F0; --green: #3FBE8B; --green-bg: #163229;
+          --navy: #3663B0; --navy-soft: #202B40; --accent: #5B93F0; --accent: #5B93F0; --accent: #5B93F0; --green: #3FBE8B; --green-bg: #163229;
           --amber: #E0AA4E; --amber-bg: #3A2E15; --red: #E27263; --red-bg: #3B1D1A;
         }
         .sidebar {
