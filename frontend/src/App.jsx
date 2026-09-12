@@ -135,7 +135,7 @@ function MainApp() {
             </button>
           )}
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 1.2, opacity: 0.75, fontWeight: 600, textTransform: "uppercase" }}>Consultor Digital</div>
+            <div style={{ fontSize: 11, letterSpacing: 1.2, opacity: 0.75, fontWeight: 600, textTransform: "uppercase" }}>D3NA</div>
             <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "Georgia, serif" }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
           </div>
         </div>

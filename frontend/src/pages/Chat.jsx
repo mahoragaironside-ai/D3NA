@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Mic, Square, Loader2, Search } from "lucide-react";
+import { Send, Mic, Square, Loader2, Search, MoreVertical } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
 import ReportCard from "../components/ReportCard.jsx";
@@ -13,12 +13,6 @@ const CHIPS = [
   "Preciso de clientes",
   "Quero analisar uma decisão",
 ];
-
-const CATEGORY_LABEL = {
-  compra: "Decisão de compra", stock: "Decisão de stock", importacao: "Importação",
-  negocio: "Início de negócio", validacao: "Validação de ideia", produto_digital: "Produto digital",
-  marketing: "Marketing", publicidade: "Publicidade paga", preco: "Definição de preço", estrategia: "Estratégia",
-};
 
 export default function Chat({ project, onProjectUpdate, subscription, onUpgrade }) {
   const isCourse = project.category === "curso_marketing";
@@ -39,6 +33,7 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
   const [audioError, setAudioError] = useState("");
   const [searchingSuppliers, setSearchingSuppliers] = useState(false);
   const [showAdBreak, setShowAdBreak] = useState(false);
+  const [showTools, setShowTools] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const scrollRef = useRef(null);
@@ -199,20 +194,32 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
         </div>
       )}
 
-      <div style={{ padding: "14px 16px 0" }}>
-        <ProgressPanel memory={memoryStatus} />
+      <div style={{ padding: "10px 16px 0", display: "flex", justifyContent: "flex-end" }}>
         <button
-          onClick={searchSuppliers}
-          disabled={searchingSuppliers}
-          style={{
-            marginTop: 10, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "9px 0",
-            fontSize: 13, fontWeight: 600, color: C.navy, cursor: searchingSuppliers ? "default" : "pointer",
-          }}>
-          {searchingSuppliers ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={14} />}
-          {searchingSuppliers ? "A pesquisar na internet…" : "Pesquisar fornecedores reais"}
+          onClick={() => setShowTools((s) => !s)}
+          title="Ferramentas e progresso"
+          style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+        >
+          <MoreVertical size={16} color={C.inkSoft} />
         </button>
       </div>
+
+      {showTools && (
+        <div style={{ padding: "8px 16px 0" }}>
+          <ProgressPanel memory={memoryStatus} />
+          <button
+            onClick={searchSuppliers}
+            disabled={searchingSuppliers}
+            style={{
+              marginTop: 10, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "9px 0",
+              fontSize: 13, fontWeight: 600, color: C.navy, cursor: searchingSuppliers ? "default" : "pointer",
+            }}>
+            {searchingSuppliers ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={14} />}
+            {searchingSuppliers ? "A pesquisar na internet…" : "Pesquisar fornecedores reais"}
+          </button>
+        </div>
+      )}
 
       <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.length === 1 && (
