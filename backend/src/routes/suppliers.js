@@ -27,6 +27,7 @@ router.post("/:projectId/suppliers", async (req, res) => {
     return res.status(400).json({ error: "Ainda não sei que produto procurar — descreve primeiro o que queres comprar ou vender." });
   }
 
+  console.log("[DEBUG suppliers] productName length:", productName?.length, "| location:", JSON.stringify(memory.location)?.slice(0, 200));
   const isImport = project.rows[0].category === "importacao";
   if (!isImport && !memory.location) {
     return res.status(400).json({
