@@ -6,6 +6,7 @@ export const C = {
   border: "var(--border)",
   navy: "var(--navy)",
   navySoft: "var(--navy-soft)",
+  accent: "var(--accent)",
   green: "var(--green)",
   greenBg: "var(--green-bg)",
   amber: "var(--amber)",

@@ -188,7 +188,7 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
       {subscription?.subscription_status !== "ativo" && (
         <div style={{ background: C.navySoft, color: C.navy, fontSize: 12.5, padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span>Plano gratuito — 1 análise/mês.</span>
-          <button onClick={onUpgrade} style={{ background: C.navy, color: "#fff", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 12, cursor: "pointer" }}>
+          <button onClick={onUpgrade} style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
             Ativar — 600 Kz / 7 dias
           </button>
         </div>
