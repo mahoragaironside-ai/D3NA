@@ -128,16 +128,18 @@ function MainApp() {
       />
 
       <div className="app-main" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <div style={{ background: C.navy, color: "#fff", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ background: C.navy, color: "#fff", padding: "16px 18px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           {!sidebarOpen && (
-            <button onClick={() => setSidebarOpen(true)} style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <button onClick={() => setSidebarOpen(true)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <Menu size={16} color="#fff" />
             </button>
           )}
           <div>
-            <img src="/logo.png" alt="D3NA" style={{ width: 30, height: 30, borderRadius: 8, objectFit: "cover", marginBottom: 4 }} />
-            <div style={{ fontSize: 11, letterSpacing: 1.2, opacity: 0.75, fontWeight: 600, textTransform: "uppercase" }}>D3NA</div>
-            <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "Georgia, serif" }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <img src="/logo.png" alt="" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
+              <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: 0.6 }}>D3NA</span>
+            </div>
+            <div style={{ fontSize: 12.5, fontWeight: 500, fontFamily: "Georgia, serif", opacity: 0.78, marginTop: 2 }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
           </div>
         </div>
 
