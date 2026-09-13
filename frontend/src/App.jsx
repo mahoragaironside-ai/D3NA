@@ -5,12 +5,14 @@ import { C } from "./tokens.js";
 import Auth from "./pages/Auth.jsx";
 import Chat from "./pages/Chat.jsx";
 import AdminPanel from "./pages/AdminPanel.jsx";
+import SiteBuilder from "./pages/SiteBuilder.jsx";
 import PaymentModal from "./components/PaymentModal.jsx";
 import PhoneVerifyBanner from "./components/PhoneVerifyBanner.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 
 export default function App() {
   if (window.location.pathname === "/admin") return <AdminPanel />;
+  if (window.location.pathname === "/construtor") return <SiteBuilder />;
 
   return <MainApp />;
 }

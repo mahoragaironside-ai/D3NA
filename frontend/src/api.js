@@ -72,6 +72,16 @@ export const api = {
       headers: { "x-admin-key": adminKey },
     }).then(handle),
 
+  createSiteBuild: (payload) =>
+    fetch(`${API_URL}/site-builds`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).then(handle),
+
+  getSiteBuildStatus: (buildId) =>
+    fetch(`${API_URL}/site-builds/${buildId}/status`).then(handle),
+
   me: () => fetch(`${API_URL}/auth/me`, { headers: authHeaders() }).then(handle),
   sendOtp: () => fetch(`${API_URL}/auth/otp/send`, { method: "POST", headers: authHeaders() }).then(handle),
   verifyOtp: (code) =>
