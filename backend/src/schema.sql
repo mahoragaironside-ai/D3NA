@@ -75,3 +75,23 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   expires_at                          TIMESTAMPTZ,
   created_at                            TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS site_builds (
+  build_id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_category    VARCHAR(30),
+  business_type        VARCHAR(60),
+  color_scheme         VARCHAR(20),
+  structure_choice     INTEGER,
+  style_choice         INTEGER,
+  domain_choice        VARCHAR(20) DEFAULT 'blogger',
+  tier                 VARCHAR(10) DEFAULT 'basico',
+  company_name         TEXT,
+  company_description  TEXT,
+  contact_info         TEXT,
+  amount               NUMERIC DEFAULT 1500.00,
+  currency             VARCHAR(3) DEFAULT 'AOA',
+  payment_reference    VARCHAR(30),
+  payment_status       VARCHAR(20) DEFAULT 'pendente',
+  created_at           TIMESTAMPTZ DEFAULT now(),
+  confirmed_at         TIMESTAMPTZ
+);

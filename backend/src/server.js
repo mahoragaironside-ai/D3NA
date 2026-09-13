@@ -8,6 +8,7 @@ import subscriptionRoutes from "./routes/subscriptions.js";
 import audioRoutes from "./routes/audio.js";
 import supplierRoutes from "./routes/suppliers.js";
 import adRoutes from "./routes/ads.js";
+import siteBuilderRoutes from "./routes/siteBuilder.js";
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN || "*" }));
@@ -21,6 +22,7 @@ app.use("/projects", messageRoutes); // adiciona POST /projects/:projectId/messa
 app.use("/projects", audioRoutes);   // adiciona POST /projects/:projectId/audio
 app.use("/projects", supplierRoutes); // adiciona POST /projects/:projectId/suppliers
 app.use("/ads", adRoutes);
+app.use("/site-builds", siteBuilderRoutes);
 app.use("/subscriptions", subscriptionRoutes);
 
 app.use((err, req, res, next) => {
