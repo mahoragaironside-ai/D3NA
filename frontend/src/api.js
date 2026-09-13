@@ -63,6 +63,15 @@ export const api = {
       headers: { "x-admin-key": adminKey },
     }).then(handle),
 
+  adminPendingSiteBuilds: (adminKey) =>
+    fetch(`${API_URL}/site-builds/admin/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminConfirmSiteBuild: (buildId, adminKey) =>
+    fetch(`${API_URL}/site-builds/${buildId}/confirm`, {
+      method: "POST",
+      headers: { "x-admin-key": adminKey },
+    }).then(handle),
+
   me: () => fetch(`${API_URL}/auth/me`, { headers: authHeaders() }).then(handle),
   sendOtp: () => fetch(`${API_URL}/auth/otp/send`, { method: "POST", headers: authHeaders() }).then(handle),
   verifyOtp: (code) =>

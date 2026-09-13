@@ -9,16 +9,20 @@ export default function AdminPanel() {
   const [adminKey, setAdminKey] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [pending, setPending] = useState([]);
+  const [pendingSites, setPendingSites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [confirmedIds, setConfirmedIds] = useState([]);
 
   async function load(key) {
     setLoading(true);
     setError("");
     try {
-      const rows = await api.adminPending(key);
+      const [rows, siteRows] = await Promise.all([
+        api.adminPending(key),
+        api.adminPendingSiteBuilds(key),
+      ]);
       setPending(rows);
+      setPendingSites(siteRows);
       setUnlocked(true);
     } catch (e) {
       setError(e.message || "Chave inválida.");
@@ -31,8 +35,16 @@ export default function AdminPanel() {
   async function confirm(id) {
     try {
       await api.adminConfirm(id, adminKey);
-      setConfirmedIds((c) => [...c, id]);
       setPending((p) => p.filter((s) => s.subscription_id !== id));
+    } catch (e) {
+      alert("Erro ao confirmar: " + e.message);
+    }
+  }
+
+  async function confirmSite(id) {
+    try {
+      await api.adminConfirmSiteBuild(id, adminKey);
+      setPendingSites((p) => p.filter((s) => s.build_id !== id));
     } catch (e) {
       alert("Erro ao confirmar: " + e.message);
     }
@@ -76,7 +88,7 @@ export default function AdminPanel() {
       </div>
 
       {pending.length === 0 ? (
-        <div style={{ color: C.inkSoft, fontSize: 14, textAlign: "center", padding: 40 }}>
+        <div style={{ color: C.inkSoft, fontSize: 14, textAlign: "center", padding: 24 }}>
           Sem pagamentos pendentes de confirmação.
         </div>
       ) : (
@@ -100,10 +112,38 @@ export default function AdminPanel() {
         </div>
       )}
 
+      <div style={{ fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 700, color: C.ink, margin: "32px 0 12px" }}>
+        Construtor de sites — pendentes ({pendingSites.length})
+      </div>
+
+      {pendingSites.length === 0 ? (
+        <div style={{ color: C.inkSoft, fontSize: 14, textAlign: "center", padding: 24 }}>
+          Sem construções de sites pendentes de confirmação.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {pendingSites.map((s) => (
+            <div key={s.build_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{s.company_name} · {s.contact_info}</div>
+                <div style={{ fontSize: 12.5, color: C.inkSoft }}>
+                  Plano {s.tier === "pro" ? "Pro" : "Básico"} · Referência {s.payment_reference} · {Number(s.amount).toLocaleString("pt-PT")} {s.currency} · {new Date(s.created_at).toLocaleString("pt-PT")}
+                </div>
+              </div>
+              <button
+                onClick={() => confirmSite(s.build_id)}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+              >
+                <CheckCircle2 size={15} /> Confirmar pagamento
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ marginTop: 24, fontSize: 12, color: C.inkSoft, lineHeight: 1.6 }}>
         Confirma um pagamento só depois de verificares no teu extrato FaciPay (ou app) que a
         transferência com o valor e a referência indicados foi mesmo recebida.
-        Isto ativa a subscrição do utilizador por 7 dias a partir de agora.
       </div>
     </div>
   );
