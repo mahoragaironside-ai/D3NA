@@ -47,7 +47,7 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
       Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "groq/compound-mini",
+      model: "groq/compound",
       messages: [
         { role: "system", content: SUPPLIER_SYSTEM_PROMPT },
         { role: "user", content: userQuery },
