@@ -25,7 +25,11 @@ REGRAS OBRIGATÓRIAS:
 - Termina SEMPRE com um aviso curto a lembrar que a pessoa deve confirmar reputação e condições
   diretamente com o fornecedor antes de pagar qualquer adiantamento — a pesquisa é um ponto de
   partida, não uma garantia.
-- Responde em português, de forma direta e organizada (lista curta), sem floreios.`;
+- Responde em português, de forma direta e organizada (lista curta), sem floreios.
+- IMPORTANTE: quando formulares os termos de pesquisa na internet (a pesquisa em si, não a
+  resposta final), usa termos em INGLÊS — isto tende a devolver muito mais resultados e reduz
+  falhas técnicas da ferramenta de pesquisa. A tua RESPOSTA FINAL ao utilizador continua sempre
+  em português.`;
 
 export async function findSuppliers({ productName, location, isImport, notes }) {
   if (!process.env.GROQ_API_KEY) {
