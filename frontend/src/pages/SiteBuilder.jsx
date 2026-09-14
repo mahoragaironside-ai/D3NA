@@ -100,6 +100,7 @@ export default function SiteBuilder() {
     5: !!domainChoice,
     6: !!tier,
     7: companyName && contactInfo,
+    8: true,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "24px 16px" };
@@ -158,7 +159,7 @@ export default function SiteBuilder() {
     <div style={wrap}>
       <div style={card}>
         <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-          Construtor de sites · Passo {step} de 7
+          Construtor de sites · Passo {step} de 8
         </div>
 
         {step === 1 && (
@@ -167,11 +168,17 @@ export default function SiteBuilder() {
             <div style={subtitle}>Escolhe a categoria e depois o tipo exato.</div>
             <button style={optBtn(businessCategory === "vendas")} onClick={() => { setBusinessCategory("vendas"); setBusinessType(""); }}>Vendas</button>
             <button style={optBtn(businessCategory === "servicos")} onClick={() => { setBusinessCategory("servicos"); setBusinessType(""); }}>Prestação de serviços</button>
-            {businessCategory && (
+            {businessCategory && !businessType && (
               <div style={{ marginTop: 12 }}>
                 {NEGOCIOS[businessCategory].map((t) => (
                   <button key={t} style={optBtn(businessType === t)} onClick={() => setBusinessType(t)}>{t}</button>
                 ))}
+              </div>
+            )}
+            {businessType && (
+              <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", background: C.navySoft, borderRadius: 10, padding: "10px 14px" }}>
+                <span style={{ fontSize: 14, color: C.navy, fontWeight: 600 }}>{businessType}</span>
+                <button onClick={() => setBusinessType("")} style={{ background: "none", border: "none", color: C.navy, fontSize: 12.5, textDecoration: "underline", cursor: "pointer" }}>Trocar</button>
               </div>
             )}
           </>
@@ -274,11 +281,27 @@ export default function SiteBuilder() {
           </>
         )}
 
+        {step === 8 && (
+          <>
+            <div style={title}>Confere tudo antes de pagar</div>
+            <div style={subtitle}>É assim que o site vai ficar. Se algo não estiver bem, volta atrás e muda.</div>
+            <MiniPreview big structureId={structureChoice} styleId={styleChoice} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+            <div style={{ marginTop: 14, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.9 }}>
+              <div><strong style={{ color: C.ink }}>Negócio:</strong> {businessType}</div>
+              <div><strong style={{ color: C.ink }}>Cores:</strong> {selectedColor.label}</div>
+              <div><strong style={{ color: C.ink }}>Estrutura:</strong> {ESTRUTURAS.find((e) => e.id === structureChoice)?.label}</div>
+              <div><strong style={{ color: C.ink }}>Estilo:</strong> {ESTILOS.find((e) => e.id === styleChoice)?.label}</div>
+              <div><strong style={{ color: C.ink }}>Onde vai ficar:</strong> {domainChoice === "blogger" ? "Blogger do Google" : "Domínio próprio"}</div>
+              <div><strong style={{ color: C.ink }}>Nível:</strong> {tier === "pro" ? "Pro — 25.000 Kz" : "Básico — 1.500 Kz"}</div>
+            </div>
+          </>
+        )}
+
         {error && <div style={{ color: C.red, fontSize: 13, marginTop: 10 }}>{error}</div>}
 
         <div style={navRow}>
           {step > 1 ? <button style={backBtn} onClick={() => setStep((s) => s - 1)}>Voltar</button> : <span />}
-          {step < 7 ? (
+          {step < 8 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
             <button style={navBtn} disabled={!canNext[7] || submitting} onClick={submit}>
