@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
+import MiniPreview from "../components/MiniPreview.jsx";
 
 const NEGOCIOS = {
   vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
@@ -113,6 +114,7 @@ export default function SiteBuilder() {
   const navRow = { display: "flex", justifyContent: "space-between", marginTop: 20 };
   const navBtn = { background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer" };
   const backBtn = { background: "none", border: "none", color: C.inkSoft, fontSize: 14, cursor: "pointer" };
+  const selectedColor = CORES.find((c) => c.id === colorScheme) || CORES[0];
 
   if (result) {
     return (
@@ -194,7 +196,10 @@ export default function SiteBuilder() {
         {step === 3 && (
           <>
             <div style={title}>Estrutura do site</div>
-            <div style={subtitle}>Como as secções do site se organizam.</div>
+            <div style={subtitle}>Como as secções do site se organizam. A pré-visualização atualiza-se sozinha.</div>
+            <div style={{ marginBottom: 14 }}>
+              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+            </div>
             {ESTRUTURAS.map((e) => (
               <button key={e.id} style={optBtn(structureChoice === e.id)} onClick={() => setStructureChoice(e.id)}>
                 <div style={{ fontWeight: 600 }}>{e.label}</div>
@@ -207,7 +212,10 @@ export default function SiteBuilder() {
         {step === 4 && (
           <>
             <div style={title}>Estilo visual</div>
-            <div style={subtitle}>O acabamento e os pequenos efeitos.</div>
+            <div style={subtitle}>O acabamento e os pequenos efeitos. A pré-visualização atualiza-se sozinha.</div>
+            <div style={{ marginBottom: 14 }}>
+              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+            </div>
             {ESTILOS.map((e) => (
               <button key={e.id} style={optBtn(styleChoice === e.id)} onClick={() => setStyleChoice(e.id)}>
                 <div style={{ fontWeight: 600 }}>{e.label}</div>
@@ -220,14 +228,23 @@ export default function SiteBuilder() {
         {step === 5 && (
           <>
             <div style={title}>Onde vai ficar o site?</div>
+            <div style={subtitle}>Em ambos os casos recebes um ficheiro para descarregar depois do pagamento.</div>
             <button style={optBtn(domainChoice === "blogger")} onClick={() => setDomainChoice("blogger")}>
               <div style={{ fontWeight: 600 }}>Blogger do Google (grátis)</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Recebes um ficheiro para inserir no teu blog</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Recebes um ficheiro XML para importar no teu blog</div>
             </button>
             <button style={optBtn(domainChoice === "proprio")} onClick={() => setDomainChoice("proprio")}>
               <div style={{ fontWeight: 600 }}>Domínio próprio</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com (só disponível no Pro)</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes os ficheiros do site prontos</div>
             </button>
+            {domainChoice === "blogger" && (
+              <div style={{ background: C.navySoft, borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12.5, color: C.ink, lineHeight: 1.6 }}>
+                Já tens um blog criado no Blogger (blogger.com)? Depois de receberes o ficheiro,
+                vais a <strong>Configurações → Gerir blog → Importar e fazer cópia de segurança</strong>
+                no teu blog para o inserir. Se ainda não tens blog, cria um gratuito em blogger.com
+                antes de importares o ficheiro.
+              </div>
+            )}
           </>
         )}
 
