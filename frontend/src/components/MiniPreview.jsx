@@ -1,7 +1,7 @@
 import React from "react";
 
 // Maquete pequena e honesta do site: não é o site real, mas dá uma ideia
-// visual concreta da estrutura + estilo + cores + nome + pequenos efeitos,
+// visual concreta da estrutura + estilo + cores + nome + logo + pequenos efeitos,
 // antes de pagar.
 const SECOES_POR_ESTRUTURA = {
   1: ["capa", "sobre", "contacto"],
@@ -11,11 +11,58 @@ const SECOES_POR_ESTRUTURA = {
   5: ["capa", "sobre", "catalogo", "galeria", "contacto"],
 };
 
-export default function MiniPreview({ structureId, styleId, primary, secondary, companyName, big }) {
+function LogoMark({ logoChoice, L1, L2, primary, secondary, scale }) {
+  const size = 20 * scale;
+  const fs = 10 * scale;
+  const base = { width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
+
+  if (logoChoice === 2) {
+    return (
+      <div style={{ ...base, borderRadius: 5, overflow: "hidden", display: "flex" }}>
+        <div style={{ flex: 1, background: secondary, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L1}</span>
+        </div>
+        <div style={{ flex: 1, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L2}</span>
+        </div>
+      </div>
+    );
+  }
+  if (logoChoice === 3) {
+    return (
+      <div style={{ ...base, background: "#fff", borderRadius: "50%", border: `1.5px solid ${secondary}` }}>
+        <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L1}{L2}</span>
+      </div>
+    );
+  }
+  if (logoChoice === 4) {
+    return (
+      <div style={base}>
+        <span style={{ fontFamily: "Georgia, serif", fontSize: fs * 1.1, color: secondary, borderBottom: `1px solid ${secondary}` }}>{L1}{L2.toLowerCase()}</span>
+      </div>
+    );
+  }
+  if (logoChoice === 5) {
+    return (
+      <div style={{ ...base, position: "relative" }}>
+        <span style={{ position: "absolute", fontSize: fs, fontWeight: 900, color: secondary, opacity: 0.4, transform: "translate(1px,1px)" }}>{L1}{L2}</span>
+        <span style={{ position: "relative", fontSize: fs, fontWeight: 900, color: secondary }}>{L1}{L2}</span>
+      </div>
+    );
+  }
+  // 1 (padrão/minimalista) ou nenhum escolhido ainda
+  return (
+    <div style={{ ...base, background: secondary, borderRadius: "50%" }}>
+      <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.75 }}>{L1}{L2}</span>
+    </div>
+  );
+}
+
+export default function MiniPreview({ structureId, styleId, primary, secondary, companyName, logoChoice, big }) {
   const secoes = SECOES_POR_ESTRUTURA[structureId] || SECOES_POR_ESTRUTURA[1];
   const nome = companyName || "A tua empresa";
-  const inicio = nome.slice(0, 2);
-  const resto = nome.slice(2);
+  const L1 = (nome[0] || "D").toUpperCase();
+  const L2 = (nome[1] || "3").toUpperCase();
 
   const isClassico = styleId === 2;
   const isModerno = styleId === 3;
@@ -36,11 +83,9 @@ export default function MiniPreview({ structureId, styleId, primary, secondary, 
         .d3na_prev_btn { animation: d3na_pulse 1.6s ease-in-out infinite; }
       `}</style>
 
-      <div style={{ background: primary, color: "#fff", padding: `${8 * scale}px ${10 * scale}px`, display: "flex", alignItems: "center" }}>
-        <span style={{ fontSize: 12 * scale, fontWeight: 600 }}>
-          <span style={{ color: secondary, fontWeight: 800 }}>{inicio}</span>
-          {resto}
-        </span>
+      <div style={{ background: primary, color: "#fff", padding: `${8 * scale}px ${10 * scale}px`, display: "flex", alignItems: "center", gap: 8 * scale }}>
+        <LogoMark logoChoice={logoChoice} L1={L1} L2={L2} primary={primary} secondary={secondary} scale={scale} />
+        <span style={{ fontSize: 12 * scale, fontWeight: 600 }}>{nome}</span>
       </div>
 
       <div style={{ padding: spacing * scale, display: "flex", flexDirection: "column", gap: spacing * scale }}>

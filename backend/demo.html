@@ -5,39 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Padaria Bom Sabor</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.6; background: #fff; }
+  :root {
+    --bg: #ffffff; --card-bg: #ffffff; --text: #1a1a1a; --text-soft: #555;
+    --nav-bg: #ffffff; --nav-border: #eee; --footer-text: #999;
+    --shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+  body.dark {
+    --bg: #121212; --card-bg: #1e1e1e; --text: #f0f0f0; --text-soft: #b8b8b8;
+    --nav-bg: #1a1a1a; --nav-border: #2a2a2a; --footer-text: #777;
+    --shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
+
+  .logo-mark { display:flex; align-items:center; justify-content:center; width:36px; height:36px; flex-shrink:0; }.logo-mark-4 { width:auto; }
+        .logo-mark-4 span { font-family: Georgia, serif; font-size:18px; color:#1E7A52; border-bottom:2px solid #1E7A52; padding-bottom:1px; }
   
-    .logo-mark { display:flex; align-items:center; justify-content:center;
-      font-weight:800; letter-spacing:0.5px; }
+  .ads-box { background: var(--card-bg); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
+  .ads-label { font-size: 10px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .ads-track { position: relative; height: 90px; }
+  .ads-slide {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; opacity: 0; transition: opacity 0.5s ease; border-radius: 10px;
+    font-size: 12.5px; color: var(--text-soft); background: var(--bg); padding: 10px;
+  }
+  .ads-slide.on { opacity: 1; }
+  .ads-slide.d3na { background: #1E7A52; color: #fff; font-weight: 600; flex-direction: column; gap: 4px; text-decoration: none; }
+  .ads-slide.d3na small { font-weight: 400; opacity: 0.85; font-size: 11px; }
+  .ads-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+  .ads-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--nav-border); }
+  .ads-dot.on { background: #1E7A52; }
   
-      .logo-mark { width:36px; height:36px; border-radius:50%;
-        background:#1E7A52; color:#F5F6F8; font-size:13px;
-        transform: rotate(-15deg) scale(0.7); opacity:0;
-        animation: logoPop 0.5s cubic-bezier(.34,1.56,.64,1) forwards; }
-      @keyframes logoPop { to { transform: rotate(0) scale(1); opacity:1; } }
-    
 
   nav {
     position: sticky; top: 0; z-index: 20;
-    background: #fff; border-bottom: 1px solid #eee;
+    background: var(--nav-bg); border-bottom: 1px solid var(--nav-border);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 20px;
+    padding: 14px 20px; transition: background 0.3s, border-color 0.3s;
   }
   nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #1E7A52; }
+  nav .direita { display: flex; align-items: center; gap: 4px; }
 
-  .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; flex-direction:column; gap:4px; }
+  .theme-btn, .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; }
+  .menu-btn { flex-direction: column; gap:4px; }
   .menu-btn span { width:20px; height:2px; background:#1E7A52; display:block; border-radius:2px; }
 
   .menu-drop {
-    position: absolute; top: 56px; right: 16px; background:#fff;
-    border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    position: absolute; top: 56px; right: 16px; background: var(--card-bg);
+    border-radius: 12px; box-shadow: var(--shadow);
     padding: 8px; display: none; flex-direction: column; min-width: 160px; z-index: 30;
   }
   .menu-drop.on { display: flex; }
-  .menu-drop a { padding: 10px 14px; color:#333; text-decoration:none; font-size:14px; border-radius:8px; }
-  .menu-drop a:active { background:#f2f2f2; }
+  .menu-drop a { padding: 10px 14px; color: var(--text); text-decoration:none; font-size:14px; border-radius:8px; }
 
   header {
     background: linear-gradient(135deg, #1E7A52 0%, #1E7A52dd 100%);
@@ -57,41 +77,42 @@
 
   section { max-width: 680px; margin: -40px auto 0; padding: 0 20px 50px; position: relative; }
   .card {
-    background: #fff; border-radius: 16px; padding: 28px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08); margin-bottom: 20px;
+    background: var(--card-bg); border-radius: 16px; padding: 28px;
+    box-shadow: var(--shadow); margin-bottom: 20px; transition: background 0.3s;
   }
   .card h2 { font-size: 19px; color: #1E7A52; margin-bottom: 12px; font-weight: 800; }
-  .card p { font-size: 14.5px; color: #555; }
+  .card p { font-size: 14.5px; color: var(--text-soft); }
 
   .testemunhos { display: flex; flex-direction: column; gap: 12px; }
-  .testemunho { background: #F7F7F9; border-radius: 12px; padding: 16px; font-size: 13.5px; color: #444; }
+  .testemunho { background: var(--bg); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-soft); }
   .testemunho b { display: block; color: #1E7A52; font-size: 13px; margin-top: 6px; }
 
   .contacto-box {
     background: #1E7A52; color: #F5F6F8; border-radius: 16px; padding: 32px 24px;
     text-align: center;
   }
-  .contacto-box h2 { font-size: 19px; margin-bottom: 6px; }
-  .contacto-box p { opacity: 0.85; font-size: 13.5px; margin-bottom: 18px; }
+  .contacto-box h2 { font-size: 19px; margin-bottom: 18px; }
   .btns { display: flex; flex-direction: column; gap: 10px; }
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 13px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px;
   }
   .btn-wa { background: #25D366; color: #fff; }
-  .btn-tel { background: rgba(255,255,255,0.15); color: #F5F6F8; border: 1px solid #F5F6F855; }
+  .btn-alt { background: rgba(255,255,255,0.15); color: #F5F6F8; border: 1px solid #F5F6F855; }
 
-  footer { text-align: center; padding: 30px 20px; font-size: 12px; color: #999; }
-  footer .redes { margin-bottom: 8px; font-size: 12px; color: #bbb; }
+  footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--footer-text); }
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="marca"><span class="logo-mark">PA</span> Padaria Bom Sabor</div>
-  <button class="menu-btn" onclick="document.getElementById('menuDrop').classList.toggle('on')">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="marca"><div class="logo-mark logo-mark-4"><span>Pa</span></div> Padaria Bom Sabor</div>
+  <div class="direita">
+    <button class="theme-btn" id="themeBtn" title="Alternar tema">🌙</button>
+    <button class="menu-btn" onclick="document.getElementById('menuDrop').classList.toggle('on')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
   <div class="menu-drop" id="menuDrop">
     <a href="#sobre">Sobre</a>
     <a href="#contacto">Contacto</a>
@@ -118,20 +139,32 @@
     </div>
   </div>
 
+  
+  <div class="ads-box reveal">
+    <div class="ads-label">Publicidade</div>
+    <div class="ads-track" id="adsTrack">
+      <div class="ads-slide on" data-i="0"><!-- ADSTERRA_SLOT_1 --> Espaço de anúncio 1</div>
+      <div class="ads-slide" data-i="1"><!-- ADSTERRA_SLOT_2 --> Espaço de anúncio 2</div>
+      <div class="ads-slide" data-i="2"><!-- ADSTERRA_SLOT_3 --> Espaço de anúncio 3</div>
+      <a class="ads-slide d3na" data-i="3" href="#" target="_blank">
+        Quer ganhar renda extra?
+        <small>Torna-te afiliado D3NA →</small>
+      </a>
+    </div>
+    <div class="ads-dots" id="adsDots"></div>
+  </div>
+
   <div class="contacto-box reveal" id="contacto">
     <h2>Fale connosco</h2>
-    <p>923 456 789</p>
     <div class="btns">
-      <a class="btn btn-wa" href="https://wa.me/244923456789?text=Ol%C3%A1!%20Vi%20o%20site%20da%20Padaria%20Bom%20Sabor%20e%20gostava%20de%20saber%20mais." target="_blank">WhatsApp</a>
-      <a class="btn btn-tel" href="tel:923456789">Ligar agora</a>
+      <a class="btn btn-wa" href="https://wa.me/244923456789" target="_blank">💬 923 456 789</a>
+      <a class="btn btn-alt" href="https://instagram.com/padariabomsabor" target="_blank">📸 padariabomsabor</a>
+      <a class="btn btn-alt" href="tel:923456789" >📞 923 456 789</a>
     </div>
   </div>
 </section>
 
-<footer>
-  <div class="redes">Redes sociais em breve</div>
-  Site criado com D3NA
-</footer>
+<footer>Site criado com D3NA</footer>
 
 <script>
   const els = document.querySelectorAll(".reveal");
@@ -147,6 +180,45 @@
       drop.classList.remove("on");
     }
   });
+
+  const themeBtn = document.getElementById("themeBtn");
+  function aplicarTema(escuro) {
+    document.body.classList.toggle("dark", escuro);
+    themeBtn.textContent = escuro ? "☀️" : "🌙";
+  }
+  const guardado = localStorage.getItem("d3na_theme");
+  aplicarTema(guardado === "dark");
+  themeBtn.addEventListener("click", () => {
+    const escuro = !document.body.classList.contains("dark");
+    aplicarTema(escuro);
+    localStorage.setItem("d3na_theme", escuro ? "dark" : "light");
+  });
+  
+  (function () {
+    const track = document.getElementById("adsTrack");
+    const dotsBox = document.getElementById("adsDots");
+    const slides = track.querySelectorAll(".ads-slide");
+    slides.forEach((_, i) => {
+      const d = document.createElement("div");
+      d.className = "ads-dot" + (i === 0 ? " on" : "");
+      dotsBox.appendChild(d);
+    });
+    const dots = dotsBox.querySelectorAll(".ads-dot");
+    let idx = 0;
+    const ultimo = slides.length - 1;
+    function mostrar(i) {
+      slides.forEach((s) => s.classList.remove("on"));
+      dots.forEach((d) => d.classList.remove("on"));
+      slides[i].classList.add("on");
+      dots[i].classList.add("on");
+    }
+    const intervalo = setInterval(() => {
+      if (idx >= ultimo) { clearInterval(intervalo); return; }
+      idx++;
+      mostrar(idx);
+    }, 7000);
+  })();
+  
 </script>
 
 </body>

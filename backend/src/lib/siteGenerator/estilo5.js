@@ -1,10 +1,5 @@
-import { getColors } from "../colors.js";
 import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
 import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
-import { estilo1 } from "./estilo1.js";
-import { estilo2 } from "./estilo2.js";
-import { estilo4 } from "./estilo4.js";
-import { estilo5 } from "./estilo5.js";
 
 const ICONES = {
   whatsapp: "💬", instagram: "📸", tiktok: "🎵",
@@ -14,14 +9,12 @@ const ICONES = {
 function renderContactBtns(contactLinks) {
   if (!contactLinks || contactLinks.length === 0) return "";
   return contactLinks.map((c) => {
-    const isWa = c.platform === "whatsapp";
-    const cls = isWa ? "btn btn-wa" : "btn btn-alt";
     const alvo = c.link.startsWith("tel:") ? "" : `target="_blank"`;
-    return `<a class="${cls}" href="${c.link}" ${alvo}>${ICONES[c.platform] || "🔗"} ${c.label}</a>`;
+    return `<a class="btn" href="${c.link}" ${alvo}>${ICONES[c.platform] || "🔗"} ${c.label}</a>`;
   }).join("\n      ");
 }
 
-export function estilo3(dados, primary, secondary, iniciais, corpo) {
+export function estilo5(dados, primary, secondary, iniciais, corpo) {
   const { company_name, company_description, business_type, contact_links, logo_choice } = dados;
 
   return `<!DOCTYPE html>
@@ -32,14 +25,14 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
 <title>${company_name}</title>
 <style>
   :root {
-    --bg: #ffffff; --card-bg: #ffffff; --text: #1a1a1a; --text-soft: #555;
-    --nav-bg: #ffffff; --nav-border: #eee; --footer-text: #999;
-    --shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --bg: #f4f4f6; --card-bg: #ffffff; --text: #1a1a1a; --text-soft: #666;
+    --nav-bg: #ffffff; --nav-border: #eaeaea; --footer-text: #999;
+    --shadow: 0 10px 24px rgba(0,0,0,0.10);
   }
   body.dark {
-    --bg: #121212; --card-bg: #1e1e1e; --text: #f0f0f0; --text-soft: #b8b8b8;
-    --nav-bg: #1a1a1a; --nav-border: #2a2a2a; --footer-text: #777;
-    --shadow: 0 8px 30px rgba(0,0,0,0.4);
+    --bg: #141414; --card-bg: #202020; --text: #f0f0f0; --text-soft: #b0b0b0;
+    --nav-bg: #1a1a1a; --nav-border: #2c2c2c; --footer-text: #777;
+    --shadow: 0 10px 24px rgba(0,0,0,0.4);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,12 +57,12 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 20px; transition: background 0.3s, border-color 0.3s;
   }
-  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: ${primary}; }
+  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); }
   nav .direita { display: flex; align-items: center; gap: 4px; }
 
   .theme-btn, .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; }
   .menu-btn { flex-direction: column; gap:4px; }
-  .menu-btn span { width:20px; height:2px; background:${primary}; display:block; border-radius:2px; }
+  .menu-btn span { width:20px; height:2px; background: var(--text); display:block; border-radius:2px; }
 
   .menu-drop {
     position: absolute; top: 56px; right: 16px; background: var(--card-bg);
@@ -82,47 +75,43 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
   .menu-ad-box { padding: 4px 14px 10px; overflow: hidden; }
 
   header {
-    background: linear-gradient(135deg, ${primary} 0%, ${primary}dd 100%);
-    color: ${secondary};
-    padding: 70px 20px 90px;
-    text-align: center;
+    padding: 40px 20px 20px; text-align: center;
   }
-  header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
-  header p { font-size: 15px; opacity: 0.9; }
   header .badge {
-    display: inline-block; background: rgba(255,255,255,0.18); border-radius: 20px;
-    padding: 6px 16px; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.5px;
+    display: inline-block; background: ${primary}22; color: ${primary}; border-radius: 20px;
+    padding: 6px 16px; font-size: 12px; margin-bottom: 14px; font-weight: 600;
   }
+  header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  header p { font-size: 14px; color: var(--text-soft); max-width: 460px; margin: 0 auto; }
 
-  .reveal { opacity: 0; transform: translateY(18px); transition: all 0.6s ease; }
+  .reveal { opacity: 0; transform: translateY(14px); transition: all 0.6s ease; }
   .reveal.on { opacity: 1; transform: translateY(0); }
 
-  section { max-width: 680px; margin: -40px auto 0; padding: 0 20px 50px; position: relative; }
+  section { max-width: 680px; margin: 0 auto; padding: 10px 16px 50px; }
   .card {
-    background: var(--card-bg); border-radius: 16px; padding: 28px;
-    box-shadow: var(--shadow); margin-bottom: 20px; transition: background 0.3s;
+    background: var(--card-bg); border-radius: 18px; padding: 24px;
+    box-shadow: var(--shadow); margin-bottom: 16px;
   }
-  .card h2 { font-size: 19px; color: ${primary}; margin-bottom: 12px; font-weight: 800; }
-  .card p { font-size: 14.5px; color: var(--text-soft); }
+  .card h2 { font-size: 17px; color: var(--text); margin-bottom: 12px; font-weight: 800; }
+  .card p { font-size: 14px; color: var(--text-soft); }
 
-  .testemunhos { display: flex; flex-direction: column; gap: 12px; }
-  .testemunho { background: var(--bg); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-soft); }
-  .testemunho b { display: block; color: ${primary}; font-size: 13px; margin-top: 6px; }
+  .testemunhos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .testemunho { background: var(--bg); border-radius: 14px; padding: 14px; font-size: 12.5px; color: var(--text-soft); }
+  .testemunho b { display: block; color: ${primary}; font-size: 12px; margin-top: 8px; }
 
   .contacto-box {
-    background: ${primary}; color: ${secondary}; border-radius: 16px; padding: 32px 24px;
-    text-align: center;
+    background: var(--card-bg); border-radius: 18px; padding: 26px 22px;
+    text-align: center; box-shadow: var(--shadow);
   }
-  .contacto-box h2 { font-size: 19px; margin-bottom: 18px; }
-  .btns { display: flex; flex-direction: column; gap: 10px; }
+  .contacto-box h2 { font-size: 17px; margin-bottom: 16px; font-weight: 800; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 13px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 13px 8px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 13px;
+    background: ${primary}; color: ${secondary};
   }
-  .btn-wa { background: #25D366; color: #fff; }
-  .btn-alt { background: rgba(255,255,255,0.15); color: ${secondary}; border: 1px solid ${secondary}55; }
 
-  footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--footer-text); }
+  footer { text-align: center; padding: 26px 20px; font-size: 12px; color: var(--footer-text); }
 </style>
 </head>
 <body>
@@ -160,21 +149,20 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
 <header>
   <div class="badge">${business_type}</div>
   <h1>${company_name}</h1>
-  <p>${company_description ? company_description.slice(0, 60) : "Qualidade que se sente"}</p>
+  <p>${company_description ? company_description.slice(0, 60) : "Tudo o que precisa, num só lugar"}</p>
 </header>
 
-<section>
-${corpo || `
-  <div class="card reveal" id="sobre">
+<section>  ${corpo || `
+<div class="card reveal" id="sobre">
     <h2>Sobre nós</h2>
     <p>${company_description || "Descrição em breve."}</p>
   </div>
 
   <div class="card reveal">
     <h2>O que dizem os clientes</h2>
-    <div class="testemunhos">
-      <div class="testemunho">"Atendimento rápido e produto de qualidade." <b>— Cliente satisfeito</b></div>
-      <div class="testemunho">"Recomendo a todos, superou as expectativas." <b>— Cliente satisfeito</b></div>
+    <div class="testemunhos-grid">
+      <div class="testemunho">"Atendimento rápido e produto de qualidade."<b>Cliente satisfeito</b></div>
+      <div class="testemunho">"Recomendo a todos, superou as expectativas."<b>Cliente satisfeito</b></div>
     </div>
   </div>
 `}
@@ -223,27 +211,4 @@ ${corpo || `
 
 </body>
 </html>`;
-}
-
-export function gerarEstrutura1(dados) {
-  const {
-    company_name = "O Meu Negócio", company_description = "",
-    business_type = "", color_scheme = "azul", style_choice = 1,
-    logo_choice = 1, contact_links = [],
-  } = dados;
-
-  const { primary, secondary } = getColors(color_scheme);
-  const iniciais = company_name.slice(0, 2).toUpperCase();
-  const d = { company_name, company_description, business_type, contact_links, logo_choice };
-
-  const geradores = {
-    1: estilo1,
-    2: estilo2,
-    3: estilo3,
-    4: estilo4,
-    5: estilo5,
-  };
-  const gerar = geradores[style_choice] || estilo3;
-
-  return gerar(d, primary, secondary, iniciais);
 }

@@ -11,10 +11,11 @@ router.post("/", async (req, res) => {
     business_category, business_type, color_scheme,
     structure_choice, style_choice, domain_choice,
     tier, company_name, company_description, contact_info,
+    contact_links, logo_choice, catalog_items,
   } = req.body;
 
-  if (!company_name || !contact_info) {
-    return res.status(400).json({ error: "Nome da empresa e forma de contacto são obrigatórios." });
+  if (!company_name || (!contact_links && !contact_info)) {
+    return res.status(400).json({ error: "Nome da empresa e pelo menos um contacto são obrigatórios." });
   }
 
   const isPro = tier === "pro";
@@ -25,12 +26,14 @@ router.post("/", async (req, res) => {
     `INSERT INTO site_builds
       (business_category, business_type, color_scheme, structure_choice, style_choice,
        domain_choice, tier, company_name, company_description, contact_info,
+       contact_links, logo_choice, catalog_items,
        amount, currency, payment_reference, payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'pendente')
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'pendente')
      RETURNING build_id`,
     [
       business_category, business_type, color_scheme, structure_choice, style_choice,
       domain_choice || "blogger", isPro ? "pro" : "basico", company_name, company_description, contact_info,
+      contact_links || null, logo_choice || null, catalog_items || null,
       amount, process.env.PAYMENT_CURRENCY || "AOA", reference,
     ]
   );

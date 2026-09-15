@@ -1,10 +1,5 @@
-import { getColors } from "../colors.js";
 import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
 import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
-import { estilo1 } from "./estilo1.js";
-import { estilo2 } from "./estilo2.js";
-import { estilo4 } from "./estilo4.js";
-import { estilo5 } from "./estilo5.js";
 
 const ICONES = {
   whatsapp: "💬", instagram: "📸", tiktok: "🎵",
@@ -14,14 +9,12 @@ const ICONES = {
 function renderContactBtns(contactLinks) {
   if (!contactLinks || contactLinks.length === 0) return "";
   return contactLinks.map((c) => {
-    const isWa = c.platform === "whatsapp";
-    const cls = isWa ? "btn btn-wa" : "btn btn-alt";
     const alvo = c.link.startsWith("tel:") ? "" : `target="_blank"`;
-    return `<a class="${cls}" href="${c.link}" ${alvo}>${ICONES[c.platform] || "🔗"} ${c.label}</a>`;
+    return `<a class="btn" href="${c.link}" ${alvo}>${ICONES[c.platform] || "🔗"} ${c.label}</a>`;
   }).join("\n      ");
 }
 
-export function estilo3(dados, primary, secondary, iniciais, corpo) {
+export function estilo2(dados, primary, secondary, iniciais, corpo) {
   const { company_name, company_description, business_type, contact_links, logo_choice } = dados;
 
   return `<!DOCTYPE html>
@@ -32,14 +25,14 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
 <title>${company_name}</title>
 <style>
   :root {
-    --bg: #ffffff; --card-bg: #ffffff; --text: #1a1a1a; --text-soft: #555;
-    --nav-bg: #ffffff; --nav-border: #eee; --footer-text: #999;
-    --shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --bg: #faf7f2; --card-bg: #fffdfa; --text: #2b2620; --text-soft: #6b6255;
+    --nav-bg: #fffdfa; --nav-border: #e8dfd0; --footer-text: #a39a89;
+    --shadow: 0 6px 20px rgba(60,45,20,0.08); --linha: #e8dfd0;
   }
   body.dark {
-    --bg: #121212; --card-bg: #1e1e1e; --text: #f0f0f0; --text-soft: #b8b8b8;
-    --nav-bg: #1a1a1a; --nav-border: #2a2a2a; --footer-text: #777;
-    --shadow: 0 8px 30px rgba(0,0,0,0.4);
+    --bg: #1c1712; --card-bg: #241e17; --text: #f2ece0; --text-soft: #c2b6a0;
+    --nav-bg: #241e17; --nav-border: #3a3226; --footer-text: #8a7d68;
+    --shadow: 0 6px 20px rgba(0,0,0,0.4); --linha: #3a3226;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,76 +46,70 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     color: var(--text-soft); opacity: 0.35; pointer-events: none; z-index: 5; letter-spacing: 1px;
   }
   .menu-d3na { position: absolute; bottom: 4px; right: 10px; font-size: 8px; color: var(--text-soft); opacity: 0.4; letter-spacing: 0.5px; }
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: var(--text); line-height: 1.7; background: var(--bg); transition: background 0.3s, color 0.3s; }
 
   ${logoBadgeCSS(logo_choice, primary, secondary)}
   ${adsCarouselCSS(primary)}
 
   nav {
     position: sticky; top: 0; z-index: 20;
-    background: var(--nav-bg); border-bottom: 1px solid var(--nav-border);
+    background: var(--nav-bg); border-bottom: 2px solid ${primary};
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 20px; transition: background 0.3s, border-color 0.3s;
+    padding: 16px 22px; transition: background 0.3s, border-color 0.3s;
   }
-  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: ${primary}; }
+  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: ${primary}; letter-spacing: 0.5px; }
   nav .direita { display: flex; align-items: center; gap: 4px; }
 
   .theme-btn, .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; }
   .menu-btn { flex-direction: column; gap:4px; }
-  .menu-btn span { width:20px; height:2px; background:${primary}; display:block; border-radius:2px; }
+  .menu-btn span { width:20px; height:2px; background:${primary}; display:block; }
 
   .menu-drop {
-    position: absolute; top: 56px; right: 16px; background: var(--card-bg);
-    border-radius: 12px; box-shadow: var(--shadow);
+    position: absolute; top: 58px; right: 16px; background: var(--card-bg);
+    border: 1px solid var(--linha); border-radius: 4px; box-shadow: var(--shadow);
     padding: 8px; display: none; flex-direction: column; min-width: 340px; max-width: calc(100vw - 32px); z-index: 30;
   }
   .menu-drop.on { display: flex; }
-  .menu-drop a { padding: 10px 14px; color: var(--text); text-decoration:none; font-size:14px; border-radius:8px; }
+  .menu-drop a { padding: 10px 14px; color: var(--text); text-decoration:none; font-size:14px; }
   .menu-ad-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin: 8px 14px 4px; }
   .menu-ad-box { padding: 4px 14px 10px; overflow: hidden; }
 
   header {
-    background: linear-gradient(135deg, ${primary} 0%, ${primary}dd 100%);
-    color: ${secondary};
-    padding: 70px 20px 90px;
-    text-align: center;
+    padding: 60px 20px; text-align: center; border-bottom: 1px solid var(--linha);
   }
-  header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
-  header p { font-size: 15px; opacity: 0.9; }
   header .badge {
-    display: inline-block; background: rgba(255,255,255,0.18); border-radius: 20px;
-    padding: 6px 16px; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.5px;
+    display: inline-block; border: 1px solid ${primary}; color: ${primary}; border-radius: 2px;
+    padding: 5px 14px; font-size: 11px; margin-bottom: 18px; letter-spacing: 1.5px; text-transform: uppercase;
   }
+  header h1 { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+  header p { font-size: 14.5px; color: var(--text-soft); font-style: italic; max-width: 480px; margin: 0 auto; }
 
-  .reveal { opacity: 0; transform: translateY(18px); transition: all 0.6s ease; }
+  .reveal { opacity: 0; transform: translateY(16px); transition: all 0.6s ease; }
   .reveal.on { opacity: 1; transform: translateY(0); }
 
-  section { max-width: 680px; margin: -40px auto 0; padding: 0 20px 50px; position: relative; }
+  section { max-width: 660px; margin: 0 auto; padding: 40px 20px 50px; }
   .card {
-    background: var(--card-bg); border-radius: 16px; padding: 28px;
-    box-shadow: var(--shadow); margin-bottom: 20px; transition: background 0.3s;
+    background: var(--card-bg); border: 1px solid var(--linha); padding: 30px;
+    margin-bottom: 24px; box-shadow: var(--shadow);
   }
-  .card h2 { font-size: 19px; color: ${primary}; margin-bottom: 12px; font-weight: 800; }
+  .card h2 { font-size: 18px; color: ${primary}; margin-bottom: 14px; font-weight: 700; border-bottom: 1px solid var(--linha); padding-bottom: 10px; }
   .card p { font-size: 14.5px; color: var(--text-soft); }
 
-  .testemunhos { display: flex; flex-direction: column; gap: 12px; }
-  .testemunho { background: var(--bg); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-soft); }
-  .testemunho b { display: block; color: ${primary}; font-size: 13px; margin-top: 6px; }
+  .testemunhos { display: flex; flex-direction: column; gap: 16px; }
+  .testemunho { font-size: 14px; color: var(--text-soft); font-style: italic; padding-left: 14px; border-left: 3px solid ${primary}; }
+  .testemunho b { display: block; color: var(--text); font-style: normal; font-size: 12.5px; margin-top: 6px; }
 
   .contacto-box {
-    background: ${primary}; color: ${secondary}; border-radius: 16px; padding: 32px 24px;
-    text-align: center;
+    background: var(--card-bg); border: 2px solid ${primary}; padding: 32px 24px; text-align: center;
   }
-  .contacto-box h2 { font-size: 19px; margin-bottom: 18px; }
+  .contacto-box h2 { font-size: 18px; color: ${primary}; margin-bottom: 18px; font-weight: 700; }
   .btns { display: flex; flex-direction: column; gap: 10px; }
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 13px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px;
+    padding: 13px; border: 1px solid ${primary}; text-decoration: none; font-weight: 700; font-size: 14px; color: ${primary};
   }
-  .btn-wa { background: #25D366; color: #fff; }
-  .btn-alt { background: rgba(255,255,255,0.15); color: ${secondary}; border: 1px solid ${secondary}55; }
 
-  footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--footer-text); }
+  footer { text-align: center; padding: 28px 20px; font-size: 12px; color: var(--footer-text); }
 </style>
 </head>
 <body>
@@ -160,12 +147,11 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
 <header>
   <div class="badge">${business_type}</div>
   <h1>${company_name}</h1>
-  <p>${company_description ? company_description.slice(0, 60) : "Qualidade que se sente"}</p>
+  <p>${company_description ? company_description.slice(0, 70) : "Tradição e qualidade em cada detalhe"}</p>
 </header>
 
-<section>
-${corpo || `
-  <div class="card reveal" id="sobre">
+<section>  ${corpo || `
+<div class="card reveal" id="sobre">
     <h2>Sobre nós</h2>
     <p>${company_description || "Descrição em breve."}</p>
   </div>
@@ -173,8 +159,8 @@ ${corpo || `
   <div class="card reveal">
     <h2>O que dizem os clientes</h2>
     <div class="testemunhos">
-      <div class="testemunho">"Atendimento rápido e produto de qualidade." <b>— Cliente satisfeito</b></div>
-      <div class="testemunho">"Recomendo a todos, superou as expectativas." <b>— Cliente satisfeito</b></div>
+      <div class="testemunho">"Atendimento rápido e produto de qualidade." <b>Cliente satisfeito</b></div>
+      <div class="testemunho">"Recomendo a todos, superou as expectativas." <b>Cliente satisfeito</b></div>
     </div>
   </div>
 `}
@@ -223,27 +209,4 @@ ${corpo || `
 
 </body>
 </html>`;
-}
-
-export function gerarEstrutura1(dados) {
-  const {
-    company_name = "O Meu Negócio", company_description = "",
-    business_type = "", color_scheme = "azul", style_choice = 1,
-    logo_choice = 1, contact_links = [],
-  } = dados;
-
-  const { primary, secondary } = getColors(color_scheme);
-  const iniciais = company_name.slice(0, 2).toUpperCase();
-  const d = { company_name, company_description, business_type, contact_links, logo_choice };
-
-  const geradores = {
-    1: estilo1,
-    2: estilo2,
-    3: estilo3,
-    4: estilo4,
-    5: estilo5,
-  };
-  const gerar = geradores[style_choice] || estilo3;
-
-  return gerar(d, primary, secondary, iniciais);
 }

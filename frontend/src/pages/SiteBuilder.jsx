@@ -4,6 +4,8 @@ import { api } from "../api.js";
 import { C } from "../tokens.js";
 import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
+import ContactLinksPicker from "../components/ContactLinksPicker.jsx";
+import CatalogItemsPicker from "../components/CatalogItemsPicker.jsx";
 
 const NEGOCIOS = {
   vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
@@ -48,8 +50,9 @@ export default function SiteBuilder() {
   const [tier, setTier] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companyDescription, setCompanyDescription] = useState("");
-  const [contactInfo, setContactInfo] = useState("");
+  const [contactLinks, setContactLinks] = useState([]);
   const [logoChoice, setLogoChoice] = useState(null);
+  const [catalogItems, setCatalogItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -82,8 +85,9 @@ export default function SiteBuilder() {
         tier,
         company_name: companyName,
         company_description: companyDescription,
-        contact_info: contactInfo,
+        contact_links: JSON.stringify(contactLinks),
         logo_choice: logoChoice,
+        catalog_items: JSON.stringify(catalogItems),
       });
       localStorage.setItem("d3na_site_build_id", r.build_id);
       setResult(r);
@@ -95,6 +99,8 @@ export default function SiteBuilder() {
     }
   }
 
+  const precisaCatalogo = [2, 3, 5].includes(structureChoice);
+
   const canNext = {
     1: businessCategory && businessType,
     2: !!colorScheme,
@@ -102,8 +108,9 @@ export default function SiteBuilder() {
     4: !!styleChoice,
     5: !!domainChoice,
     6: !!tier,
-    7: companyName && contactInfo && !!logoChoice,
-    8: true,
+    7: companyName && contactLinks.length > 0 && !!logoChoice,
+    8: !precisaCatalogo || catalogItems.length > 0,
+    9: true,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "24px 16px" };
@@ -128,8 +135,8 @@ export default function SiteBuilder() {
             <>
               <div style={title}>Pagamento confirmado ✅</div>
               <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
-                O teu site está a ser preparado. Entra em contacto pelo mesmo número que
-                indicaste ({contactInfo}) para receberes o ficheiro/acesso final.
+                O teu site está a ser preparado. Entra em contacto pelos dados que
+                indicaste para receberes o ficheiro/acesso final.
               </p>
             </>
           ) : (
@@ -162,7 +169,7 @@ export default function SiteBuilder() {
     <div style={wrap}>
       <div style={card}>
         <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-          Construtor de sites · Passo {step} de 8
+          Construtor de sites · Passo {step} de 9
         </div>
 
         {step === 1 && (
@@ -208,7 +215,7 @@ export default function SiteBuilder() {
             <div style={title}>Estrutura do site</div>
             <div style={subtitle}>Como as secções do site se organizam. A pré-visualização atualiza-se sozinha.</div>
             <div style={{ marginBottom: 14 }}>
-              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} logoChoice={logoChoice} />
             </div>
             {ESTRUTURAS.map((e) => (
               <button key={e.id} style={optBtn(structureChoice === e.id)} onClick={() => setStructureChoice(e.id)}>
@@ -224,7 +231,7 @@ export default function SiteBuilder() {
             <div style={title}>Estilo visual</div>
             <div style={subtitle}>O acabamento e os pequenos efeitos. A pré-visualização atualiza-se sozinha.</div>
             <div style={{ marginBottom: 14 }}>
-              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+              <MiniPreview structureId={structureChoice || 1} styleId={styleChoice || 1} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} logoChoice={logoChoice} />
             </div>
             {ESTILOS.map((e) => (
               <button key={e.id} style={optBtn(styleChoice === e.id)} onClick={() => setStyleChoice(e.id)}>
@@ -279,17 +286,28 @@ export default function SiteBuilder() {
               style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14, marginBottom: 10 }} />
             <textarea placeholder="Descrição curta" value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)}
               style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14, marginBottom: 10, minHeight: 70, resize: "none" }} />
-            <input placeholder="Contacto (WhatsApp/telefone)" value={contactInfo} onChange={(e) => setContactInfo(e.target.value)}
-              style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14 }} />
+            <ContactLinksPicker value={contactLinks} onChange={setContactLinks} />
             <LogoPreview name={companyName} primary={selectedColor.primary} secondary={selectedColor.secondary} selected={logoChoice} onSelect={setLogoChoice} />
           </>
         )}
 
         {step === 8 && (
           <>
+            <div style={title}>Catálogo</div>
+            <div style={subtitle}>
+              {precisaCatalogo
+                ? "Adiciona os produtos/serviços que vão aparecer no site. Sem foto, só nome, preço e descrição."
+                : "A estrutura que escolheste não usa catálogo, mas podes adicionar itens à mesma se quiseres."}
+            </div>
+            <CatalogItemsPicker value={catalogItems} onChange={setCatalogItems} />
+          </>
+        )}
+
+        {step === 9 && (
+          <>
             <div style={title}>Confere tudo antes de pagar</div>
             <div style={subtitle}>É assim que o site vai ficar. Se algo não estiver bem, volta atrás e muda.</div>
-            <MiniPreview big structureId={structureChoice} styleId={styleChoice} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} />
+            <MiniPreview big structureId={structureChoice} styleId={styleChoice} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} logoChoice={logoChoice} />
             <div style={{ marginTop: 14, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.9 }}>
               <div><strong style={{ color: C.ink }}>Negócio:</strong> {businessType}</div>
               <div><strong style={{ color: C.ink }}>Cores:</strong> {selectedColor.label}</div>
@@ -305,10 +323,10 @@ export default function SiteBuilder() {
 
         <div style={navRow}>
           {step > 1 ? <button style={backBtn} onClick={() => setStep((s) => s - 1)}>Voltar</button> : <span />}
-          {step < 8 ? (
+          {step < 9 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
-            <button style={navBtn} disabled={!canNext[7] || submitting} onClick={submit}>
+            <button style={navBtn} disabled={!canNext[8] || submitting} onClick={submit}>
               {submitting ? "A enviar…" : "Construir site"}
             </button>
           )}
