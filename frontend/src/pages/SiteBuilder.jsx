@@ -3,6 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
 import MiniPreview from "../components/MiniPreview.jsx";
+import LogoPreview from "../components/LogoPreview.jsx";
 
 const NEGOCIOS = {
   vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
@@ -48,6 +49,7 @@ export default function SiteBuilder() {
   const [companyName, setCompanyName] = useState("");
   const [companyDescription, setCompanyDescription] = useState("");
   const [contactInfo, setContactInfo] = useState("");
+  const [logoChoice, setLogoChoice] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -81,6 +83,7 @@ export default function SiteBuilder() {
         company_name: companyName,
         company_description: companyDescription,
         contact_info: contactInfo,
+        logo_choice: logoChoice,
       });
       localStorage.setItem("d3na_site_build_id", r.build_id);
       setResult(r);
@@ -99,7 +102,7 @@ export default function SiteBuilder() {
     4: !!styleChoice,
     5: !!domainChoice,
     6: !!tier,
-    7: companyName && contactInfo,
+    7: companyName && contactInfo && !!logoChoice,
     8: true,
   };
 
@@ -278,6 +281,7 @@ export default function SiteBuilder() {
               style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14, marginBottom: 10, minHeight: 70, resize: "none" }} />
             <input placeholder="Contacto (WhatsApp/telefone)" value={contactInfo} onChange={(e) => setContactInfo(e.target.value)}
               style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14 }} />
+            <LogoPreview name={companyName} primary={selectedColor.primary} secondary={selectedColor.secondary} selected={logoChoice} onSelect={setLogoChoice} />
           </>
         )}
 

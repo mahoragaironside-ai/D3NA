@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria Bom Sabor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.6; background: #fff; }
+
+  
+    .logo-mark { display:flex; align-items:center; justify-content:center;
+      font-weight:800; letter-spacing:0.5px; }
+  
+      .logo-mark { width:36px; height:36px; border-radius:50%;
+        background:#1E7A52; color:#F5F6F8; font-size:13px;
+        transform: rotate(-15deg) scale(0.7); opacity:0;
+        animation: logoPop 0.5s cubic-bezier(.34,1.56,.64,1) forwards; }
+      @keyframes logoPop { to { transform: rotate(0) scale(1); opacity:1; } }
+    
+
+  nav {
+    position: sticky; top: 0; z-index: 20;
+    background: #fff; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+  }
+  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #1E7A52; }
+
+  .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; flex-direction:column; gap:4px; }
+  .menu-btn span { width:20px; height:2px; background:#1E7A52; display:block; border-radius:2px; }
+
+  .menu-drop {
+    position: absolute; top: 56px; right: 16px; background:#fff;
+    border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    padding: 8px; display: none; flex-direction: column; min-width: 160px; z-index: 30;
+  }
+  .menu-drop.on { display: flex; }
+  .menu-drop a { padding: 10px 14px; color:#333; text-decoration:none; font-size:14px; border-radius:8px; }
+  .menu-drop a:active { background:#f2f2f2; }
+
+  header {
+    background: linear-gradient(135deg, #1E7A52 0%, #1E7A52dd 100%);
+    color: #F5F6F8;
+    padding: 70px 20px 90px;
+    text-align: center;
+  }
+  header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+  header p { font-size: 15px; opacity: 0.9; }
+  header .badge {
+    display: inline-block; background: rgba(255,255,255,0.18); border-radius: 20px;
+    padding: 6px 16px; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.5px;
+  }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: all 0.6s ease; }
+  .reveal.on { opacity: 1; transform: translateY(0); }
+
+  section { max-width: 680px; margin: -40px auto 0; padding: 0 20px 50px; position: relative; }
+  .card {
+    background: #fff; border-radius: 16px; padding: 28px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08); margin-bottom: 20px;
+  }
+  .card h2 { font-size: 19px; color: #1E7A52; margin-bottom: 12px; font-weight: 800; }
+  .card p { font-size: 14.5px; color: #555; }
+
+  .testemunhos { display: flex; flex-direction: column; gap: 12px; }
+  .testemunho { background: #F7F7F9; border-radius: 12px; padding: 16px; font-size: 13.5px; color: #444; }
+  .testemunho b { display: block; color: #1E7A52; font-size: 13px; margin-top: 6px; }
+
+  .contacto-box {
+    background: #1E7A52; color: #F5F6F8; border-radius: 16px; padding: 32px 24px;
+    text-align: center;
+  }
+  .contacto-box h2 { font-size: 19px; margin-bottom: 6px; }
+  .contacto-box p { opacity: 0.85; font-size: 13.5px; margin-bottom: 18px; }
+  .btns { display: flex; flex-direction: column; gap: 10px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px;
+  }
+  .btn-wa { background: #25D366; color: #fff; }
+  .btn-tel { background: rgba(255,255,255,0.15); color: #F5F6F8; border: 1px solid #F5F6F855; }
+
+  footer { text-align: center; padding: 30px 20px; font-size: 12px; color: #999; }
+  footer .redes { margin-bottom: 8px; font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="marca"><span class="logo-mark">PA</span> Padaria Bom Sabor</div>
+  <button class="menu-btn" onclick="document.getElementById('menuDrop').classList.toggle('on')">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="menu-drop" id="menuDrop">
+    <a href="#sobre">Sobre</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+</nav>
+
+<header>
+  <div class="badge">Pastelaria</div>
+  <h1>Padaria Bom Sabor</h1>
+  <p>Pão fresco todos os dias, bolos por encomenda e entrega ao d</p>
+</header>
+
+<section>
+  <div class="card reveal" id="sobre">
+    <h2>Sobre nós</h2>
+    <p>Pão fresco todos os dias, bolos por encomenda e entrega ao domicílio em Luanda.</p>
+  </div>
+
+  <div class="card reveal">
+    <h2>O que dizem os clientes</h2>
+    <div class="testemunhos">
+      <div class="testemunho">"Atendimento rápido e produto de qualidade." <b>— Cliente satisfeito</b></div>
+      <div class="testemunho">"Recomendo a todos, superou as expectativas." <b>— Cliente satisfeito</b></div>
+    </div>
+  </div>
+
+  <div class="contacto-box reveal" id="contacto">
+    <h2>Fale connosco</h2>
+    <p>923 456 789</p>
+    <div class="btns">
+      <a class="btn btn-wa" href="https://wa.me/244923456789?text=Ol%C3%A1!%20Vi%20o%20site%20da%20Padaria%20Bom%20Sabor%20e%20gostava%20de%20saber%20mais." target="_blank">WhatsApp</a>
+      <a class="btn btn-tel" href="tel:923456789">Ligar agora</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="redes">Redes sociais em breve</div>
+  Site criado com D3NA
+</footer>
+
+<script>
+  const els = document.querySelectorAll(".reveal");
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("on"); });
+  }, { threshold: 0.15 });
+  els.forEach((el) => obs.observe(el));
+
+  document.addEventListener("click", (ev) => {
+    const drop = document.getElementById("menuDrop");
+    const btn = document.querySelector(".menu-btn");
+    if (drop.classList.contains("on") && !drop.contains(ev.target) && !btn.contains(ev.target)) {
+      drop.classList.remove("on");
+    }
+  });
+</script>
+
+</body>
+</html>
