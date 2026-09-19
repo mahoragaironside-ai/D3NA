@@ -1,37 +1,9 @@
-import { getColors } from "../colors.js";
-import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
-import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
-import { catalogoCSS } from "./catalogo.js";
-import { galeriaCSS } from "./galeria.js";
-import { estilo1 } from "./estilo1.js";
-import { estilo2 } from "./estilo2.js";
-import { estilo4 } from "./estilo4.js";
-import { estilo5 } from "./estilo5.js";
-
-const ICONES = {
-  whatsapp: "💬", instagram: "📸", tiktok: "🎵",
-  facebook: "👍", telefone: "📞", outro: "🔗",
-};
-
-function renderContactBtns(contactLinks) {
-  if (!contactLinks || contactLinks.length === 0) return "";
-  return contactLinks.map((c) => {
-    const isWa = c.platform === "whatsapp";
-    const cls = isWa ? "btn btn-wa" : "btn btn-alt";
-    const alvo = c.link.startsWith("tel:") ? "" : `target="_blank"`;
-    return `<a class="${cls}" href="${c.link}" ${alvo}>${ICONES[c.platform] || "🔗"} ${c.label}</a>`;
-  }).join("\n      ");
-}
-
-export function estilo3(dados, primary, secondary, iniciais, corpo) {
-  const { company_name, company_description, business_type, contact_links, logo_choice } = dados;
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${company_name}</title>
+<title>Padaria Bom Sabor</title>
 <style>
   :root {
     --bg: #ffffff; --card-bg: #ffffff; --text: #1a1a1a; --text-soft: #555;
@@ -47,7 +19,7 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   .watermark-logo {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 34vw; font-weight: 800; color: ${primary}; opacity: 0.045;
+    font-size: 34vw; font-weight: 800; color: #1E7A52; opacity: 0.045;
     pointer-events: none; z-index: 0; white-space: nowrap; user-select: none;
   }
   .watermark-d3na {
@@ -57,10 +29,31 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
   .menu-d3na { position: absolute; bottom: 4px; right: 10px; font-size: 8px; color: var(--text-soft); opacity: 0.4; letter-spacing: 0.5px; }
   body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
 
-  ${logoBadgeCSS(logo_choice, primary, secondary)}
-  ${adsCarouselCSS(primary)}
-  ${catalogoCSS(primary)}
-  ${galeriaCSS(primary)}
+  .logo-mark { display:flex; align-items:center; justify-content:center; width:36px; height:36px; flex-shrink:0; }.logo-mark-4 { width:auto; }
+        .logo-mark-4 span { font-family: Georgia, serif; font-size:18px; color:#1E7A52; border-bottom:2px solid #1E7A52; padding-bottom:1px; }
+  
+  .ads-box { background: var(--card-bg); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
+  .ads-label { font-size: 10px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .ads-track { position: relative; height: 100px; }
+  .ads-slide {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; opacity: 0; transition: opacity 0.5s ease; border-radius: 10px;
+    font-size: 12.5px; color: var(--text-soft); background: var(--bg); padding: 10px;
+  }
+  .ads-slide.on { opacity: 1; }
+  .ads-slide.d3na {
+    background: linear-gradient(135deg, #1E7A52 0%, #1E7A52bb 60%, #1E7A52 100%);
+    color: #fff; font-weight: 700; flex-direction: column; gap: 3px; text-decoration: none;
+    box-shadow: 0 4px 14px #1E7A5255; border: 1px solid rgba(255,255,255,0.25);
+  }
+  .ads-slide.d3na .d3na-icon { font-size: 18px; display: inline-block; animation: d3naPulse 1.6s ease-in-out infinite; }
+  .ads-slide.d3na strong { font-size: 13.5px; letter-spacing: 0.3px; }
+  .ads-slide.d3na small { font-weight: 500; opacity: 0.9; font-size: 11px; }
+  @keyframes d3naPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+  .ads-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+  .ads-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--nav-border); }
+  .ads-dot.on { background: #1E7A52; }
+  
 
   nav {
     position: sticky; top: 0; z-index: 20;
@@ -68,12 +61,12 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 20px; transition: background 0.3s, border-color 0.3s;
   }
-  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: ${primary}; }
+  nav .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #1E7A52; }
   nav .direita { display: flex; align-items: center; gap: 4px; }
 
   .theme-btn, .menu-btn { background:none; border:none; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; }
   .menu-btn { flex-direction: column; gap:4px; }
-  .menu-btn span { width:20px; height:2px; background:${primary}; display:block; border-radius:2px; }
+  .menu-btn span { width:20px; height:2px; background:#1E7A52; display:block; border-radius:2px; }
 
   .menu-drop {
     position: absolute; top: 56px; right: 16px; background: var(--card-bg);
@@ -86,8 +79,8 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
   .menu-ad-box { padding: 4px 14px 10px; overflow: hidden; }
 
   header {
-    background: linear-gradient(135deg, ${primary} 0%, ${primary}dd 100%);
-    color: ${secondary};
+    background: linear-gradient(135deg, #1E7A52 0%, #1E7A52dd 100%);
+    color: #F5F6F8;
     padding: 70px 20px 90px;
     text-align: center;
   }
@@ -106,15 +99,15 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     background: var(--card-bg); border-radius: 16px; padding: 28px;
     box-shadow: var(--shadow); margin-bottom: 20px; transition: background 0.3s;
   }
-  .card h2 { font-size: 19px; color: ${primary}; margin-bottom: 12px; font-weight: 800; }
+  .card h2 { font-size: 19px; color: #1E7A52; margin-bottom: 12px; font-weight: 800; }
   .card p { font-size: 14.5px; color: var(--text-soft); }
 
   .testemunhos { display: flex; flex-direction: column; gap: 12px; }
   .testemunho { background: var(--bg); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-soft); }
-  .testemunho b { display: block; color: ${primary}; font-size: 13px; margin-top: 6px; }
+  .testemunho b { display: block; color: #1E7A52; font-size: 13px; margin-top: 6px; }
 
   .contacto-box {
-    background: ${primary}; color: ${secondary}; border-radius: 16px; padding: 32px 24px;
+    background: #1E7A52; color: #F5F6F8; border-radius: 16px; padding: 32px 24px;
     text-align: center;
   }
   .contacto-box h2 { font-size: 19px; margin-bottom: 18px; }
@@ -124,18 +117,18 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     padding: 13px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px;
   }
   .btn-wa { background: #25D366; color: #fff; }
-  .btn-alt { background: rgba(255,255,255,0.15); color: ${secondary}; border: 1px solid ${secondary}55; }
+  .btn-alt { background: rgba(255,255,255,0.15); color: #F5F6F8; border: 1px solid #F5F6F855; }
 
   footer { text-align: center; padding: 30px 20px; font-size: 12px; color: var(--footer-text); }
 </style>
 </head>
 <body>
 
-<div class="watermark-logo">${iniciais}</div>
+<div class="watermark-logo">PA</div>
 <div class="watermark-d3na">D3NA</div>
 
 <nav>
-  <div class="marca">${logoBadgeHTML(logo_choice, iniciais)} ${company_name}</div>
+  <div class="marca"><div class="logo-mark logo-mark-4"><span>Pa</span></div> Padaria Bom Sabor</div>
   <div class="direita">
     <button class="theme-btn" id="themeBtn" title="Alternar tema">🌙</button>
     <button class="menu-btn" onclick="document.getElementById('menuDrop').classList.toggle('on')">
@@ -162,33 +155,78 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
 </nav>
 
 <header>
-  <div class="badge">${business_type}</div>
-  <h1>${company_name}</h1>
-  <p>${company_description ? company_description.slice(0, 60) : "Qualidade que se sente"}</p>
+  <div class="badge">Pastelaria</div>
+  <h1>Padaria Bom Sabor</h1>
+  <p>Pão fresco todos os dias, bolos por encomenda e entrega ao d</p>
 </header>
 
 <section>
-${corpo || `
+
   <div class="card reveal" id="sobre">
     <h2>Sobre nós</h2>
-    <p>${company_description || "Descrição em breve."}</p>
+    <p>Pão fresco todos os dias, bolos por encomenda e entrega ao domicílio em Luanda.</p>
   </div>
+  <div class="card reveal" id="catalogo">
+    <h2>Catálogo</h2>
+    <div class="catalogo-grid">
+    <div class="catalogo-item">
+      <h3>Pão francês (unidade)</h3>
+      <div class="preco">50 Kz</div>
+      <p>Fresquinho, assado todas as manhãs</p>
+    </div>
+  
 
-  <div class="card reveal">
-    <h2>O que dizem os clientes</h2>
-    <div class="testemunhos">
-      <div class="testemunho">"Atendimento rápido e produto de qualidade." <b>— Cliente satisfeito</b></div>
-      <div class="testemunho">"Recomendo a todos, superou as expectativas." <b>— Cliente satisfeito</b></div>
+    <div class="catalogo-item">
+      <h3>Bolo de aniversário (médio)</h3>
+      <div class="preco">8000 Kz</div>
+      <p>Personalizado, encomenda com 2 dias de antecedência</p>
+    </div>
+  
+
+    <div class="catalogo-item">
+      <h3>Caixa de 6 croissants</h3>
+      <div class="preco">1800 Kz</div>
+      
     </div>
   </div>
-`}
+  </div>
 
-  ${adsCarouselHTML()}
+  
+  <div class="ads-box reveal">
+    <div class="ads-label">Publicidade</div>
+    <div class="ads-track" id="adsTrack">
+      <div class="ads-slide on" data-i="0"><script async="async" data-cfasync="false" src="https://pl31350812.profitableratecpmnetwork.com/a9818edad4dfcde3e8fa8cfcbc26cab6/invoke.js"></script><div id="container-a9818edad4dfcde3e8fa8cfcbc26cab6"></div></div>
+      <div class="ads-slide" data-i="1"><script>
+    atOptions = {
+      'key' : 'c9711ff1dd4ba302fc1dd70f8133ab95',
+      'format' : 'iframe',
+      'height' : 50,
+      'width' : 320,
+      'params' : {}
+    };
+  </script><script src="https://www.highrevenueformat.com/c9711ff1dd4ba302fc1dd70f8133ab95/invoke.js"></script></div>
+      <div class="ads-slide" data-i="2"><script>
+    atOptions = {
+      'key' : '5f1543605c4a64ead50bf0bdb38f2658',
+      'format' : 'iframe',
+      'height' : 60,
+      'width' : 468,
+      'params' : {}
+    };
+  </script><script src="https://www.highrevenueformat.com/5f1543605c4a64ead50bf0bdb38f2658/invoke.js"></script></div>
+      <a class="ads-slide d3na" data-i="3" href="#" target="_blank">
+        <span class="d3na-icon">💸</span>
+        <strong>Quer ganhar renda extra?</strong>
+        <small>Torna-te afiliado D3NA →</small>
+      </a>
+    </div>
+    <div class="ads-dots" id="adsDots"></div>
+  </div>
 
   <div class="contacto-box reveal" id="contacto">
     <h2>Fale connosco</h2>
     <div class="btns">
-      ${renderContactBtns(contact_links)}
+      <a class="btn btn-wa" href="https://wa.me/244923456789" target="_blank">💬 923 456 789</a>
     </div>
   </div>
 </section>
@@ -222,32 +260,31 @@ ${corpo || `
     aplicarTema(escuro);
     localStorage.setItem("d3na_theme", escuro ? "dark" : "light");
   });
-  ${adsCarouselScript()}
+  
+  (function () {
+    const track = document.getElementById("adsTrack");
+    const dotsBox = document.getElementById("adsDots");
+    const slides = track.querySelectorAll(".ads-slide");
+    slides.forEach((_, i) => {
+      const d = document.createElement("div");
+      d.className = "ads-dot" + (i === 0 ? " on" : "");
+      dotsBox.appendChild(d);
+    });
+    const dots = dotsBox.querySelectorAll(".ads-dot");
+    let idx = 0;
+    function mostrar(i) {
+      slides.forEach((s) => s.classList.remove("on"));
+      dots.forEach((d) => d.classList.remove("on"));
+      slides[i].classList.add("on");
+      dots[i].classList.add("on");
+    }
+    setInterval(() => {
+      idx = (idx + 1) % slides.length;
+      mostrar(idx);
+    }, 7000);
+  })();
+  
 </script>
 
 </body>
-</html>`;
-}
-
-export function gerarEstrutura1(dados) {
-  const {
-    company_name = "O Meu Negócio", company_description = "",
-    business_type = "", color_scheme = "azul", style_choice = 1,
-    logo_choice = 1, contact_links = [],
-  } = dados;
-
-  const { primary, secondary } = getColors(color_scheme);
-  const iniciais = company_name.slice(0, 2).toUpperCase();
-  const d = { company_name, company_description, business_type, contact_links, logo_choice };
-
-  const geradores = {
-    1: estilo1,
-    2: estilo2,
-    3: estilo3,
-    4: estilo4,
-    5: estilo5,
-  };
-  const gerar = geradores[style_choice] || estilo3;
-
-  return gerar(d, primary, secondary, iniciais);
-}
+</html>

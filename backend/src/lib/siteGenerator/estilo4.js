@@ -1,5 +1,7 @@
 import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
 import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
+import { catalogoCSS } from "./catalogo.js";
+import { galeriaCSS } from "./galeria.js";
 
 const ICONES = {
   whatsapp: "💬", instagram: "📸", tiktok: "🎵",
@@ -50,6 +52,8 @@ export function estilo4(dados, primary, secondary, iniciais, corpo) {
 
   ${logoBadgeCSS(logo_choice, primary, secondary)}
   ${adsCarouselCSS(primary)}
+  ${catalogoCSS(primary)}
+  ${galeriaCSS(primary)}
 
   nav {
     position: sticky; top: 0; z-index: 20;

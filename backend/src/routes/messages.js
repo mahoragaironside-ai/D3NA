@@ -6,6 +6,7 @@ import { mergeMemory, splitMemoryForStorage } from "../engine/memoryEngine.js";
 import { runDecisionEngine } from "../engine/decisionEngine.js";
 import { findSuppliers } from "../ai/supplierSearch.js";
 import { checkSupplierSearchLimit, logSupplierSearch } from "../ai/supplierLimit.js";
+import { isTestPhone } from "../lib/testAccount.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -20,13 +21,16 @@ router.post("/:projectId/messages", async (req, res) => {
   const project = projectResult.rows[0];
   if (!project) return res.status(404).json({ error: "Projeto não encontrado." });
 
+  const userPhoneRow = await query("SELECT phone_number FROM users WHERE user_id = $1", [req.userId]);
+  const isTestAccount = isTestPhone(userPhoneRow.rows[0]?.phone_number);
+
   const subResult = await query(
     `SELECT * FROM subscriptions WHERE user_id = $1 AND payment_status = 'confirmado'
      ORDER BY expires_at DESC LIMIT 1`,
     [req.userId]
   );
   const activeSub = subResult.rows[0];
-  const subscriptionActive = activeSub && new Date(activeSub.expires_at) > new Date();
+  const subscriptionActive = isTestAccount || (activeSub && new Date(activeSub.expires_at) > new Date());
   if (!subscriptionActive) {
     await query("UPDATE users SET subscription_status = 'expirado' WHERE user_id = $1 AND subscription_status = 'ativo'", [req.userId]);
   }

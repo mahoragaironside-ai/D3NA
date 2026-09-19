@@ -16,7 +16,7 @@ router.post("/watched", async (req, res) => {
 
   if (ad_views_count >= VIEWS_PER_CREDIT) {
     ad_views_count -= VIEWS_PER_CREDIT;
-    ad_credits += 1;
+    ad_credits += 3; // 5 anúncios vistos = 3 consultas extra, não só 1
     await query("UPDATE users SET ad_views_count = $1, ad_credits = $2 WHERE user_id = $3", [ad_views_count, ad_credits, req.userId]);
   }
 

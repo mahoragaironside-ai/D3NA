@@ -1,4 +1,6 @@
 import "dotenv/config";
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first"); // corrige "fetch failed" em redes móveis com IPv6 instável
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";

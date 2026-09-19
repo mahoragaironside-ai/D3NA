@@ -1,4 +1,5 @@
 import { catalogoHTML } from "./catalogo.js";
+import { galeriaHTML } from "./galeria.js";
 
 const ICONES = {
   whatsapp: "💬", instagram: "📸", tiktok: "🎵",
@@ -38,5 +39,13 @@ export function secaoCatalogo(items) {
   <div class="card reveal" id="catalogo">
     <h2>Catálogo</h2>
     ${catalogoHTML(items)}
+  </div>`;
+}
+
+export function secaoGaleria(items) {
+  return `
+  <div class="card reveal" id="galeria">
+    <h2>Galeria</h2>
+    ${galeriaHTML(items)}
   </div>`;
 }
