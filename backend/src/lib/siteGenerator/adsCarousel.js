@@ -5,13 +5,15 @@ export function adsCarouselCSS(primary) {
   return `
   .ads-box { background: var(--card-bg); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
   .ads-label { font-size: 10px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-  .ads-track { position: relative; height: 100px; }
+  .ads-track { position: relative; min-height: 50px; transition: height 0.3s ease; }
   .ads-slide {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    text-align: center; opacity: 0; transition: opacity 0.5s ease; border-radius: 10px;
-    font-size: 12.5px; color: var(--text-soft); background: var(--bg); padding: 10px;
+    position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; border-radius: 10px;
+    font-size: 12.5px; color: var(--text-soft); background: var(--bg); padding: 10px; pointer-events: none;
   }
-  .ads-slide.on { opacity: 1; }
+  .ads-slide.on { opacity: 1; visibility: visible; position: relative; pointer-events: auto; }
+  .ads-scale { overflow: hidden; display: flex; justify-content: center; width: 100%; }
+  .ads-scale-inner { transform-origin: top center; }
   .ads-slide.d3na {
     background: linear-gradient(135deg, ${primary} 0%, ${primary}bb 60%, ${primary} 100%);
     color: #fff; font-weight: 700; flex-direction: column; gap: 3px; text-decoration: none;
@@ -33,7 +35,9 @@ export function adsCarouselHTML() {
     <div class="ads-label">Publicidade</div>
     <div class="ads-track" id="adsTrack">
       <div class="ads-slide on" data-i="0"><script async="async" data-cfasync="false" src="https://pl31350812.profitableratecpmnetwork.com/a9818edad4dfcde3e8fa8cfcbc26cab6/invoke.js"></script><div id="container-a9818edad4dfcde3e8fa8cfcbc26cab6"></div></div>
-      <div class="ads-slide" data-i="1"><script>
+      <div class="ads-slide" data-i="1">
+        <div class="ads-scale" data-w="320" data-h="50">
+          <div class="ads-scale-inner"><script>
     atOptions = {
       'key' : 'c9711ff1dd4ba302fc1dd70f8133ab95',
       'format' : 'iframe',
@@ -42,7 +46,11 @@ export function adsCarouselHTML() {
       'params' : {}
     };
   </script><script src="https://www.highrevenueformat.com/c9711ff1dd4ba302fc1dd70f8133ab95/invoke.js"></script></div>
-      <div class="ads-slide" data-i="2"><script>
+        </div>
+      </div>
+      <div class="ads-slide" data-i="2">
+        <div class="ads-scale" data-w="468" data-h="60">
+          <div class="ads-scale-inner"><script>
     atOptions = {
       'key' : '5f1543605c4a64ead50bf0bdb38f2658',
       'format' : 'iframe',
@@ -51,6 +59,8 @@ export function adsCarouselHTML() {
       'params' : {}
     };
   </script><script src="https://www.highrevenueformat.com/5f1543605c4a64ead50bf0bdb38f2658/invoke.js"></script></div>
+        </div>
+      </div>
       <a class="ads-slide d3na" data-i="3" href="#" target="_blank">
         <span class="d3na-icon">💸</span>
         <strong>Quer ganhar renda extra?</strong>
@@ -74,12 +84,41 @@ export function adsCarouselScript() {
     });
     const dots = dotsBox.querySelectorAll(".ads-dot");
     let idx = 0;
+
+    function aplicarEscala() {
+      track.querySelectorAll(".ads-scale").forEach((caixa) => {
+        const largura = Number(caixa.dataset.w);
+        const altura = Number(caixa.dataset.h);
+        const inner = caixa.querySelector(".ads-scale-inner");
+        const disponivel = caixa.clientWidth || track.clientWidth;
+        const escala = Math.min(1, disponivel / largura);
+        inner.style.width = largura + "px";
+        inner.style.height = altura + "px";
+        inner.style.transform = "scale(" + escala + ")";
+        caixa.style.height = (altura * escala) + "px";
+      });
+    }
+
+    function ajustarAltura() {
+      aplicarEscala();
+      const activo = track.querySelector(".ads-slide.on");
+      if (activo) track.style.height = activo.offsetHeight + "px";
+    }
+
     function mostrar(i) {
       slides.forEach((s) => s.classList.remove("on"));
       dots.forEach((d) => d.classList.remove("on"));
       slides[i].classList.add("on");
       dots[i].classList.add("on");
+      setTimeout(ajustarAltura, 50);
     }
+
+    if ("ResizeObserver" in window) {
+      const ro = new ResizeObserver(ajustarAltura);
+      slides.forEach((s) => ro.observe(s));
+    }
+
+    mostrar(0);
     setInterval(() => {
       idx = (idx + 1) % slides.length;
       mostrar(idx);

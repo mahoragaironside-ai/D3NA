@@ -52,6 +52,17 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
 
   ${logoBadgeCSS(logo_choice, primary, secondary)}
   ${adsCarouselCSS(primary)}
+
+  .cta-flutuante {
+    position: fixed; bottom: 20px; right: 16px; z-index: 40;
+    display: flex; align-items: center; gap: 8px;
+    background: ${primary}; color: ${secondary}; text-decoration: none;
+    padding: 13px 18px; border-radius: 30px; font-weight: 700; font-size: 13.5px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    animation: ctaEntrar 0.5s ease 1s both;
+  }
+  .cta-flutuante:active { transform: scale(0.96); }
+  @keyframes ctaEntrar { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   ${catalogoCSS(primary)}
   ${galeriaCSS(primary)}
 
@@ -76,7 +87,9 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
   .menu-drop.on { display: flex; }
   .menu-drop a { padding: 10px 14px; color: var(--text); text-decoration:none; font-size:14px; border-radius:8px; }
   .menu-ad-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin: 8px 14px 4px; }
-  .menu-ad-box { padding: 4px 14px 10px; overflow: hidden; }
+  .menu-ad-box { padding: 4px 14px 10px; overflow: hidden; display: flex; justify-content: center; }
+  .menu-ad-scale { width: 170px; height: 27px; overflow: hidden; }
+  .menu-ad-inner { width: 320px; height: 50px; transform: scale(0.53125); transform-origin: top left; }
 
   header {
     padding: 40px 20px 20px; text-align: center;
@@ -137,7 +150,7 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
     <a href="#contacto">Contacto</a>
     <div class="menu-ad-label">Publicidade</div>
     <div class="menu-ad-box">
-      <script>
+      <div class="menu-ad-scale"><div class="menu-ad-inner"><script>
         atOptions = {
           'key' : 'c9711ff1dd4ba302fc1dd70f8133ab95',
           'format' : 'iframe',
@@ -145,7 +158,7 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
           'width' : 320,
           'params' : {}
         };
-      </script><script src="https://www.highrevenueformat.com/c9711ff1dd4ba302fc1dd70f8133ab95/invoke.js"></script>
+      </script><script src="https://www.highrevenueformat.com/c9711ff1dd4ba302fc1dd70f8133ab95/invoke.js"></script></div></div>
     </div>
   </div>
 </nav>
@@ -213,6 +226,12 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
   ${adsCarouselScript()}
 </script>
 
+${(() => {
+  const wa = (contact_links || []).find((c) => c.platform === "whatsapp");
+  const alvo = wa ? wa.link : "#contacto";
+  const externo = wa ? `target="_blank"` : "";
+  return `<a class="cta-flutuante" href="${alvo}" ${externo}>💬 Fale connosco</a>`;
+})()}
 </body>
 </html>`;
 }

@@ -7,13 +7,15 @@ export default function CatalogItemsPicker({ value, onChange }) {
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [imagemUrl, setImagemUrl] = useState("");
 
   function adicionar() {
     if (!nome.trim() || !preco.trim()) return;
-    onChange([...value, { name: nome.trim(), price: preco.trim(), description: descricao.trim() }]);
+    onChange([...value, { name: nome.trim(), price: preco.trim(), description: descricao.trim(), image_url: imagemUrl.trim() }]);
     setNome("");
     setPreco("");
     setDescricao("");
+    setImagemUrl("");
     setAberto(false);
   }
 
@@ -33,6 +35,7 @@ export default function CatalogItemsPicker({ value, onChange }) {
           <div>
             <div style={{ fontSize: 13, color: C.ink, fontWeight: 600 }}>{item.name} — {item.price} Kz</div>
             {item.description && <div style={{ fontSize: 11.5, color: C.inkSoft }}>{item.description}</div>}
+            {item.image_url && <div style={{ fontSize: 10.5, color: C.inkSoft }}>📷 com imagem</div>}
           </div>
           <button onClick={() => remover(i)} style={{ background: "none", border: "none", cursor: "pointer", color: C.inkSoft, flexShrink: 0, marginLeft: 8 }}>
             <X size={16} />
@@ -67,6 +70,12 @@ export default function CatalogItemsPicker({ value, onChange }) {
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
             style={{ ...inputStyle, minHeight: 60, resize: "none" }}
+          />
+          <input
+            placeholder="Link da imagem (opcional — hospedada onde quiseres)"
+            value={imagemUrl}
+            onChange={(e) => setImagemUrl(e.target.value)}
+            style={inputStyle}
           />
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={adicionar} style={{ flex: 1, background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "8px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Adicionar</button>

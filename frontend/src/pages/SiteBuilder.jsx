@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
@@ -58,6 +58,9 @@ export default function SiteBuilder() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState(null);
   const [checking, setChecking] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState("");
 
   async function checkStatus(buildId) {
     setChecking(true);
@@ -70,6 +73,34 @@ export default function SiteBuilder() {
       setChecking(false);
     }
   }
+
+  async function carregarPreview() {
+    setPreviewLoading(true);
+    setPreviewError("");
+    try {
+      const html = await api.previewSiteBuild({
+        business_category: businessCategory,
+        business_type: businessType,
+        color_scheme: colorScheme,
+        structure_choice: structureChoice,
+        style_choice: styleChoice,
+        company_name: companyName,
+        company_description: companyDescription,
+        contact_links: JSON.stringify(contactLinks),
+        logo_choice: logoChoice,
+        catalog_items: JSON.stringify(catalogItems),
+      });
+      setPreviewHtml(html);
+    } catch (e) {
+      setPreviewError(e.message || "Não foi possível carregar a pré-visualização.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (step === 8) carregarPreview();
+  }, [step]);
 
   async function submit() {
     setSubmitting(true);
@@ -107,10 +138,10 @@ export default function SiteBuilder() {
     3: !!structureChoice,
     4: !!styleChoice,
     5: !!domainChoice,
-    6: !!tier,
-    7: companyName && contactLinks.length > 0 && !!logoChoice,
-    8: !precisaCatalogo || catalogItems.length > 0,
-    9: true,
+    6: companyName && contactLinks.length > 0 && !!logoChoice,
+    7: !precisaCatalogo || catalogItems.length > 0,
+    8: true,
+    9: !!tier,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "24px 16px" };
@@ -265,7 +296,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 6 && (
+        {step === 9 && (
           <>
             <div style={title}>Nível do site</div>
             <button style={optBtn(tier === "basico")} onClick={() => setTier("basico")}>
@@ -279,7 +310,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 7 && (
+        {step === 6 && (
           <>
             <div style={title}>Dados da empresa</div>
             <input placeholder="Nome da empresa" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
@@ -291,7 +322,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 8 && (
+        {step === 7 && (
           <>
             <div style={title}>Catálogo</div>
             <div style={subtitle}>
@@ -303,11 +334,23 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 9 && (
+        {step === 8 && (
           <>
             <div style={title}>Confere tudo antes de pagar</div>
             <div style={subtitle}>É assim que o site vai ficar. Se algo não estiver bem, volta atrás e muda.</div>
-            <MiniPreview big structureId={structureChoice} styleId={styleChoice} primary={selectedColor.primary} secondary={selectedColor.secondary} companyName={companyName} logoChoice={logoChoice} />
+            {previewLoading && (
+              <div style={{ textAlign: "center", padding: "30px 0", color: C.inkSoft, fontSize: 13 }}>A gerar o teu site real…</div>
+            )}
+            {previewError && (
+              <div style={{ color: C.red, fontSize: 13, padding: "12px 0" }}>{previewError}</div>
+            )}
+            {!previewLoading && !previewError && previewHtml && (
+              <iframe
+                title="Pré-visualização do site"
+                srcDoc={previewHtml}
+                style={{ width: "100%", height: 480, border: `1px solid ${C.border}`, borderRadius: 12, background: "#fff" }}
+              />
+            )}
             <div style={{ marginTop: 14, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.9 }}>
               <div><strong style={{ color: C.ink }}>Negócio:</strong> {businessType}</div>
               <div><strong style={{ color: C.ink }}>Cores:</strong> {selectedColor.label}</div>
@@ -326,7 +369,7 @@ export default function SiteBuilder() {
           {step < 9 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
-            <button style={navBtn} disabled={!canNext[8] || submitting} onClick={submit}>
+            <button style={navBtn} disabled={!canNext[9] || submitting} onClick={submit}>
               {submitting ? "A enviar…" : "Construir site"}
             </button>
           )}

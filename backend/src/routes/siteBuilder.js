@@ -1,8 +1,23 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAdminKey } from "../middleware/auth.js";
+import { gerarSite } from "../lib/siteGenerator/index.js";
 
 const router = Router();
+
+// Pré-visualização em tempo real, sem gravar nada nem exigir pagamento —
+// usada pelo wizard para mostrar o site real antes de a pessoa decidir pagar.
+router.post("/preview", (req, res) => {
+  try {
+    const contact_links = req.body.contact_links ? JSON.parse(req.body.contact_links || "[]") : [];
+    const catalog_items = req.body.catalog_items ? JSON.parse(req.body.catalog_items || "[]") : [];
+    const html = gerarSite({ ...req.body, contact_links, catalog_items });
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send(html);
+  } catch (e) {
+    res.status(400).json({ error: "Não foi possível gerar a pré-visualização: " + e.message });
+  }
+});
 
 // Submissão pública do wizard — não exige login, porque esta funcionalidade
 // só é acessível através do link direto/escondido.
