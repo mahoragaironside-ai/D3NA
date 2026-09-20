@@ -1,4 +1,5 @@
 import { getColors } from "../colors.js";
+import { getFontFamily } from "../fonts.js";
 import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
 import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
 import { catalogoCSS } from "./catalogo.js";
@@ -23,7 +24,7 @@ function renderContactBtns(contactLinks) {
   }).join("\n      ");
 }
 
-export function estilo3(dados, primary, secondary, iniciais, corpo) {
+export function estilo3(dados, primary, secondary, iniciais, corpo, fontFamily = "-apple-system, Helvetica, Arial, sans-serif") {
   const { company_name, company_description, business_type, contact_links, logo_choice } = dados;
 
   return `<!DOCTYPE html>
@@ -55,7 +56,7 @@ export function estilo3(dados, primary, secondary, iniciais, corpo) {
     color: var(--text-soft); opacity: 0.35; pointer-events: none; z-index: 5; letter-spacing: 1px;
   }
   .menu-d3na { position: absolute; bottom: 4px; right: 10px; font-size: 8px; color: var(--text-soft); opacity: 0.4; letter-spacing: 0.5px; }
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
+  body { font-family: ${fontFamily}; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
 
   ${logoBadgeCSS(logo_choice, primary, secondary)}
   ${adsCarouselCSS(primary)}
@@ -252,10 +253,11 @@ export function gerarEstrutura1(dados) {
   const {
     company_name = "O Meu Negócio", company_description = "",
     business_type = "", color_scheme = "azul", style_choice = 1,
-    logo_choice = 1, contact_links = [],
+    logo_choice = 1, contact_links = [], font_choice = "sistema",
   } = dados;
 
   const { primary, secondary } = getColors(color_scheme);
+  const fontFamily = getFontFamily(font_choice);
   const iniciais = company_name.slice(0, 2).toUpperCase();
   const d = { company_name, company_description, business_type, contact_links, logo_choice };
 
@@ -268,5 +270,5 @@ export function gerarEstrutura1(dados) {
   };
   const gerar = geradores[style_choice] || estilo3;
 
-  return gerar(d, primary, secondary, iniciais);
+  return gerar(d, primary, secondary, iniciais, undefined, fontFamily);
 }

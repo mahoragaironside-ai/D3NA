@@ -16,7 +16,7 @@ function renderContactBtns(contactLinks) {
   }).join("\n      ");
 }
 
-export function estilo5(dados, primary, secondary, iniciais, corpo) {
+export function estilo5(dados, primary, secondary, iniciais, corpo, fontFamily = "-apple-system, Helvetica, Arial, sans-serif") {
   const { company_name, company_description, business_type, contact_links, logo_choice } = dados;
 
   return `<!DOCTYPE html>
@@ -48,7 +48,7 @@ export function estilo5(dados, primary, secondary, iniciais, corpo) {
     color: var(--text-soft); opacity: 0.35; pointer-events: none; z-index: 5; letter-spacing: 1px;
   }
   .menu-d3na { position: absolute; bottom: 4px; right: 10px; font-size: 8px; color: var(--text-soft); opacity: 0.4; letter-spacing: 0.5px; }
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
+  body { font-family: ${fontFamily}; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
 
   ${logoBadgeCSS(logo_choice, primary, secondary)}
   ${adsCarouselCSS(primary)}

@@ -21,6 +21,12 @@ const CORES = [
   { id: "verde", primary: "#1E7A52", secondary: "#F5F6F8", label: "Verde & Cinza claro" },
   { id: "grafite", primary: "#15181F", secondary: "#E0AA4E", label: "Grafite & Dourado" },
   { id: "vinho", primary: "#7A1E2E", secondary: "#FFFFFF", label: "Vinho & Branco" },
+  { id: "terracota", primary: "#B24C2B", secondary: "#FFF6EF", label: "Terracota & Creme" },
+  { id: "roxo", primary: "#4B2E83", secondary: "#F5F0FA", label: "Roxo & Lilás claro" },
+  { id: "petroleo", primary: "#0D3B3E", secondary: "#E7F4F3", label: "Petróleo & Turquesa claro" },
+  { id: "mostarda", primary: "#8A6A14", secondary: "#FFFBF0", label: "Mostarda & Creme" },
+  { id: "coral", primary: "#C94A38", secondary: "#FFF8F6", label: "Coral & Branco suave" },
+  { id: "preto", primary: "#0A0A0A", secondary: "#FFFFFF", label: "Preto & Branco" },
 ];
 
 const ESTRUTURAS = [
@@ -39,11 +45,25 @@ const ESTILOS = [
   { id: 5, label: "Cartão/loja", desc: "Grelha tipo catálogo de produtos" },
 ];
 
+const FONTES = [
+  { id: "sistema", label: "Sistema (padrão)", family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" },
+  { id: "classica", label: "Clássica (serifada)", family: "Georgia, 'Times New Roman', serif" },
+  { id: "moderna", label: "Moderna", family: "'Trebuchet MS', 'Segoe UI', sans-serif" },
+  { id: "maquina", label: "Máquina de escrever", family: "'Courier New', Courier, monospace" },
+  { id: "elegante", label: "Elegante", family: "Garamond, 'Times New Roman', serif" },
+  { id: "arredondada", label: "Arredondada", family: "Verdana, Geneva, sans-serif" },
+  { id: "impacto", label: "Impacto", family: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" },
+  { id: "tradicional", label: "Tradicional", family: "'Palatino Linotype', 'Book Antiqua', Palatino, serif" },
+  { id: "tecnica", label: "Técnica", family: "'Lucida Console', Monaco, monospace" },
+  { id: "suave", label: "Suave", family: "Tahoma, Geneva, sans-serif" },
+];
+
 export default function SiteBuilder() {
   const [step, setStep] = useState(1);
   const [businessCategory, setBusinessCategory] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [colorScheme, setColorScheme] = useState("");
+  const [fontChoice, setFontChoice] = useState("");
   const [structureChoice, setStructureChoice] = useState(null);
   const [styleChoice, setStyleChoice] = useState(null);
   const [domainChoice, setDomainChoice] = useState("");
@@ -82,6 +102,7 @@ export default function SiteBuilder() {
         business_category: businessCategory,
         business_type: businessType,
         color_scheme: colorScheme,
+        font_choice: fontChoice,
         structure_choice: structureChoice,
         style_choice: styleChoice,
         company_name: companyName,
@@ -110,6 +131,7 @@ export default function SiteBuilder() {
         business_category: businessCategory,
         business_type: businessType,
         color_scheme: colorScheme,
+        font_choice: fontChoice,
         structure_choice: structureChoice,
         style_choice: styleChoice,
         domain_choice: domainChoice,
@@ -135,13 +157,14 @@ export default function SiteBuilder() {
   const canNext = {
     1: businessCategory && businessType,
     2: !!colorScheme,
-    3: !!structureChoice,
-    4: !!styleChoice,
-    5: !!domainChoice,
+    3: !!fontChoice,
+    4: !!structureChoice,
+    5: !!styleChoice,
     6: companyName && contactLinks.length > 0 && !!logoChoice,
     7: !precisaCatalogo || catalogItems.length > 0,
     8: true,
-    9: !!tier,
+    9: !!domainChoice,
+    10: !!tier,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "24px 16px" };
@@ -200,7 +223,7 @@ export default function SiteBuilder() {
     <div style={wrap}>
       <div style={card}>
         <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-          Construtor de sites · Passo {step} de 9
+          Construtor de sites · Passo {step} de 10
         </div>
 
         {step === 1 && (
@@ -243,6 +266,19 @@ export default function SiteBuilder() {
 
         {step === 3 && (
           <>
+            <div style={title}>Tipo de letra</div>
+            <div style={subtitle}>A fonte usada em todo o texto do site. Combina com qualquer Estilo visual.</div>
+            {FONTES.map((f) => (
+              <button key={f.id} style={{ ...optBtn(fontChoice === f.id), fontFamily: f.family }} onClick={() => setFontChoice(f.id)}>
+                <div style={{ fontWeight: 600 }}>{f.label}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft, fontFamily: f.family }}>Exemplo: {companyName || "O Meu Negócio"}</div>
+              </button>
+            ))}
+          </>
+        )}
+
+        {step === 4 && (
+          <>
             <div style={title}>Estrutura do site</div>
             <div style={subtitle}>Como as secções do site se organizam. A pré-visualização atualiza-se sozinha.</div>
             <div style={{ marginBottom: 14 }}>
@@ -257,7 +293,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <div style={title}>Estilo visual</div>
             <div style={subtitle}>O acabamento e os pequenos efeitos. A pré-visualização atualiza-se sozinha.</div>
@@ -273,7 +309,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 5 && (
+        {step === 9 && (
           <>
             <div style={title}>Onde vai ficar o site?</div>
             <div style={subtitle}>Em ambos os casos recebes um ficheiro para descarregar depois do pagamento.</div>
@@ -296,7 +332,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 9 && (
+        {step === 10 && (
           <>
             <div style={title}>Nível do site</div>
             <button style={optBtn(tier === "basico")} onClick={() => setTier("basico")}>
@@ -354,6 +390,7 @@ export default function SiteBuilder() {
             <div style={{ marginTop: 14, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.9 }}>
               <div><strong style={{ color: C.ink }}>Negócio:</strong> {businessType}</div>
               <div><strong style={{ color: C.ink }}>Cores:</strong> {selectedColor.label}</div>
+              <div><strong style={{ color: C.ink }}>Fonte:</strong> {FONTES.find((f) => f.id === fontChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estrutura:</strong> {ESTRUTURAS.find((e) => e.id === structureChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estilo:</strong> {ESTILOS.find((e) => e.id === styleChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Onde vai ficar:</strong> {domainChoice === "blogger" ? "Blogger do Google" : "Domínio próprio"}</div>
@@ -366,10 +403,10 @@ export default function SiteBuilder() {
 
         <div style={navRow}>
           {step > 1 ? <button style={backBtn} onClick={() => setStep((s) => s - 1)}>Voltar</button> : <span />}
-          {step < 9 ? (
+          {step < 10 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
-            <button style={navBtn} disabled={!canNext[9] || submitting} onClick={submit}>
+            <button style={navBtn} disabled={!canNext[10] || submitting} onClick={submit}>
               {submitting ? "A enviar…" : "Construir site"}
             </button>
           )}

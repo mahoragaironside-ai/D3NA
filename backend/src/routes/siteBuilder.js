@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
     business_category, business_type, color_scheme,
     structure_choice, style_choice, domain_choice,
     tier, company_name, company_description, contact_info,
-    contact_links, logo_choice, catalog_items, gallery_items,
+    contact_links, logo_choice, catalog_items, gallery_items, font_choice,
   } = req.body;
 
   if (!company_name || (!contact_links && !contact_info)) {
@@ -41,14 +41,14 @@ router.post("/", async (req, res) => {
     `INSERT INTO site_builds
       (business_category, business_type, color_scheme, structure_choice, style_choice,
        domain_choice, tier, company_name, company_description, contact_info,
-       contact_links, logo_choice, catalog_items, gallery_items,
+       contact_links, logo_choice, catalog_items, gallery_items, font_choice,
        amount, currency, payment_reference, payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'pendente')
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,'pendente')
      RETURNING build_id`,
     [
       business_category, business_type, color_scheme, structure_choice, style_choice,
       domain_choice || "blogger", isPro ? "pro" : "basico", company_name, company_description, contact_info,
-      contact_links || null, logo_choice || null, catalog_items || null, gallery_items || null,
+      contact_links || null, logo_choice || null, catalog_items || null, gallery_items || null, font_choice || "sistema",
       amount, process.env.PAYMENT_CURRENCY || "AOA", reference,
     ]
   );

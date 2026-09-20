@@ -95,3 +95,9 @@ CREATE TABLE IF NOT EXISTS site_builds (
   created_at           TIMESTAMPTZ DEFAULT now(),
   confirmed_at         TIMESTAMPTZ
 );
+
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS contact_links TEXT;
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS logo_choice INTEGER;
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS catalog_items TEXT;
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS gallery_items TEXT;
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS font_choice VARCHAR(20) DEFAULT 'sistema';
