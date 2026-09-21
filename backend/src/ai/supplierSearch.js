@@ -78,6 +78,7 @@ async function comRetry(fn, tentativas = 2) {
 }
 
 export async function findSuppliers({ productName, location, isImport, notes }) {
+  console.log("=== NO MOMENTO DO PEDIDO, TAVILY presente:", !!process.env.TAVILY_API_KEY, "===");
   if (!process.env.TAVILY_API_KEY) {
     throw new Error("MARCA_TESTE_123 — TAVILY_API_KEY não configurada.");
   }
