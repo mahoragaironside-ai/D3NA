@@ -6,6 +6,7 @@ import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
 import ContactLinksPicker from "../components/ContactLinksPicker.jsx";
 import CatalogItemsPicker from "../components/CatalogItemsPicker.jsx";
+import GalleryItemsPicker from "../components/GalleryItemsPicker.jsx";
 
 const NEGOCIOS = {
   vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
@@ -73,6 +74,7 @@ export default function SiteBuilder() {
   const [contactLinks, setContactLinks] = useState([]);
   const [logoChoice, setLogoChoice] = useState(null);
   const [catalogItems, setCatalogItems] = useState([]);
+  const [galleryItems, setGalleryItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -110,6 +112,7 @@ export default function SiteBuilder() {
         contact_links: JSON.stringify(contactLinks),
         logo_choice: logoChoice,
         catalog_items: JSON.stringify(catalogItems),
+        gallery_items: JSON.stringify(galleryItems),
       });
       setPreviewHtml(html);
     } catch (e) {
@@ -141,6 +144,7 @@ export default function SiteBuilder() {
         contact_links: JSON.stringify(contactLinks),
         logo_choice: logoChoice,
         catalog_items: JSON.stringify(catalogItems),
+        gallery_items: JSON.stringify(galleryItems),
       });
       localStorage.setItem("d3na_site_build_id", r.build_id);
       setResult(r);
@@ -153,6 +157,7 @@ export default function SiteBuilder() {
   }
 
   const precisaCatalogo = [2, 3, 5].includes(structureChoice);
+  const precisaGaleria = structureChoice === 4;
 
   const canNext = {
     1: businessCategory && businessType,
@@ -161,7 +166,7 @@ export default function SiteBuilder() {
     4: !!structureChoice,
     5: !!styleChoice,
     6: companyName && contactLinks.length > 0 && !!logoChoice,
-    7: !precisaCatalogo || catalogItems.length > 0,
+    7: (!precisaCatalogo || catalogItems.length > 0) && (!precisaGaleria || galleryItems.length > 0),
     8: true,
     9: !!domainChoice,
     10: !!tier,
@@ -360,13 +365,23 @@ export default function SiteBuilder() {
 
         {step === 7 && (
           <>
-            <div style={title}>Catálogo</div>
-            <div style={subtitle}>
-              {precisaCatalogo
-                ? "Adiciona os produtos/serviços que vão aparecer no site. Sem foto, só nome, preço e descrição."
-                : "A estrutura que escolheste não usa catálogo, mas podes adicionar itens à mesma se quiseres."}
-            </div>
-            <CatalogItemsPicker value={catalogItems} onChange={setCatalogItems} />
+            {precisaGaleria ? (
+              <>
+                <div style={title}>Galeria</div>
+                <div style={subtitle}>Adiciona as fotos que vão aparecer na galeria do site.</div>
+                <GalleryItemsPicker value={galleryItems} onChange={setGalleryItems} />
+              </>
+            ) : (
+              <>
+                <div style={title}>Catálogo</div>
+                <div style={subtitle}>
+                  {precisaCatalogo
+                    ? "Adiciona os produtos/serviços que vão aparecer no site. Sem foto, só nome, preço e descrição."
+                    : "A estrutura que escolheste não usa catálogo, mas podes adicionar itens à mesma se quiseres."}
+                </div>
+                <CatalogItemsPicker value={catalogItems} onChange={setCatalogItems} />
+              </>
+            )}
           </>
         )}
 
