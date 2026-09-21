@@ -79,7 +79,7 @@ async function comRetry(fn, tentativas = 2) {
 
 export async function findSuppliers({ productName, location, isImport, notes }) {
   if (!process.env.TAVILY_API_KEY) {
-    throw new Error("TAVILY_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
+    throw new Error("MARCA_TESTE_123 — TAVILY_API_KEY não configurada.");
   }
   if (!process.env.GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
