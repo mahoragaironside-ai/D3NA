@@ -1,3 +1,5 @@
+import { ICONES } from "./secoes.js";
+
 function escXml(str) {
   if (!str) return "";
   return String(str)
@@ -15,10 +17,7 @@ const CORES = {
   vinho: { primary: "#9f1239", secondary: "#ffffff" },
 };
 
-const ICONES = {
-  whatsapp: "💬", instagram: "📸", tiktok: "🎵",
-  facebook: "👍", telefone: "📞", outro: "🔗",
-};
+
 
 function renderContactBtnsXML(contactLinks) {
   if (!contactLinks || contactLinks.length === 0) return "";

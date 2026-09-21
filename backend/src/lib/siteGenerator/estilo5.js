@@ -2,11 +2,9 @@ import { logoBadgeCSS, logoBadgeHTML } from "./logoBadge.js";
 import { adsCarouselCSS, adsCarouselHTML, adsCarouselScript } from "./adsCarousel.js";
 import { catalogoCSS } from "./catalogo.js";
 import { galeriaCSS } from "./galeria.js";
+import { ICONES } from "./secoes.js";
 
-const ICONES = {
-  whatsapp: "💬", instagram: "📸", tiktok: "🎵",
-  facebook: "👍", telefone: "📞", outro: "🔗",
-};
+
 
 function renderContactBtns(contactLinks) {
   if (!contactLinks || contactLinks.length === 0) return "";

@@ -19,10 +19,10 @@ function LogoMark({ logoChoice, L1, L2, primary, secondary, scale }) {
   if (logoChoice === 2) {
     return (
       <div style={{ ...base, borderRadius: 5, overflow: "hidden", display: "flex" }}>
-        <div style={{ flex: 1, background: secondary, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ flex: 1, background: secondary, display: "flex", alignItems: "center", justifyContent: "center", animation: "mp_logoBounce 1.8s ease-in-out infinite" }}>
           <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L1}</span>
         </div>
-        <div style={{ flex: 1, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ flex: 1, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", animation: "mp_logoBounce 1.8s ease-in-out infinite", animationDelay: "0.3s" }}>
           <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L2}</span>
         </div>
       </div>
@@ -30,29 +30,44 @@ function LogoMark({ logoChoice, L1, L2, primary, secondary, scale }) {
   }
   if (logoChoice === 3) {
     return (
-      <div style={{ ...base, background: "#fff", borderRadius: "50%", border: `1.5px solid ${secondary}` }}>
+      <div style={{ ...base, background: "#fff", borderRadius: "50%", border: `1.5px solid ${secondary}`, animation: "mp_logoPing 2s ease-out infinite" }}>
         <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L1}{L2}</span>
       </div>
     );
   }
   if (logoChoice === 4) {
     return (
-      <div style={base}>
-        <span style={{ fontFamily: "Georgia, serif", fontSize: fs * 1.1, color: secondary, borderBottom: `1px solid ${secondary}` }}>{L1}{L2.toLowerCase()}</span>
+      <div style={{ ...base, overflow: "hidden" }}>
+        <span style={{ fontFamily: "Georgia, serif", fontSize: fs * 1.1, color: secondary, borderBottom: `1px solid ${secondary}`, display: "inline-block", animation: "mp_logoSlide 1.8s ease-in-out infinite" }}>{L1}{L2.toLowerCase()}</span>
       </div>
     );
   }
   if (logoChoice === 5) {
     return (
       <div style={{ ...base, position: "relative" }}>
-        <span style={{ position: "absolute", fontSize: fs, fontWeight: 900, color: secondary, opacity: 0.4, transform: "translate(1px,1px)" }}>{L1}{L2}</span>
+        <span style={{ position: "absolute", fontSize: fs, fontWeight: 900, color: secondary, opacity: 0.4, animation: "mp_logoFloat 2.4s ease-in-out infinite" }}>{L1}{L2}</span>
         <span style={{ position: "relative", fontSize: fs, fontWeight: 900, color: secondary }}>{L1}{L2}</span>
+      </div>
+    );
+  }
+  if (logoChoice === 6) {
+    return (
+      <div style={{ ...base, borderRadius: 5, background: `linear-gradient(120deg, ${primary}, ${secondary}, ${primary})`, backgroundSize: "200% 200%", animation: "mp_logoGradient 3s ease infinite" }}>
+        <span style={{ color: "#fff", fontWeight: 800, fontSize: fs * 0.8, textShadow: "0 1px 2px rgba(0,0,0,0.25)" }}>{L1}{L2}</span>
+      </div>
+    );
+  }
+  if (logoChoice === 7) {
+    return (
+      <div style={{ ...base, position: "relative", background: "#fff", borderRadius: "50%" }}>
+        <span style={{ position: "absolute", inset: -2, borderRadius: "50%", border: `1.5px dashed ${secondary}`, animation: "mp_logoSpin 6s linear infinite" }} />
+        <span style={{ position: "relative", color: primary, fontWeight: 800, fontSize: fs * 0.8 }}>{L1}{L2}</span>
       </div>
     );
   }
   // 1 (padrão/minimalista) ou nenhum escolhido ainda
   return (
-    <div style={{ ...base, background: secondary, borderRadius: "50%" }}>
+    <div style={{ ...base, background: secondary, borderRadius: "50%", animation: "mp_logoPulse 2.2s ease-in-out infinite" }}>
       <span style={{ color: primary, fontWeight: 800, fontSize: fs * 0.75 }}>{L1}{L2}</span>
     </div>
   );
@@ -81,6 +96,13 @@ export default function MiniPreview({ structureId, styleId, primary, secondary, 
         @keyframes d3na_pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         .d3na_prev_capa { animation: d3na_fade 0.6s ease; }
         .d3na_prev_btn { animation: d3na_pulse 1.6s ease-in-out infinite; }
+        @keyframes mp_logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes mp_logoBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        @keyframes mp_logoPing { 0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.25); } 70% { box-shadow: 0 0 0 4px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
+        @keyframes mp_logoSlide { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(2px); } }
+        @keyframes mp_logoFloat { 0%, 100% { transform: translate(1px, 1px); opacity: 0.35; } 50% { transform: translate(2px, 2px); opacity: 0.55; } }
+        @keyframes mp_logoGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes mp_logoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
 
       <div style={{ background: primary, color: "#fff", padding: `${8 * scale}px ${10 * scale}px`, display: "flex", alignItems: "center", gap: 8 * scale }}>
