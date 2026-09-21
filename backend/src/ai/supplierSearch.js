@@ -1,5 +1,5 @@
-// Pesquisa de fornecedores — Tavily faz a pesquisa real, um modelo Groq normal
-// escreve a resposta final, já formatada em lista com links clicáveis.
+// Pesquisa de fornecedores — Serper.dev faz a pesquisa real (resultados do Google),
+// um modelo Groq normal escreve a resposta final, formatada em lista com links clicáveis.
 
 const SUPPLIER_SYSTEM_PROMPT = `És um assistente de pesquisa de fornecedores para um pequeno
 empreendedor angolano. Vais receber RESULTADOS DE PESQUISA REAIS DA INTERNET — a tua tarefa é
@@ -25,42 +25,41 @@ FORMATO OBRIGATÓRIO DA RESPOSTA (segue isto à risca):
   mais baratas nos resultados e destaca-as no topo com "💚 Mais barato que o teu preço actual".
 - Se for pesquisa de importação: separa claramente "FORNECEDORES INTERNACIONAIS" de "AGENTES DE
   IMPORTAÇÃO/DESPACHANTES" com um subtítulo em negrito entre os dois grupos.
-- Se um resultado for claramente antigo (mais de 1-2 anos), avisa que pode estar desatualizado.
+- Se um resultado for claramente antigo, avisa que pode estar desatualizado.
 - Usa APENAS informação presente nos resultados fornecidos — nunca inventes preços, nomes ou
   contactos que não estejam lá.
 - Termina SEMPRE com uma linha curta a lembrar que a pessoa deve confirmar reputação e condições
   diretamente com o fornecedor antes de pagar qualquer adiantamento.
 - Responde em português, direto, sem floreios, sem introduções longas.`;
 
-async function tavilySearch(query) {
-  const response = await fetch("https://api.tavily.com/search", {
+async function serperSearch(query) {
+  const response = await fetch("https://google.serper.dev/search", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.TAVILY_API_KEY}`,
+      "X-API-KEY": process.env.SERPER_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query,
-      search_depth: "advanced",
-      max_results: 10,
-      include_answer: false,
-      include_raw_content: false,
+      q: query,
+      gl: "ao",
+      hl: "pt",
+      num: 15,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Erro na pesquisa Tavily: ${response.status} ${errText}`);
+    throw new Error(`Erro na pesquisa Serper: ${response.status} ${errText}`);
   }
 
   const data = await response.json();
-  return data.results || [];
+  return data.organic || [];
 }
 
 function formatarResultados(resultados, rotulo) {
   if (resultados.length === 0) return `\n[${rotulo}] — nenhum resultado encontrado.\n`;
   return `\n[${rotulo}]\n` + resultados.map((r, i) =>
-    `${i + 1}. ${r.title}\nFonte: ${r.url}\nData: ${r.published_date || "não disponível"}\nResumo: ${(r.content || "").slice(0, 400)}`
+    `${i + 1}. ${r.title}\nFonte: ${r.link}\nResumo: ${(r.snippet || "").slice(0, 400)}`
   ).join("\n\n");
 }
 
@@ -78,9 +77,8 @@ async function comRetry(fn, tentativas = 2) {
 }
 
 export async function findSuppliers({ productName, location, isImport, notes }) {
-  console.log("=== NO MOMENTO DO PEDIDO, TAVILY presente:", !!process.env.TAVILY_API_KEY, "===");
-  if (!process.env.TAVILY_API_KEY) {
-    throw new Error("MARCA_TESTE_123 — TAVILY_API_KEY não configurada.");
+  if (!process.env.SERPER_API_KEY) {
+    throw new Error("SERPER_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
   }
   if (!process.env.GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
@@ -90,14 +88,14 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
 
   if (isImport) {
     const [fornecedores, agentes] = await Promise.all([
-      comRetry(() => tavilySearch(`${productName} wholesale supplier factory export to Angola price contact`)),
-      comRetry(() => tavilySearch(`import agent customs broker Angola ${productName} shipping`)),
+      comRetry(() => serperSearch(`${productName} wholesale supplier factory export to Angola price contact`)),
+      comRetry(() => serperSearch(`import agent customs broker Angola ${productName} shipping`)),
     ]);
     contextoPesquisa =
       formatarResultados(fornecedores, "Fornecedores internacionais") +
       formatarResultados(agentes, "Agentes de importação / despachantes");
   } else {
-    const resultados = await comRetry(() => tavilySearch(`${productName} supplier price contact ${location}`));
+    const resultados = await comRetry(() => serperSearch(`${productName} fornecedor preço contacto ${location}`));
     contextoPesquisa = formatarResultados(resultados, "Fornecedores locais");
   }
 
