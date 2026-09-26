@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth, requireAdminKey } from "../middleware/auth.js";
+import { sendNotificationSms } from "../services/notifications.js";
 
 const router = Router();
 
@@ -78,6 +79,13 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
     [startedAt, expiresAt, subscription.subscription_id]
   );
   await query("UPDATE users SET subscription_status = 'ativo' WHERE user_id = $1", [subscription.user_id]);
+
+  try {
+    const u = await query("SELECT phone_number FROM users WHERE user_id = $1", [subscription.user_id]);
+    await sendNotificationSms(u.rows[0]?.phone_number, "O teu pagamento da consultoria foi confirmado. A tua subscricao esta ativa.");
+  } catch (e) {
+    console.error("Falha ao notificar utilizador:", e.message);
+  }
 
   res.json({ status: "confirmado", expires_at: expiresAt });
 });

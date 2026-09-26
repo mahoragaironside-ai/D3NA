@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import { api } from "../api.js";
+import ReviewModal from "../components/ReviewModal.jsx";
 import { C } from "../tokens.js";
 import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
@@ -83,12 +84,16 @@ export default function SiteBuilder() {
   const [previewHtml, setPreviewHtml] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
+  const [showReview, setShowReview] = useState(false);
 
   async function checkStatus(buildId) {
     setChecking(true);
     try {
       const s = await api.getSiteBuildStatus(buildId);
       setStatus(s.payment_status);
+      if (s.payment_status === "confirmado" && !localStorage.getItem("review_done_" + buildId)) {
+        setShowReview(true);
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -172,16 +177,16 @@ export default function SiteBuilder() {
     10: !!tier,
   };
 
-  const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "24px 16px" };
-  const card = { background: C.surface, borderRadius: 16, padding: 24, width: 420, maxWidth: "100%", boxSizing: "border-box" };
+  const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "16px 12px" };
+  const card = { background: C.surface, borderRadius: 16, padding: 18, width: 420, maxWidth: "100%", boxSizing: "border-box" };
   const title = { fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 700, color: C.ink, marginBottom: 4 };
-  const subtitle = { fontSize: 13, color: C.inkSoft, marginBottom: 18 };
+  const subtitle = { fontSize: 12.5, color: C.inkSoft, marginBottom: 12 };
   const optBtn = (active) => ({
     display: "block", width: "100%", textAlign: "left", background: active ? C.navySoft : C.bg,
-    border: `1px solid ${active ? C.navy : C.border}`, borderRadius: 10, padding: "10px 14px",
-    marginBottom: 8, cursor: "pointer", color: C.ink, fontSize: 14,
+    border: `1px solid ${active ? C.navy : C.border}`, borderRadius: 10, padding: "8px 12px",
+    marginBottom: 6, cursor: "pointer", color: C.ink, fontSize: 13.5,
   });
-  const navRow = { display: "flex", justifyContent: "space-between", marginTop: 20 };
+  const navRow = { display: "flex", justifyContent: "space-between", marginTop: 14 };
   const navBtn = { background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer" };
   const backBtn = { background: "none", border: "none", color: C.inkSoft, fontSize: 14, cursor: "pointer" };
   const selectedColor = CORES.find((c) => c.id === colorScheme) || CORES[0];
@@ -190,6 +195,16 @@ export default function SiteBuilder() {
     return (
       <div style={wrap}>
         <div style={card}>
+          {showReview && (
+            <ReviewModal
+              serviceType="construtor"
+              referenceId={result && result.build_id}
+              onClose={() => {
+                localStorage.setItem("review_done_" + (result && result.build_id), "1");
+                setShowReview(false);
+              }}
+            />
+          )}
           {status === "confirmado" ? (
             <>
               <div style={title}>Pagamento confirmado ✅</div>

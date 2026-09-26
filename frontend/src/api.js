@@ -66,6 +66,36 @@ export const api = {
   adminPendingSiteBuilds: (adminKey) =>
     fetch(`${API_URL}/site-builds/admin/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),
 
+  adminSummary: (adminKey) =>
+    fetch(`${API_URL}/admin-stats/summary`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminRevenue: (adminKey, bucket) =>
+    fetch(`${API_URL}/admin-stats/revenue?bucket=${bucket || "dia"}`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminNewUsers: (adminKey, bucket) =>
+    fetch(`${API_URL}/admin-stats/new-users?bucket=${bucket || "dia"}`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminUsers: (adminKey) =>
+    fetch(`${API_URL}/admin-stats/users`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminActivityLog: (adminKey) =>
+    fetch(`${API_URL}/activity-log`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminReviews: (adminKey) =>
+    fetch(`${API_URL}/reviews`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminReviewsSummary: (adminKey) =>
+    fetch(`${API_URL}/reviews/summary`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminPendingCourses: (adminKey) =>
+    fetch(`${API_URL}/course-enrollments/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminConfirmCourse: (enrollmentId, adminKey) =>
+    fetch(`${API_URL}/course-enrollments/${enrollmentId}/confirm`, {
+      method: "POST",
+      headers: { "x-admin-key": adminKey },
+    }).then(handle),
+
   adminConfirmSiteBuild: (buildId, adminKey) =>
     fetch(`${API_URL}/site-builds/${buildId}/confirm`, {
       method: "POST",
@@ -118,6 +148,13 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ query }),
+    }).then(handle),
+
+  createReview: (service_type, reference_id, rating, comment) =>
+    fetch(`${API_URL}/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ service_type, reference_id, rating, comment }),
     }).then(handle),
 
   adWatched: () => fetch(`${API_URL}/ads/watched`, { method: "POST", headers: authHeaders() }).then(handle),

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAdminKey } from "../middleware/auth.js";
+import { sendNotificationSms, extractPhoneFromContactLinks } from "../services/notifications.js";
 import { gerarSite } from "../lib/siteGenerator/index.js";
 
 const router = Router();
@@ -88,6 +89,14 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
     [req.params.id]
   );
   if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  try {
+    const phone = extractPhoneFromContactLinks(result.rows[0].contact_links);
+    await sendNotificationSms(phone, "O pagamento do teu site foi confirmado. Entra em contacto para receberes o ficheiro/acesso final.");
+  } catch (e) {
+    console.error("Falha ao notificar utilizador:", e.message);
+  }
+
   res.json({ status: "confirmado" });
 });
 

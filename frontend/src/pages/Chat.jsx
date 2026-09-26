@@ -5,6 +5,7 @@ import { C } from "../tokens.js";
 import ReportCard from "../components/ReportCard.jsx";
 import ProgressPanel from "../components/ProgressPanel.jsx";
 import AdBreak from "../components/AdBreak.jsx";
+import ReviewModal from "../components/ReviewModal.jsx";
 
 const CHIPS = [
   "Quero começar um negócio",
@@ -15,6 +16,17 @@ const CHIPS = [
 ];
 
 export default function Chat({ project, onProjectUpdate, subscription, onUpgrade }) {
+  const [showReview, setShowReview] = useState(false);
+
+  useEffect(() => {
+    const sub = subscription && subscription.latest;
+    if (!sub || !sub.expires_at || !sub.subscription_id) return;
+    const hoursLeft = (new Date(sub.expires_at) - new Date()) / 36e5;
+    const doneKey = "review_done_sub_" + sub.subscription_id;
+    if (hoursLeft > 0 && hoursLeft <= 24 && !localStorage.getItem(doneKey)) {
+      setShowReview(true);
+    }
+  }, [subscription]);
   const isCourse = project.category === "curso_marketing";
   const [messages, setMessages] = useState(
     project.messages && project.messages.length > 0
@@ -185,6 +197,17 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {showReview && (
+        <ReviewModal
+          serviceType="consultoria"
+          referenceId={subscription && subscription.latest && subscription.latest.subscription_id}
+          onClose={() => {
+            const sub = subscription && subscription.latest;
+            if (sub && sub.subscription_id) localStorage.setItem("review_done_sub_" + sub.subscription_id, "1");
+            setShowReview(false);
+          }}
+        />
+      )}
       {subscription?.subscription_status !== "ativo" && (
         <div style={{ background: C.navySoft, color: C.navy, fontSize: 12.5, padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span>Plano gratuito — 1 análise/mês.</span>

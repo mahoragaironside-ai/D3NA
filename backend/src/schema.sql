@@ -101,3 +101,41 @@ ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS logo_choice INTEGER;
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS catalog_items TEXT;
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS gallery_items TEXT;
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS font_choice VARCHAR(20) DEFAULT 'sistema';
+
+-- Curso (inscrição semanal, mesmo modelo de subscriptions)
+CREATE TABLE IF NOT EXISTS course_enrollments (
+  enrollment_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  course_name          TEXT,
+  amount                NUMERIC DEFAULT 0,
+  currency                VARCHAR(3) DEFAULT 'AOA',
+  payment_method            VARCHAR(20) DEFAULT 'refx_facipay',
+  payment_reference           VARCHAR(30),
+  payment_status                 VARCHAR(20) DEFAULT 'pendente',
+  started_at                       TIMESTAMPTZ,
+  expires_at                         TIMESTAMPTZ,
+  created_at                           TIMESTAMPTZ DEFAULT now()
+);
+
+-- Avaliacoes de qualidade (obrigatoria pos-compra)
+CREATE TABLE IF NOT EXISTS reviews (
+  review_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  service_type  VARCHAR(20) NOT NULL, -- 'construtor' | 'consultoria' | 'curso' | 'afiliado'
+  reference_id  UUID, -- build_id, subscription_id, enrollment_id, etc (sem FK fixa, tipo varia)
+  rating        SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment       TEXT,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- Registo em sistema informativo (log de acoes/eventos)
+CREATE TABLE IF NOT EXISTS activity_log (
+  log_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(user_id) ON DELETE SET NULL,
+  event_type  VARCHAR(50) NOT NULL, -- 'pagamento_confirmado' | 'conta_criada' | 'site_entregue' | etc
+  details     JSONB DEFAULT '{}',
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+-- Liga sites construidos ao utilizador dono
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(user_id) ON DELETE SET NULL;
