@@ -10,9 +10,24 @@ const MENU = [
   { id: "utilizadores", label: "Utilizadores", icon: Users },
   { id: "registo", label: "Registo do sistema", icon: ClipboardList },
   { id: "indicadores", label: "Indicadores e qualidade", icon: Star },
+  { id: "apoio_cliente", label: "Apoio ao Cliente", icon: MessageCircle },
   { id: "afiliados", label: "Apoio ao afiliado", icon: HeartHandshake },
   { id: "organograma", label: "Organograma", icon: Network },
 ];
+
+function useUnreadSupportCount(adminKey, unlocked) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!unlocked) return;
+    function load() {
+      api.adminSupportUnreadCount(adminKey).then((r) => setCount(r.count)).catch(() => {});
+    }
+    load();
+    const interval = setInterval(load, 20000);
+    return () => clearInterval(interval);
+  }, [adminKey, unlocked]);
+  return count;
+}
 
 export default function AdminPanel() {
   const [adminKey, setAdminKey] = useState("");
@@ -20,6 +35,7 @@ export default function AdminPanel() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("dashboard");
+  const unreadSupport = useUnreadSupportCount(adminKey, unlocked);
 
   async function tryUnlock(e) {
     e.preventDefault();
@@ -74,6 +90,11 @@ export default function AdminPanel() {
               }}
             >
               <Icon size={15} /> {m.label}
+              {m.id === "apoio_cliente" && unreadSupport > 0 && (
+                <span style={{ background: C.red || "#c0392b", color: "#fff", borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginLeft: 2 }}>
+                  {unreadSupport}
+                </span>
+              )}
             </button>
           );
         })}
@@ -85,6 +106,7 @@ export default function AdminPanel() {
         {tab === "utilizadores" && <UtilizadoresTab adminKey={adminKey} />}
         {tab === "registo" && <RegistoTab adminKey={adminKey} />}
         {tab === "indicadores" && <IndicadoresTab adminKey={adminKey} />}
+        {tab === "apoio_cliente" && <ApoioClienteTab adminKey={adminKey} />}
         {tab === "afiliados" && <EmBreve texto="O programa de afiliados ainda vai ser construído — esta secção liga-se assim que existir." />}
         {tab === "organograma" && <Organograma />}
       </div>
@@ -122,6 +144,96 @@ function Organograma() {
         <div style={box}><div style={{ fontWeight: 600, color: C.ink }}>Contabilidade</div><div style={sub}>Planeada — por IA</div></div>
         <div style={box}><div style={{ fontWeight: 600, color: C.ink }}>Produto / Tecnologia</div><div style={sub}>Fundador + IA</div></div>
       </div>
+    </div>
+  );
+}
+
+function ApoioClienteTab({ adminKey }) {
+  const [conversas, setConversas] = useState([]);
+  const [activa, setActiva] = useState(null);
+  const [msgs, setMsgs] = useState([]);
+  const [texto, setTexto] = useState("");
+
+  function loadLista() {
+    api.adminSupportPending(adminKey).then(setConversas).catch(() => {});
+  }
+
+  useEffect(loadLista, [adminKey]);
+
+  function abrir(conv) {
+    setActiva(conv);
+    api.adminSupportHistory(conv.conversation_id, adminKey).then(setMsgs).catch(() => {});
+  }
+
+  async function enviar() {
+    if (!texto.trim() || !activa) return;
+    await api.adminSupportReply(activa.conversation_id, texto, adminKey);
+    setMsgs((m) => [...m, { sender: "admin", content: texto }]);
+    setTexto("");
+  }
+
+  async function resolver() {
+    if (!activa) return;
+    await api.adminSupportResolve(activa.conversation_id, adminKey);
+    setActiva(null);
+    loadLista();
+  }
+
+  if (activa) {
+    return (
+      <div>
+        <button onClick={() => setActiva(null)} style={{ background: "none", border: "none", color: C.navy, fontSize: 13, cursor: "pointer", marginBottom: 12 }}>
+          ← Voltar à lista
+        </button>
+        <Card>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 340, overflowY: "auto", marginBottom: 10 }}>
+            {msgs.map((m, i) => (
+              <div key={i} style={{
+                alignSelf: m.sender === "cliente" ? "flex-start" : "flex-end",
+                background: m.sender === "cliente" ? C.bg : (m.sender === "admin" ? C.navy : C.navySoft),
+                color: m.sender === "admin" ? "#fff" : C.ink,
+                borderRadius: 10, padding: "8px 12px", fontSize: 13, maxWidth: "85%",
+              }}>
+                <div style={{ fontSize: 10, opacity: 0.6, marginBottom: 2 }}>{m.sender}</div>
+                {m.content}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && enviar()}
+              placeholder="Responder ao cliente…"
+              style={{ flex: 1, border: `1px solid ${C.border}`, borderRadius: 10, padding: "8px 10px", fontSize: 13 }}
+            />
+            <button onClick={enviar} style={{ background: C.navy, border: "none", borderRadius: 10, width: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <Send size={15} color="#fff" />
+            </button>
+          </div>
+          <button onClick={resolver} style={{ marginTop: 10, background: "none", border: `1px solid ${C.border}`, borderRadius: 10, padding: "8px 12px", fontSize: 12.5, color: C.inkSoft, cursor: "pointer" }}>
+            Marcar como resolvido
+          </button>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <SectionTitle>Apoio ao Cliente — escalados ({conversas.length})</SectionTitle>
+      {conversas.length === 0 ? (
+        <div style={{ color: C.inkSoft, fontSize: 14, textAlign: "center", padding: 24 }}>Sem conversas escaladas.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {conversas.map((c) => (
+            <div key={c.conversation_id} onClick={() => abrir(c)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, cursor: "pointer" }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{c.phone_number || "Cliente"}</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>{c.ultima_mensagem}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

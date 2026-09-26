@@ -332,21 +332,20 @@ export default function SiteBuilder() {
         {step === 9 && (
           <>
             <div style={title}>Onde vai ficar o site?</div>
-            <div style={subtitle}>Em ambos os casos recebes um ficheiro para descarregar depois do pagamento.</div>
-            <button style={optBtn(domainChoice === "blogger")} onClick={() => setDomainChoice("blogger")}>
-              <div style={{ fontWeight: 600 }}>Blogger do Google (grátis)</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Recebes um ficheiro XML para importar no teu blog</div>
+            <div style={subtitle}>Em ambos os casos recebes o ficheiro do site pronto após o pagamento.</div>
+            <button style={optBtn(domainChoice === "netlify")} onClick={() => setDomainChoice("netlify")}>
+              <div style={{ fontWeight: 600 }}>Publicar grátis (recomendado)</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Sem hospedagem própria? Fica no ar em segundos, sem custos</div>
             </button>
             <button style={optBtn(domainChoice === "proprio")} onClick={() => setDomainChoice("proprio")}>
-              <div style={{ fontWeight: 600 }}>Domínio próprio</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes os ficheiros do site prontos</div>
+              <div style={{ fontWeight: 600 }}>Já tenho hospedagem</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes o ficheiro para carregares no teu servidor</div>
             </button>
-            {domainChoice === "blogger" && (
+            {domainChoice === "netlify" && (
               <div style={{ background: C.navySoft, borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12.5, color: C.ink, lineHeight: 1.6 }}>
-                Já tens um blog criado no Blogger (blogger.com)? Depois de receberes o ficheiro,
-                vais a <strong>Configurações → Gerir blog → Importar e fazer cópia de segurança</strong>
-                no teu blog para o inserir. Se ainda não tens blog, cria um gratuito em blogger.com
-                antes de importares o ficheiro.
+                Depois de receberes o ficheiro: vai a <strong>netlify.com/drop</strong>, arrasta o
+                ficheiro para lá, e o site fica no ar em segundos — sem conta, sem custos. Se
+                quiseres guardar esse link para sempre, cria uma conta grátis e clica em "Claim".
               </div>
             )}
           </>
@@ -423,7 +422,7 @@ export default function SiteBuilder() {
               <div><strong style={{ color: C.ink }}>Fonte:</strong> {FONTES.find((f) => f.id === fontChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estrutura:</strong> {ESTRUTURAS.find((e) => e.id === structureChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estilo:</strong> {ESTILOS.find((e) => e.id === styleChoice)?.label}</div>
-              <div><strong style={{ color: C.ink }}>Onde vai ficar:</strong> {domainChoice === "blogger" ? "Blogger do Google" : "Domínio próprio"}</div>
+              <div><strong style={{ color: C.ink }}>Onde vai ficar:</strong> {domainChoice === "netlify" ? "Publicação gratuita (Netlify)" : "Hospedagem própria"}</div>
               <div><strong style={{ color: C.ink }}>Nível:</strong> {tier === "pro" ? "Pro — 25.000 Kz" : "Básico — 1.500 Kz"}</div>
             </div>
           </>

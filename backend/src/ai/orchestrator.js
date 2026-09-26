@@ -90,7 +90,7 @@ REGRAS DA AULA:
   progressivo (começar pequeno, escalar o que funciona), e diferenças entre tráfego pago e orgânico.
 - Sem clichés de IA, sem emojis em excesso, sem linguagem de piloto automático — fala como um mentor real conversaria.`;
 
-async function callChatModel({ system, messages, maxTokens, jsonMode }) {
+export async function callChatModel({ system, messages, maxTokens, jsonMode }) {
   const provider = process.env.AI_PROVIDER || "anthropic";
   return provider === "groq"
     ? callGroq({ system, messages, maxTokens, jsonMode })

@@ -9,6 +9,7 @@ import SiteBuilder from "./pages/SiteBuilder.jsx";
 import PaymentModal from "./components/PaymentModal.jsx";
 import PhoneVerifyBanner from "./components/PhoneVerifyBanner.jsx";
 import Sidebar from "./components/Sidebar.jsx";
+import SupportWidget from "./components/SupportWidget.jsx";
 
 export default function App() {
   if (window.location.pathname === "/admin") return <AdminPanel />;
@@ -160,6 +161,8 @@ function MainApp() {
       </div>
 
       {paymentInfo && <PaymentModal info={paymentInfo} onClose={() => setPaymentInfo(null)} />}
+
+      <SupportWidget />
 
       <style>{`
         :root {

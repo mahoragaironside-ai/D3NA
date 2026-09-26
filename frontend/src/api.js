@@ -157,6 +157,38 @@ export const api = {
       body: JSON.stringify({ service_type, reference_id, rating, comment }),
     }).then(handle),
 
+  supportStart: () =>
+    fetch(`${API_URL}/support/start`, { method: "POST", headers: authHeaders() }).then(handle),
+
+  supportMessage: (conversationId, content) =>
+    fetch(`${API_URL}/support/${conversationId}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ content }),
+    }).then(handle),
+
+  supportHistory: (conversationId) =>
+    fetch(`${API_URL}/support/${conversationId}`, { headers: authHeaders() }).then(handle),
+
+  adminSupportPending: (adminKey) =>
+    fetch(`${API_URL}/support/admin/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminSupportUnreadCount: (adminKey) =>
+    fetch(`${API_URL}/support/admin/unread-count`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminSupportHistory: (conversationId, adminKey) =>
+    fetch(`${API_URL}/support/admin/${conversationId}`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminSupportReply: (conversationId, content, adminKey) =>
+    fetch(`${API_URL}/support/admin/${conversationId}/reply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+      body: JSON.stringify({ content }),
+    }).then(handle),
+
+  adminSupportResolve: (conversationId, adminKey) =>
+    fetch(`${API_URL}/support/admin/${conversationId}/resolve`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
+
   adWatched: () => fetch(`${API_URL}/ads/watched`, { method: "POST", headers: authHeaders() }).then(handle),
   adStatus: () => fetch(`${API_URL}/ads/status`, { headers: authHeaders() }).then(handle),
 };

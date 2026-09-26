@@ -154,7 +154,6 @@ export function estilo4(dados, primary, secondary, iniciais, corpo, fontFamily =
 </nav>
 
 <header>
-  <div class="badge">${business_type}</div>
   <h1>${company_name}</h1>
   <p>${company_description ? company_description.slice(0, 80) : "Uma história contada com propósito"}</p>
 </header>

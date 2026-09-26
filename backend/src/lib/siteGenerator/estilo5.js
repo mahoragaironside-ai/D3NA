@@ -162,7 +162,6 @@ export function estilo5(dados, primary, secondary, iniciais, corpo, fontFamily =
 </nav>
 
 <header>
-  <div class="badge">${business_type}</div>
   <h1>${company_name}</h1>
   <p>${company_description ? company_description.slice(0, 60) : "Tudo o que precisa, num só lugar"}</p>
 </header>

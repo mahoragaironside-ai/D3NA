@@ -139,3 +139,20 @@ CREATE TABLE IF NOT EXISTS activity_log (
 
 -- Liga sites construidos ao utilizador dono
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(user_id) ON DELETE SET NULL;
+
+-- Apoio ao cliente: conversas com a IA de suporte, escalonadas para o dono quando necessario.
+CREATE TABLE IF NOT EXISTS support_conversations (
+  conversation_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id          UUID REFERENCES users(user_id) ON DELETE SET NULL,
+  status           VARCHAR(20) DEFAULT 'ia', -- 'ia' | 'escalado' | 'resolvido'
+  created_at       TIMESTAMPTZ DEFAULT now(),
+  updated_at       TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  message_id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id  UUID REFERENCES support_conversations(conversation_id) ON DELETE CASCADE,
+  sender           VARCHAR(20) NOT NULL, -- 'cliente' | 'ia' | 'admin'
+  content          TEXT NOT NULL,
+  created_at       TIMESTAMPTZ DEFAULT now()
+);

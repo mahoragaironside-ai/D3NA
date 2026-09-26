@@ -16,6 +16,8 @@ import activityLogRoutes from "./routes/activityLog.js";
 import reviewRoutes from "./routes/reviews.js";
 import courseEnrollmentRoutes from "./routes/courseEnrollments.js";
 import adminStatsRoutes from "./routes/adminStats.js";
+import accountingRoutes from "./routes/accounting.js";
+import supportRoutes from "./routes/support.js";
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN || "*" }));
@@ -35,6 +37,8 @@ app.use("/activity-log", activityLogRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/course-enrollments", courseEnrollmentRoutes);
 app.use("/admin-stats", adminStatsRoutes);
+app.use("/accounting", accountingRoutes);
+app.use("/support", supportRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);
