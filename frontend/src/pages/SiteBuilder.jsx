@@ -6,8 +6,6 @@ import { C } from "../tokens.js";
 import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
 import ContactLinksPicker from "../components/ContactLinksPicker.jsx";
-import CatalogItemsPicker from "../components/CatalogItemsPicker.jsx";
-import GalleryItemsPicker from "../components/GalleryItemsPicker.jsx";
 
 const NEGOCIOS = {
   vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
@@ -60,6 +58,26 @@ const FONTES = [
   { id: "suave", label: "Suave", family: "Tahoma, Geneva, sans-serif" },
 ];
 
+// Itens de exemplo automáticos — a pessoa não insere fotos/produtos no wizard;
+// isso fica para o futuro painel de controlo. As imagens são placeholders
+// genéricos (placehold.co), não fotos reais, só para dar corpo à pré-visualização.
+function gerarItensExemplo(tipo, corPrimaria, nomeNegocio) {
+  const cor = (corPrimaria || "16305C").replace("#", "");
+  const base = nomeNegocio || (tipo === "catalogo" ? "Produto" : "Foto");
+  if (tipo === "catalogo") {
+    return [1, 2, 3, 4].map((n) => ({
+      name: `${base} ${n}`,
+      price: "1000",
+      description: "Imagem de exemplo — substitui pelas tuas fotos reais no painel de gestão.",
+      image_url: `https://placehold.co/400x400/${cor}/ffffff?text=Exemplo+${n}`,
+    }));
+  }
+  return [1, 2, 3, 4].map((n) => ({
+    image_url: `https://placehold.co/500x500/${cor}/ffffff?text=Exemplo+${n}`,
+    caption: `Foto de exemplo ${n}`,
+  }));
+}
+
 export default function SiteBuilder() {
   const [step, setStep] = useState(1);
   const [businessCategory, setBusinessCategory] = useState("");
@@ -74,8 +92,6 @@ export default function SiteBuilder() {
   const [companyDescription, setCompanyDescription] = useState("");
   const [contactLinks, setContactLinks] = useState([]);
   const [logoChoice, setLogoChoice] = useState(null);
-  const [catalogItems, setCatalogItems] = useState([]);
-  const [galleryItems, setGalleryItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -85,6 +101,9 @@ export default function SiteBuilder() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
   const [showReview, setShowReview] = useState(false);
+
+  const precisaCatalogo = [2, 3, 5].includes(structureChoice);
+  const precisaGaleria = structureChoice === 4;
 
   async function checkStatus(buildId) {
     setChecking(true);
@@ -105,6 +124,9 @@ export default function SiteBuilder() {
     setPreviewLoading(true);
     setPreviewError("");
     try {
+      const cor = (CORES.find((c) => c.id === colorScheme) || CORES[0]).primary;
+      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, businessType) : [];
+      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, businessType) : [];
       const html = await api.previewSiteBuild({
         business_category: businessCategory,
         business_type: businessType,
@@ -116,8 +138,8 @@ export default function SiteBuilder() {
         company_description: companyDescription,
         contact_links: JSON.stringify(contactLinks),
         logo_choice: logoChoice,
-        catalog_items: JSON.stringify(catalogItems),
-        gallery_items: JSON.stringify(galleryItems),
+        catalog_items: JSON.stringify(catalogAuto),
+        gallery_items: JSON.stringify(galleryAuto),
       });
       setPreviewHtml(html);
     } catch (e) {
@@ -128,13 +150,16 @@ export default function SiteBuilder() {
   }
 
   useEffect(() => {
-    if (step === 8) carregarPreview();
+    if (step === 7) carregarPreview();
   }, [step]);
 
   async function submit() {
     setSubmitting(true);
     setError("");
     try {
+      const cor = (CORES.find((c) => c.id === colorScheme) || CORES[0]).primary;
+      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, businessType) : [];
+      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, businessType) : [];
       const r = await api.createSiteBuild({
         business_category: businessCategory,
         business_type: businessType,
@@ -148,8 +173,8 @@ export default function SiteBuilder() {
         company_description: companyDescription,
         contact_links: JSON.stringify(contactLinks),
         logo_choice: logoChoice,
-        catalog_items: JSON.stringify(catalogItems),
-        gallery_items: JSON.stringify(galleryItems),
+        catalog_items: JSON.stringify(catalogAuto),
+        gallery_items: JSON.stringify(galleryAuto),
       });
       localStorage.setItem("d3na_site_build_id", r.build_id);
       setResult(r);
@@ -161,9 +186,6 @@ export default function SiteBuilder() {
     }
   }
 
-  const precisaCatalogo = [2, 3, 5].includes(structureChoice);
-  const precisaGaleria = structureChoice === 4;
-
   const canNext = {
     1: businessCategory && businessType,
     2: !!colorScheme,
@@ -171,10 +193,9 @@ export default function SiteBuilder() {
     4: !!structureChoice,
     5: !!styleChoice,
     6: companyName && contactLinks.length > 0 && !!logoChoice,
-    7: (!precisaCatalogo || catalogItems.length > 0) && (!precisaGaleria || galleryItems.length > 0),
-    8: true,
-    9: !!domainChoice,
-    10: !!tier,
+    7: true,
+    8: !!domainChoice,
+    9: !!tier,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "16px 12px" };
@@ -243,7 +264,7 @@ export default function SiteBuilder() {
     <div style={wrap}>
       <div style={card}>
         <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-          Construtor de sites · Passo {step} de 10
+          Construtor de sites · Passo {step} de 9
         </div>
 
         {step === 1 && (
@@ -329,42 +350,6 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 9 && (
-          <>
-            <div style={title}>Onde vai ficar o site?</div>
-            <div style={subtitle}>Em ambos os casos recebes o ficheiro do site pronto após o pagamento.</div>
-            <button style={optBtn(domainChoice === "netlify")} onClick={() => setDomainChoice("netlify")}>
-              <div style={{ fontWeight: 600 }}>Publicar grátis (recomendado)</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Sem hospedagem própria? Fica no ar em segundos, sem custos</div>
-            </button>
-            <button style={optBtn(domainChoice === "proprio")} onClick={() => setDomainChoice("proprio")}>
-              <div style={{ fontWeight: 600 }}>Já tenho hospedagem</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes o ficheiro para carregares no teu servidor</div>
-            </button>
-            {domainChoice === "netlify" && (
-              <div style={{ background: C.navySoft, borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12.5, color: C.ink, lineHeight: 1.6 }}>
-                Depois de receberes o ficheiro: vai a <strong>netlify.com/drop</strong>, arrasta o
-                ficheiro para lá, e o site fica no ar em segundos — sem conta, sem custos. Se
-                quiseres guardar esse link para sempre, cria uma conta grátis e clica em "Claim".
-              </div>
-            )}
-          </>
-        )}
-
-        {step === 10 && (
-          <>
-            <div style={title}>Nível do site</div>
-            <button style={optBtn(tier === "basico")} onClick={() => setTier("basico")}>
-              <div style={{ fontWeight: 700 }}>Básico — 1.500 Kz</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo</div>
-            </button>
-            <button style={optBtn(tier === "pro")} onClick={() => setTier("pro")}>
-              <div style={{ fontWeight: 700 }}>Pro — 25.000 Kz</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo + domínio próprio + IA + sem anúncios + automação + tráfego pago incluído</div>
-            </button>
-          </>
-        )}
-
         {step === 6 && (
           <>
             <div style={title}>Dados da empresa</div>
@@ -378,28 +363,6 @@ export default function SiteBuilder() {
         )}
 
         {step === 7 && (
-          <>
-            {precisaGaleria ? (
-              <>
-                <div style={title}>Galeria</div>
-                <div style={subtitle}>Adiciona as fotos que vão aparecer na galeria do site.</div>
-                <GalleryItemsPicker value={galleryItems} onChange={setGalleryItems} />
-              </>
-            ) : (
-              <>
-                <div style={title}>Catálogo</div>
-                <div style={subtitle}>
-                  {precisaCatalogo
-                    ? "Adiciona os produtos/serviços que vão aparecer no site. Sem foto, só nome, preço e descrição."
-                    : "A estrutura que escolheste não usa catálogo, mas podes adicionar itens à mesma se quiseres."}
-                </div>
-                <CatalogItemsPicker value={catalogItems} onChange={setCatalogItems} />
-              </>
-            )}
-          </>
-        )}
-
-        {step === 8 && (
           <>
             <div style={title}>Confere tudo antes de pagar</div>
             <div style={subtitle}>É assim que o site vai ficar. Se algo não estiver bem, volta atrás e muda.</div>
@@ -422,9 +385,43 @@ export default function SiteBuilder() {
               <div><strong style={{ color: C.ink }}>Fonte:</strong> {FONTES.find((f) => f.id === fontChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estrutura:</strong> {ESTRUTURAS.find((e) => e.id === structureChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estilo:</strong> {ESTILOS.find((e) => e.id === styleChoice)?.label}</div>
-              <div><strong style={{ color: C.ink }}>Onde vai ficar:</strong> {domainChoice === "netlify" ? "Publicação gratuita (Netlify)" : "Hospedagem própria"}</div>
-              <div><strong style={{ color: C.ink }}>Nível:</strong> {tier === "pro" ? "Pro — 25.000 Kz" : "Básico — 1.500 Kz"}</div>
             </div>
+          </>
+        )}
+
+        {step === 8 && (
+          <>
+            <div style={title}>Onde vai ficar o site?</div>
+            <div style={subtitle}>Em ambos os casos recebes o ficheiro do site pronto após o pagamento.</div>
+            <button style={optBtn(domainChoice === "netlify")} onClick={() => setDomainChoice("netlify")}>
+              <div style={{ fontWeight: 600 }}>Publicar grátis (recomendado)</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Sem hospedagem própria? Fica no ar em segundos, sem custos</div>
+            </button>
+            <button style={optBtn(domainChoice === "proprio")} onClick={() => setDomainChoice("proprio")}>
+              <div style={{ fontWeight: 600 }}>Já tenho hospedagem</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes o ficheiro para carregares no teu servidor</div>
+            </button>
+            {domainChoice === "netlify" && (
+              <div style={{ background: C.navySoft, borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12.5, color: C.ink, lineHeight: 1.6 }}>
+                Depois de receberes o ficheiro: vai a <strong>netlify.com/drop</strong>, arrasta o
+                ficheiro para lá, e o site fica no ar em segundos — sem conta, sem custos. Se
+                quiseres guardar esse link para sempre, cria uma conta grátis e clica em "Claim".
+              </div>
+            )}
+          </>
+        )}
+
+        {step === 9 && (
+          <>
+            <div style={title}>Nível do site</div>
+            <button style={optBtn(tier === "basico")} onClick={() => setTier("basico")}>
+              <div style={{ fontWeight: 700 }}>Básico — 1.500 Kz</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo</div>
+            </button>
+            <button style={optBtn(tier === "pro")} onClick={() => setTier("pro")}>
+              <div style={{ fontWeight: 700 }}>Pro — 25.000 Kz</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo + domínio próprio + IA + sem anúncios + automação + tráfego pago incluído</div>
+            </button>
           </>
         )}
 
@@ -432,10 +429,10 @@ export default function SiteBuilder() {
 
         <div style={navRow}>
           {step > 1 ? <button style={backBtn} onClick={() => setStep((s) => s - 1)}>Voltar</button> : <span />}
-          {step < 10 ? (
+          {step < 9 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
-            <button style={navBtn} disabled={!canNext[10] || submitting} onClick={submit}>
+            <button style={navBtn} disabled={!canNext[9] || submitting} onClick={submit}>
               {submitting ? "A enviar…" : "Construir site"}
             </button>
           )}
