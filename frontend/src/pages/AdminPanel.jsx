@@ -42,7 +42,7 @@ export default function AdminPanel() {
     setLoading(true);
     setError("");
     try {
-      await api.adminSummary(adminKey);
+      const k = adminKey.trim(); setAdminKey(k); await api.adminSummary(k);
       setUnlocked(true);
     } catch (e2) {
       setError(e2.message || "Chave inválida.");
@@ -59,7 +59,7 @@ export default function AdminPanel() {
           <div style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 700, color: C.ink, margin: "4px 0 18px" }}>D3NA — Painel de controlo</div>
           <input
             type="password"
-            value={adminKey}
+            value={adminKey} autoCapitalize="none" autoCorrect="off" spellCheck={false}
             onChange={(e) => setAdminKey(e.target.value)}
             placeholder="Chave administrativa"
             style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14, outline: "none" }}
