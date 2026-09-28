@@ -38,7 +38,8 @@ function MainApp() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) { setLoadingBoot(false); return; }
-    bootstrap();
+    const t = setTimeout(() => setLoadingBoot(false), 20000);
+    bootstrap().finally(() => clearTimeout(t));
   }, []);
 
   async function bootstrap() {
