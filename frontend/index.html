@@ -17,7 +17,18 @@
       }
       body { background: var(--bg); }
     </style>
-  </head>
+  <script>
+(function(){
+function mostraErro(m){var r=document.getElementById('root');if(r)r.innerHTML='<div style="padding:20px;font-family:monospace;font-size:13px;color:#e74c3c;white-space:pre-wrap;">'+m+'</div>';}
+window.addEventListener('error',function(e){
+if(e.target&&e.target.tagName==='SCRIPT'){mostraErro('FALHOU A DESCARREGAR: '+e.target.src);return;}
+mostraErro('ERRO: '+(e.message||'')+(e.error&&e.error.stack?'\n'+e.error.stack:''));
+},true);
+window.addEventListener('unhandledrejection',function(e){mostraErro('ERRO: '+(e.reason&&e.reason.stack?e.reason.stack:e.reason));});
+setTimeout(function(){var r=document.getElementById('root');if(r&&r.innerHTML.indexOf('A carregar o D3NA')>-1)mostraErro('A app nao arrancou em 20s. O ficheiro JS nao chegou a executar (rede fraca?). Recarrega a pagina.');},20000);
+})();
+</script>
+</head>
   <body style="margin:0;">
     <div id="root"><p style="color:#9aa4b2;font-family:sans-serif;text-align:center;margin-top:40vh;padding:0 24px">A carregar o D3NA… se demorar, o servidor está a acordar (até 1 minuto). Não feches a página.</p></div>
     <script>
