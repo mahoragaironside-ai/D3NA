@@ -112,6 +112,8 @@ export const api = {
   getSiteBuildStatus: (buildId) =>
     fetch(`${API_URL}/site-builds/${buildId}/status`).then(handle),
 
+  siteBuildDownloadUrl: (buildId) => `${API_URL}/site-builds/${buildId}/download`,
+
   previewSiteBuild: async (payload) => {
     const res = await fetch(`${API_URL}/site-builds/preview`, {
       method: "POST",

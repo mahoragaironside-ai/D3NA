@@ -100,4 +100,36 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
   res.json({ status: "confirmado" });
 });
 
+
+// Descarrega o site real — só liberta o ficheiro depois do pagamento confirmado.
+// Nunca confia no que o browser diz; verifica sempre o estado guardado na base de dados.
+router.get("/:id/download", async (req, res) => {
+  const result = await query("SELECT * FROM site_builds WHERE build_id = $1", [req.params.id]);
+  if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  const site = result.rows[0];
+  if (site.payment_status !== "confirmado") {
+    return res.status(403).json({ error: "O pagamento ainda não foi confirmado — o ficheiro não está disponível." });
+  }
+
+  try {
+    const dados = {
+      ...site,
+      contact_links: site.contact_links ? JSON.parse(site.contact_links) : [],
+      catalog_items: site.catalog_items ? JSON.parse(site.catalog_items) : [],
+      gallery_items: site.gallery_items ? JSON.parse(site.gallery_items) : [],
+    };
+    const html = gerarSite(dados);
+    const nomeFicheiro = (site.company_name || "site")
+      .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "site";
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${nomeFicheiro}.html"`);
+    res.send(html);
+  } catch (e) {
+    res.status(500).json({ error: "Não foi possível gerar o ficheiro final: " + e.message });
+  }
+});
+
 export default router;

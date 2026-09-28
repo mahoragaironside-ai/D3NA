@@ -230,9 +230,15 @@ export default function SiteBuilder() {
             <>
               <div style={title}>Pagamento confirmado ✅</div>
               <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
-                O teu site está a ser preparado. Entra em contacto pelos dados que
-                indicaste para receberes o ficheiro/acesso final.
+                O teu site já está pronto. Descarrega o ficheiro e segue as instruções
+                de publicação que escolheste.
               </p>
+              <a
+                href={api.siteBuildDownloadUrl(result.build_id)}
+                style={{ ...navBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none", marginTop: 10 }}
+              >
+                Descarregar o meu site
+              </a>
             </>
           ) : (
             <>
