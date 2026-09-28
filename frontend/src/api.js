@@ -191,6 +191,48 @@ export const api = {
   adminSupportResolve: (conversationId, adminKey) =>
     fetch(`${API_URL}/support/admin/${conversationId}/resolve`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
 
+  personalSummary: (adminKey) =>
+    fetch(`${API_URL}/personal/summary`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalDebts: (adminKey) =>
+    fetch(`${API_URL}/personal/debts`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalAddDebt: (data, adminKey) =>
+    fetch(`${API_URL}/personal/debts`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify(data) }).then(handle),
+
+  personalPayDebt: (id, adminKey) =>
+    fetch(`${API_URL}/personal/debts/${id}/pay`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalGoals: (adminKey) =>
+    fetch(`${API_URL}/personal/goals`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalAddGoal: (data, adminKey) =>
+    fetch(`${API_URL}/personal/goals`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify(data) }).then(handle),
+
+  personalGoalProgress: (id, amount, adminKey) =>
+    fetch(`${API_URL}/personal/goals/${id}/progress`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify({ amount }) }).then(handle),
+
+  personalSaveLog: (data, adminKey) =>
+    fetch(`${API_URL}/personal/log`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify(data) }).then(handle),
+
+  personalGetLog: (adminKey) =>
+    fetch(`${API_URL}/personal/log?dias=30`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalExpenses: (adminKey) =>
+    fetch(`${API_URL}/personal/expenses`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalAddExpense: (data, adminKey) =>
+    fetch(`${API_URL}/personal/expenses`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify(data) }).then(handle),
+
+  personalMissions: (adminKey) =>
+    fetch(`${API_URL}/personal/missions`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalCompleteMission: (id, adminKey) =>
+    fetch(`${API_URL}/personal/missions/${id}/complete`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
+
+  personalSetConfig: (key, value, adminKey) =>
+    fetch(`${API_URL}/personal/config`, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey }, body: JSON.stringify({ key, value }) }).then(handle),
+
   adWatched: () => fetch(`${API_URL}/ads/watched`, { method: "POST", headers: authHeaders() }).then(handle),
   adStatus: () => fetch(`${API_URL}/ads/status`, { headers: authHeaders() }).then(handle),
 };

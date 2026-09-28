@@ -13,6 +13,7 @@ const MENU = [
   { id: "apoio_cliente", label: "Apoio ao Cliente", icon: MessageCircle },
   { id: "afiliados", label: "Apoio ao afiliado", icon: HeartHandshake },
   { id: "organograma", label: "Organograma", icon: Network },
+  { id: "pessoal", label: "Módulo Pessoal", icon: Star },
 ];
 
 function useUnreadSupportCount(adminKey, unlocked) {
@@ -109,6 +110,7 @@ export default function AdminPanel() {
         {tab === "apoio_cliente" && <ApoioClienteTab adminKey={adminKey} />}
         {tab === "afiliados" && <EmBreve texto="O programa de afiliados ainda vai ser construído — esta secção liga-se assim que existir." />}
         {tab === "organograma" && <Organograma />}
+        {tab === "pessoal" && <PessoalTab adminKey={adminKey} />}
       </div>
     </div>
   );
@@ -234,6 +236,141 @@ function ApoioClienteTab({ adminKey }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function PessoalTab({ adminKey }) {
+  const [summary, setSummary] = useState(null);
+  const [debts, setDebts] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [missions, setMissions] = useState([]);
+  const [showLogForm, setShowLogForm] = useState(false);
+  const [logForm, setLogForm] = useState({ meals_planned: 4, meals_completed: 0, workout_done: false, weight_kg: "" });
+
+  function loadAll() {
+    api.personalSummary(adminKey).then(setSummary).catch(() => {});
+    api.personalDebts(adminKey).then(setDebts).catch(() => {});
+    api.personalGoals(adminKey).then(setGoals).catch(() => {});
+    api.personalMissions(adminKey).then(setMissions).catch(() => {});
+  }
+
+  useEffect(loadAll, [adminKey]);
+
+  async function guardarLog() {
+    const hoje = new Date().toISOString().slice(0, 10);
+    await api.personalSaveLog({ log_date: hoje, ...logForm, weight_kg: logForm.weight_kg || null }, adminKey);
+    setShowLogForm(false);
+    loadAll();
+  }
+
+  async function pagarDivida(id) {
+    await api.personalPayDebt(id, adminKey);
+    loadAll();
+  }
+
+  async function concluirMissao(id) {
+    await api.personalCompleteMission(id, adminKey);
+    loadAll();
+  }
+
+  if (!summary) return <div style={{ color: C.inkSoft }}>A carregar…</div>;
+
+  const dividasPendentes = debts.filter((d) => d.status === "pendente");
+  const dividasOrdenadas = [...dividasPendentes].sort((a, b) => (a.due_date || "9999") < (b.due_date || "9999") ? -1 : 1);
+
+  return (
+    <div>
+      <SectionTitle>Nível actual: {summary.nivel.nivel} — {summary.nivel.nome}</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 10 }}>
+        <Card><Stat label="Refeições cumpridas" value={summary.progresso.pct_refeicoes + "%"} /></Card>
+        <Card><Stat label="Treinos feitos" value={summary.progresso.pct_treinos + "%"} /></Card>
+        <Card><Stat label="Metas concluídas" value={summary.progresso.metas_concluidas} /></Card>
+        <Card><Stat label="Dívidas pendentes" value={`${summary.dividas_pendentes.total.toLocaleString("pt-PT")} Kz`} /></Card>
+        <Card><Stat label="Despesas este mês" value={`${summary.despesas_mes.toLocaleString("pt-PT")} Kz`} /></Card>
+      </div>
+      {summary.estagio && summary.estagio.estagioComecou && (
+        <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 20 }}>
+          Estágio: área {summary.estagio.area} de 6 ({summary.estagio.diasPassados} dias desde o início)
+        </div>
+      )}
+
+      <SectionTitle>Registo de hoje</SectionTitle>
+      {!showLogForm ? (
+        <button onClick={() => setShowLogForm(true)} style={{ background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+          Registar hoje
+        </button>
+      ) : (
+        <Card>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label style={{ fontSize: 12, color: C.inkSoft }}>Refeições planeadas
+              <input type="number" value={logForm.meals_planned} onChange={(e) => setLogForm({ ...logForm, meals_planned: parseInt(e.target.value) || 0 })} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 8, padding: 8, marginTop: 4 }} />
+            </label>
+            <label style={{ fontSize: 12, color: C.inkSoft }}>Refeições cumpridas
+              <input type="number" value={logForm.meals_completed} onChange={(e) => setLogForm({ ...logForm, meals_completed: parseInt(e.target.value) || 0 })} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 8, padding: 8, marginTop: 4 }} />
+            </label>
+            <label style={{ fontSize: 13, color: C.ink, display: "flex", alignItems: "center", gap: 8 }}>
+              <input type="checkbox" checked={logForm.workout_done} onChange={(e) => setLogForm({ ...logForm, workout_done: e.target.checked })} /> Treino feito hoje
+            </label>
+            <label style={{ fontSize: 12, color: C.inkSoft }}>Peso (kg, opcional)
+              <input type="number" step="0.1" value={logForm.weight_kg} onChange={(e) => setLogForm({ ...logForm, weight_kg: e.target.value })} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 8, padding: 8, marginTop: 4 }} />
+            </label>
+            <button onClick={guardarLog} style={{ background: C.green, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontSize: 13, fontWeight: 600, cursor: "pointer", marginTop: 4 }}>Guardar</button>
+          </div>
+        </Card>
+      )}
+
+      <SectionTitle>Dívidas pendentes ({dividasOrdenadas.length})</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {dividasOrdenadas.map((d) => (
+          <div key={d.debt_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{d.description}</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>
+                {Number(d.amount).toLocaleString("pt-PT")} Kz {d.due_date ? "· vence " + new Date(d.due_date).toLocaleDateString("pt-PT") : d.recurring ? "· recorrente" : "· sem data"}
+              </div>
+            </div>
+            <button onClick={() => pagarDivida(d.debt_id)} style={{ background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Pago</button>
+          </div>
+        ))}
+        {dividasOrdenadas.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem dívidas pendentes.</div>}
+      </div>
+
+      <SectionTitle>Metas de poupança</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {goals.map((g) => {
+          const pct = Math.min(100, Math.round((parseFloat(g.current_amount) / parseFloat(g.target_amount)) * 100));
+          return (
+            <Card key={g.goal_id}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 600, color: C.ink }}>
+                <span>{g.title}</span>
+                <span>{pct}%</span>
+              </div>
+              <div style={{ background: C.border, borderRadius: 6, height: 8, marginTop: 6 }}>
+                <div style={{ width: pct + "%", background: g.status === "concluida" ? C.green : C.navy, height: 8, borderRadius: 6 }} />
+              </div>
+              <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 4 }}>
+                {Number(g.current_amount).toLocaleString("pt-PT")} / {Number(g.target_amount).toLocaleString("pt-PT")} Kz
+              </div>
+            </Card>
+          );
+        })}
+        {goals.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem metas registadas.</div>}
+      </div>
+
+      <SectionTitle>Missões / Agenda ({missions.length})</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {missions.map((m) => (
+          <div key={m.mission_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{m.title}</div>
+              {m.due_date && <div style={{ fontSize: 12, color: C.inkSoft }}>Até {new Date(m.due_date).toLocaleDateString("pt-PT")}</div>}
+            </div>
+            <button onClick={() => concluirMissao(m.mission_id)} style={{ background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Concluir</button>
+          </div>
+        ))}
+        {missions.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem missões pendentes.</div>}
+      </div>
     </div>
   );
 }

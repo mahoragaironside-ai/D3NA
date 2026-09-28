@@ -156,3 +156,62 @@ CREATE TABLE IF NOT EXISTS support_messages (
   content          TEXT NOT NULL,
   created_at       TIMESTAMPTZ DEFAULT now()
 );
+
+-- Modulo Pessoal — gestao financeira, saude e disciplina do dono, com gamificacao.
+CREATE TABLE IF NOT EXISTS personal_config (
+  key    VARCHAR(50) PRIMARY KEY,
+  value  TEXT
+);
+
+CREATE TABLE IF NOT EXISTS personal_debts (
+  debt_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  description    TEXT NOT NULL,
+  amount         NUMERIC NOT NULL,
+  due_date       DATE,
+  recurring      BOOLEAN DEFAULT false,
+  recurring_day  SMALLINT, -- 0=domingo .. 6=sabado, so se recurring=true
+  status         VARCHAR(20) DEFAULT 'pendente', -- 'pendente' | 'pago'
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS personal_savings_goals (
+  goal_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title           TEXT NOT NULL,
+  target_amount   NUMERIC NOT NULL,
+  current_amount  NUMERIC DEFAULT 0,
+  due_date        DATE,
+  priority        SMALLINT DEFAULT 5, -- 1 = mais prioritaria
+  status          VARCHAR(20) DEFAULT 'em_curso', -- 'em_curso' | 'concluida'
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS personal_daily_log (
+  log_id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  log_date          DATE NOT NULL UNIQUE,
+  meals_planned     SMALLINT DEFAULT 0,
+  meals_completed   SMALLINT DEFAULT 0,
+  workout_done      BOOLEAN DEFAULT false,
+  weight_kg         NUMERIC,
+  notes             TEXT,
+  created_at        TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS personal_expenses (
+  expense_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category     VARCHAR(30) NOT NULL, -- 'alimentacao' | 'internet' | 'levantamento_empresa' | 'perfumes_saldo' | 'outro'
+  description  TEXT,
+  amount       NUMERIC NOT NULL,
+  expense_date DATE DEFAULT CURRENT_DATE,
+  created_at   TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS personal_missions (
+  mission_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title        TEXT NOT NULL,
+  description  TEXT,
+  due_date     DATE,
+  type         VARCHAR(20) DEFAULT 'outro', -- 'divida' | 'meta' | 'treino' | 'estagio' | 'outro'
+  related_id   UUID,
+  status       VARCHAR(20) DEFAULT 'pendente', -- 'pendente' | 'concluida'
+  created_at   TIMESTAMPTZ DEFAULT now()
+);
