@@ -59,15 +59,15 @@ router.post("/", async (req, res) => {
       (business_category, business_type, color_scheme, structure_choice, style_choice,
        domain_choice, tier, company_name, company_description, contact_info,
        contact_links, logo_choice, catalog_items, gallery_items, font_choice,
-       panel_password_hash, publish_status,
+       panel_password_hash, publish_status, affiliate_id,
        amount, currency, payment_reference, payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'pendente')
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'pendente')
      RETURNING build_id`,
     [
       business_category, business_type, color_scheme, structure_choice, style_choice,
       domain_choice || "blogger", isPro ? "pro" : "basico", company_name, company_description, contact_info,
       contact_links || null, logo_choice || null, catalog_items || null, gallery_items || null, font_choice || "sistema",
-      panelPasswordHash, publishStatus,
+      panelPasswordHash, publishStatus, affiliateId,
       amount, process.env.PAYMENT_CURRENCY || "AOA", reference,
     ]
   );
