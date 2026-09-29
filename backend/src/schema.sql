@@ -221,3 +221,35 @@ CREATE TABLE IF NOT EXISTS personal_missions (
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS panel_password_hash TEXT;
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS publish_status VARCHAR(20) DEFAULT 'nao_aplicavel';
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS site_url TEXT;
+
+-- Programa de afiliados
+CREATE TABLE IF NOT EXISTS affiliates (
+  affiliate_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id           UUID UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+  referral_code     VARCHAR(20) UNIQUE NOT NULL,
+  redotpay_id       TEXT,
+  balance_aoa       NUMERIC(12,2) DEFAULT 0,
+  created_at        TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by_affiliate_id UUID REFERENCES affiliates(affiliate_id);
+
+CREATE TABLE IF NOT EXISTS affiliate_commissions (
+  commission_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id      UUID REFERENCES affiliates(affiliate_id) ON DELETE CASCADE,
+  referred_user_id  UUID REFERENCES users(user_id),
+  source_type       VARCHAR(30) NOT NULL,
+  amount_aoa        NUMERIC(12,2) NOT NULL,
+  reference_id      UUID,
+  created_at        TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS affiliate_withdrawals (
+  withdrawal_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id      UUID REFERENCES affiliates(affiliate_id) ON DELETE CASCADE,
+  amount_aoa        NUMERIC(12,2) NOT NULL,
+  status            VARCHAR(20) DEFAULT 'pendente',
+  redotpay_id       TEXT,
+  created_at        TIMESTAMPTZ DEFAULT now(),
+  paid_at           TIMESTAMPTZ
+);

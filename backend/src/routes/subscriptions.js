@@ -2,6 +2,7 @@ import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth, requireAdminKey } from "../middleware/auth.js";
 import { sendNotificationSms } from "../services/notifications.js";
+import { awardCommission } from "../lib/affiliateCommissions.js";
 
 const router = Router();
 
@@ -79,6 +80,12 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
     [startedAt, expiresAt, subscription.subscription_id]
   );
   await query("UPDATE users SET subscription_status = 'ativo' WHERE user_id = $1", [subscription.user_id]);
+
+  try {
+    await awardCommission(subscription.user_id, subscription.plan_name, subscription.subscription_id);
+  } catch (e) {
+    console.error("Falha ao atribuir comissao de afiliado:", e.message);
+  }
 
   try {
     const u = await query("SELECT phone_number FROM users WHERE user_id = $1", [subscription.user_id]);

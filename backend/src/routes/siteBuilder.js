@@ -77,7 +77,7 @@ router.post("/", async (req, res) => {
 // Estado de uma construção específica — usado pela página pública para saber
 // se já pode desbloquear o download.
 router.get("/:id/status", async (req, res) => {
-  const result = await query("SELECT payment_status, tier FROM site_builds WHERE build_id = $1", [req.params.id]);
+  const result = await query("SELECT payment_status, tier, publish_status, site_url FROM site_builds WHERE build_id = $1", [req.params.id]);
   if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
   res.json(result.rows[0]);
 });
@@ -109,6 +109,41 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
   }
 
   res.json({ status: "confirmado" });
+});
+
+// Lista construções pagas que escolheram "a D3NA publica por mim" e ainda
+// aguardam o upload manual no Netlify.
+router.get("/admin/pending-publish", requireAdminKey, async (req, res) => {
+  const result = await query(
+    `SELECT build_id, company_name, contact_info, tier, created_at
+     FROM site_builds
+     WHERE domain_choice = 'd3na' AND payment_status = 'confirmado' AND publish_status = 'pendente'
+     ORDER BY created_at ASC`
+  );
+  res.json(result.rows);
+});
+
+// Marca um site como publicado, depois do dono do D3NA fazer o upload manual
+// no Netlify. So funciona se o pagamento ja estiver confirmado.
+router.post("/:id/publish", requireAdminKey, async (req, res) => {
+  const { site_url } = req.body;
+  if (!site_url) return res.status(400).json({ error: "site_url é obrigatório." });
+
+  const result = await query(
+    `UPDATE site_builds SET publish_status = 'publicado', site_url = $2
+     WHERE build_id = $1 AND payment_status = 'confirmado' RETURNING *`,
+    [req.params.id, site_url]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada ou pagamento ainda não confirmado." });
+
+  try {
+    const phone = extractPhoneFromContactLinks(result.rows[0].contact_links);
+    await sendNotificationSms(phone, `O teu site já está no ar: ${site_url}. Usa a password que criaste no wizard para entrar no painel de controlo.`);
+  } catch (e) {
+    console.error("Falha ao notificar utilizador:", e.message);
+  }
+
+  res.json({ status: "publicado", site_url });
 });
 
 
