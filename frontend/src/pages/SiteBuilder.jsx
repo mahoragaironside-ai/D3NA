@@ -92,6 +92,8 @@ export default function SiteBuilder() {
   const [companyDescription, setCompanyDescription] = useState("");
   const [contactLinks, setContactLinks] = useState([]);
   const [logoChoice, setLogoChoice] = useState(null);
+  const [panelPassword, setPanelPassword] = useState("");
+  const [panelPasswordConfirm, setPanelPasswordConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -175,6 +177,7 @@ export default function SiteBuilder() {
         logo_choice: logoChoice,
         catalog_items: JSON.stringify(catalogAuto),
         gallery_items: JSON.stringify(galleryAuto),
+        panel_password: panelPassword,
       });
       localStorage.setItem("d3na_site_build_id", r.build_id);
       setResult(r);
@@ -194,7 +197,7 @@ export default function SiteBuilder() {
     5: !!styleChoice,
     6: companyName && contactLinks.length > 0 && !!logoChoice,
     7: true,
-    8: !!domainChoice,
+    8: !!domainChoice && panelPassword.length >= 4 && panelPassword === panelPasswordConfirm,
     9: !!tier,
   };
 
@@ -412,6 +415,35 @@ export default function SiteBuilder() {
                 Depois de receberes o ficheiro: vai a <strong>netlify.com/drop</strong>, arrasta o
                 ficheiro para lá, e o site fica no ar em segundos — sem conta, sem custos. Se
                 quiseres guardar esse link para sempre, cria uma conta grátis e clica em "Claim".
+              </div>
+            )}
+            {domainChoice && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ ...title, fontSize: 15 }}>Password do teu painel de controlo</div>
+                <div style={subtitle}>
+                  Vais precisar dela para entrar no painel e gerir o site depois (cores, contactos, fotos).
+                  Guarda-a bem — se a perderes, perdes o acesso ao painel para sempre.
+                </div>
+                <input
+                  type="password"
+                  placeholder="Cria uma password"
+                  value={panelPassword}
+                  onChange={(e) => setPanelPassword(e.target.value)}
+                  style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14, marginBottom: 8 }}
+                />
+                <input
+                  type="password"
+                  placeholder="Repete a password"
+                  value={panelPasswordConfirm}
+                  onChange={(e) => setPanelPasswordConfirm(e.target.value)}
+                  style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 14 }}
+                />
+                {panelPassword && panelPasswordConfirm && panelPassword !== panelPasswordConfirm && (
+                  <div style={{ color: C.red, fontSize: 12, marginTop: 6 }}>As passwords não coincidem.</div>
+                )}
+                {panelPassword && panelPassword.length < 4 && (
+                  <div style={{ color: C.red, fontSize: 12, marginTop: 6 }}>Usa pelo menos 4 caracteres.</div>
+                )}
               </div>
             )}
           </>

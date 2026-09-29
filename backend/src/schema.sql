@@ -215,3 +215,9 @@ CREATE TABLE IF NOT EXISTS personal_missions (
   status       VARCHAR(20) DEFAULT 'pendente', -- 'pendente' | 'concluida'
   created_at   TIMESTAMPTZ DEFAULT now()
 );
+
+-- Painel de controlo do construtor: só usado quando o cliente escolhe que a
+-- D3NA publica o site por ele (em vez de ele publicar sozinho via Netlify).
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS panel_password_hash TEXT;
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS publish_status VARCHAR(20) DEFAULT 'nao_aplicavel';
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS site_url TEXT;

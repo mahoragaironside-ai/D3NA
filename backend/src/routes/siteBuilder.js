@@ -3,6 +3,7 @@ import { query } from "../db.js";
 import { requireAdminKey } from "../middleware/auth.js";
 import { sendNotificationSms, extractPhoneFromContactLinks } from "../services/notifications.js";
 import { gerarSite } from "../lib/siteGenerator/index.js";
+import bcrypt from "bcryptjs";
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post("/", async (req, res) => {
     structure_choice, style_choice, domain_choice,
     tier, company_name, company_description, contact_info,
     contact_links, logo_choice, catalog_items, gallery_items, font_choice,
+    panel_password,
   } = req.body;
 
   if (!company_name || (!contact_links && !contact_info)) {
@@ -38,18 +40,27 @@ router.post("/", async (req, res) => {
   const amount = isPro ? process.env.PAYMENT_AMOUNT_SITE_PRO : process.env.PAYMENT_AMOUNT_SITE_BASICO;
   const reference = isPro ? process.env.PAYMENT_REFERENCE_SITE_PRO : process.env.PAYMENT_REFERENCE_SITE_BASICO;
 
+  // Hash da password do painel — nunca guardamos a password em si, so o hash,
+  // exatamente como e feito no login normal (routes/auth.js).
+  const panelPasswordHash = panel_password ? await bcrypt.hash(panel_password, 12) : null;
+  // Por agora so fica "pendente" quando a D3NA vai publicar por conta do cliente
+  // (fluxo ainda por ligar no wizard); nos outros casos fica "nao_aplicavel".
+  const publishStatus = domain_choice === "d3na" ? "pendente" : "nao_aplicavel";
+
   const result = await query(
     `INSERT INTO site_builds
       (business_category, business_type, color_scheme, structure_choice, style_choice,
        domain_choice, tier, company_name, company_description, contact_info,
        contact_links, logo_choice, catalog_items, gallery_items, font_choice,
+       panel_password_hash, publish_status,
        amount, currency, payment_reference, payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,'pendente')
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'pendente')
      RETURNING build_id`,
     [
       business_category, business_type, color_scheme, structure_choice, style_choice,
       domain_choice || "blogger", isPro ? "pro" : "basico", company_name, company_description, contact_info,
       contact_links || null, logo_choice || null, catalog_items || null, gallery_items || null, font_choice || "sistema",
+      panelPasswordHash, publishStatus,
       amount, process.env.PAYMENT_CURRENCY || "AOA", reference,
     ]
   );
