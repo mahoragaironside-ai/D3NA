@@ -3,6 +3,7 @@ import { query } from "../db.js";
 import { requireAdminKey } from "../middleware/auth.js";
 import { sendNotificationSms, extractPhoneFromContactLinks } from "../services/notifications.js";
 import { gerarSite } from "../lib/siteGenerator/index.js";
+import { awardCommissionDirect } from "../lib/affiliateCommissions.js";
 import bcrypt from "bcryptjs";
 
 const router = Router();
@@ -29,7 +30,7 @@ router.post("/", async (req, res) => {
     structure_choice, style_choice, domain_choice,
     tier, company_name, company_description, contact_info,
     contact_links, logo_choice, catalog_items, gallery_items, font_choice,
-    panel_password,
+    panel_password, referral_code,
   } = req.body;
 
   if (!company_name || (!contact_links && !contact_info)) {
@@ -46,6 +47,12 @@ router.post("/", async (req, res) => {
   // Por agora so fica "pendente" quando a D3NA vai publicar por conta do cliente
   // (fluxo ainda por ligar no wizard); nos outros casos fica "nao_aplicavel".
   const publishStatus = domain_choice === "d3na" ? "pendente" : "nao_aplicavel";
+
+  let affiliateId = null;
+  if (referral_code) {
+    const aff = await query("SELECT affiliate_id FROM affiliates WHERE referral_code = $1", [String(referral_code).trim().toUpperCase()]);
+    affiliateId = aff.rows[0]?.affiliate_id || null;
+  }
 
   const result = await query(
     `INSERT INTO site_builds
@@ -100,6 +107,14 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
     [req.params.id]
   );
   if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  try {
+    if (result.rows[0].affiliate_id) {
+      await awardCommissionDirect(result.rows[0].affiliate_id, "construtor", result.rows[0].build_id);
+    }
+  } catch (e) {
+    console.error("Falha ao atribuir comissao de afiliado (construtor):", e.message);
+  }
 
   try {
     const phone = extractPhoneFromContactLinks(result.rows[0].contact_links);

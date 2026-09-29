@@ -253,3 +253,5 @@ CREATE TABLE IF NOT EXISTS affiliate_withdrawals (
   created_at        TIMESTAMPTZ DEFAULT now(),
   paid_at           TIMESTAMPTZ
 );
+
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS affiliate_id UUID REFERENCES affiliates(affiliate_id);

@@ -25,3 +25,17 @@ export async function awardCommission(referredUserId, sourceType, referenceId) {
   await query("UPDATE affiliates SET balance_aoa = balance_aoa + $1 WHERE affiliate_id = $2", [amount, affiliateId]);
   return commission.rows[0];
 }
+
+// Para fluxos sem utilizador autenticado (ex.: submissao publica do Construtor),
+// onde o affiliate_id ja foi capturado diretamente na tabela de origem.
+export async function awardCommissionDirect(affiliateId, sourceType, referenceId) {
+  const amount = COMMISSION_RULES[sourceType];
+  if (!amount || !affiliateId) return null;
+  const commission = await query(
+    `INSERT INTO affiliate_commissions (affiliate_id, source_type, amount_aoa, reference_id)
+     VALUES ($1, $2, $3, $4) RETURNING *`,
+    [affiliateId, sourceType, amount, referenceId || null]
+  );
+  await query("UPDATE affiliates SET balance_aoa = balance_aoa + $1 WHERE affiliate_id = $2", [amount, affiliateId]);
+  return commission.rows[0];
+}

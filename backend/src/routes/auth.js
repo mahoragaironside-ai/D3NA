@@ -9,7 +9,7 @@ import { isTestPhone, TEST_PASSWORD } from "../lib/testAccount.js";
 const router = Router();
 
 router.post("/register", async (req, res) => {
-  const { phone_number, password } = req.body;
+  const { phone_number, password, referral_code } = req.body;
   if (!phone_number || !password || password.length < 6) {
     return res.status(400).json({ error: "Número de telefone e palavra-passe (mín. 6 caracteres) são obrigatórios." });
   }
@@ -18,9 +18,16 @@ router.post("/register", async (req, res) => {
     return res.status(409).json({ error: "Este número já está registado." });
   }
   const password_hash = await bcrypt.hash(password, 12);
+
+  let referredByAffiliateId = null;
+  if (referral_code) {
+    const aff = await query("SELECT affiliate_id FROM affiliates WHERE referral_code = $1", [String(referral_code).trim().toUpperCase()]);
+    referredByAffiliateId = aff.rows[0]?.affiliate_id || null;
+  }
+
   const result = await query(
-    "INSERT INTO users (phone_number, password_hash) VALUES ($1, $2) RETURNING user_id, phone_number",
-    [phone_number, password_hash]
+    "INSERT INTO users (phone_number, password_hash, referred_by_affiliate_id) VALUES ($1, $2, $3) RETURNING user_id, phone_number",
+    [phone_number, password_hash, referredByAffiliateId]
   );
   const user = result.rows[0];
   const token = signToken(user.user_id);
