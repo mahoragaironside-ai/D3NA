@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "node:crypto";
 import { query } from "../db.js";
 import { requireAuth, requireAdminKey } from "../middleware/auth.js";
+import { runWeeklyPassiveIncome } from "../lib/affiliateCommissions.js";
 
 const router = Router();
 
@@ -152,6 +153,11 @@ router.post("/admin/withdrawals/:id/reject", requireAdminKey, async (req, res) =
   await query("UPDATE affiliate_withdrawals SET status = 'rejeitado' WHERE withdrawal_id = $1", [withdrawal.withdrawal_id]);
   await query("UPDATE affiliates SET balance_aoa = balance_aoa + $1 WHERE affiliate_id = $2", [withdrawal.amount_aoa, withdrawal.affiliate_id]);
   res.json({ status: "rejeitado" });
+});
+
+router.post("/admin/weekly-payout", requireAdminKey, async (req, res) => {
+  const pagos = await runWeeklyPassiveIncome();
+  res.json({ afiliados_pagos: pagos.length, detalhe: pagos });
 });
 
 export default router;

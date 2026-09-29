@@ -39,3 +39,30 @@ export async function awardCommissionDirect(affiliateId, sourceType, referenceId
   await query("UPDATE affiliates SET balance_aoa = balance_aoa + $1 WHERE affiliate_id = $2", [amount, affiliateId]);
   return commission.rows[0];
 }
+
+// Corre semanalmente (via cron externo). Paga 5 AOA por cada conta registada
+// com link de afiliado que ainda nao tem plano ativo, uma vez por semana no maximo.
+export async function runWeeklyPassiveIncome() {
+  const result = await query(`
+    WITH novos AS (
+      INSERT INTO affiliate_commissions (affiliate_id, referred_user_id, source_type, amount_aoa)
+      SELECT u.referred_by_affiliate_id, u.user_id, 'registo_sem_plano', 5
+      FROM users u
+      WHERE u.referred_by_affiliate_id IS NOT NULL
+        AND u.subscription_status != 'ativo'
+        AND NOT EXISTS (
+          SELECT 1 FROM affiliate_commissions c
+          WHERE c.referred_user_id = u.user_id AND c.source_type = 'registo_sem_plano'
+            AND c.created_at > now() - interval '7 days'
+        )
+      RETURNING affiliate_id, amount_aoa
+    ),
+    somas AS (
+      SELECT affiliate_id, SUM(amount_aoa) AS total FROM novos GROUP BY affiliate_id
+    )
+    UPDATE affiliates a SET balance_aoa = a.balance_aoa + s.total
+    FROM somas s WHERE a.affiliate_id = s.affiliate_id
+    RETURNING a.affiliate_id, s.total
+  `);
+  return result.rows;
+}
