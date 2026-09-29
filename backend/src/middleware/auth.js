@@ -15,7 +15,7 @@ export function requireAuth(req, res, next) {
 
 export function requireAdminKey(req, res, next) {
   const key = req.headers["x-admin-key"];
-  if (!key || key !== process.env.ADMIN_CONFIRM_KEY) {
+  if (!key || String(key).trim() !== String(process.env.ADMIN_CONFIRM_KEY || "").trim()) {
     return res.status(403).json({ error: "Chave de administração inválida." });
   }
   next();

@@ -23,6 +23,7 @@ export function adsCarouselCSS(primary) {
   .ads-slide.d3na strong { font-size: 13.5px; letter-spacing: 0.3px; }
   .ads-slide.d3na small { font-weight: 500; opacity: 0.9; font-size: 11px; }
   @keyframes d3naPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+  .ads-native-cap { max-height: 60px; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; }
   .ads-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
   .ads-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--nav-border); }
   .ads-dot.on { background: ${primary}; }
@@ -34,7 +35,12 @@ export function adsCarouselHTML() {
   <div class="ads-box reveal">
     <div class="ads-label">Publicidade</div>
     <div class="ads-track" id="adsTrack">
-      <div class="ads-slide on" data-i="0"><script async="async" data-cfasync="false" src="https://pl31350812.profitableratecpmnetwork.com/a9818edad4dfcde3e8fa8cfcbc26cab6/invoke.js"></script><div id="container-a9818edad4dfcde3e8fa8cfcbc26cab6"></div></div>
+      <div class="ads-slide on" data-i="0">
+        <div class="ads-native-cap">
+          <script async="async" data-cfasync="false" src="https://pl31350812.profitableratecpmnetwork.com/a9818edad4dfcde3e8fa8cfcbc26cab6/invoke.js"></script>
+          <div id="container-a9818edad4dfcde3e8fa8cfcbc26cab6"></div>
+        </div>
+      </div>
       <div class="ads-slide" data-i="1">
         <div class="ads-scale" data-w="320" data-h="50">
           <div class="ads-scale-inner"><script>
