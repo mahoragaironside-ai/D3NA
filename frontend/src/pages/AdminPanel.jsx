@@ -54,7 +54,7 @@ export default function AdminPanel() {
 
   if (!unlocked) {
     return (
-      <div style={{ minHeight: "100vh", background: C.navy, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "-apple-system, sans-serif" }}>
+      <div data-admin-theme="neural" style={{ minHeight: "100vh", background: C.navy, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "-apple-system, sans-serif" }}>
         <form onSubmit={tryUnlock} style={{ background: C.surface, borderRadius: 16, padding: 28, width: 320 }}>
           <div style={{ fontSize: 12, letterSpacing: 1, color: C.inkSoft, textTransform: "uppercase", fontWeight: 600 }}>Painel administrativo</div>
           <div style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 700, color: C.ink, margin: "4px 0 18px" }}>D3NA — Painel de controlo</div>
@@ -75,7 +75,7 @@ export default function AdminPanel() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
+    <div data-admin-theme="neural" style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
       <div style={{ display: "flex", overflowX: "auto", background: C.surface, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 10 }}>
         {MENU.map((m) => {
           const Icon = m.icon;
