@@ -5,6 +5,7 @@ import { C } from "./tokens.js";
 import Auth from "./pages/Auth.jsx";
 import Chat from "./pages/Chat.jsx";
 import AdminPanel from "./pages/AdminPanel.jsx";
+import AffiliatePanel from "./pages/AffiliatePanel.jsx";
 import SiteBuilder from "./pages/SiteBuilder.jsx";
 import PaymentModal from "./components/PaymentModal.jsx";
 import PhoneVerifyBanner from "./components/PhoneVerifyBanner.jsx";
@@ -13,6 +14,7 @@ import SupportWidget from "./components/SupportWidget.jsx";
 
 export default function App() {
   if (window.location.pathname === "/admin") return <AdminPanel />;
+  if (window.location.pathname === "/afiliado") return <AffiliatePanel />;
   if (window.location.pathname === "/construtor") return <SiteBuilder />;
 
   return <MainApp />;

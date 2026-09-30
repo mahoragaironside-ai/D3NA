@@ -12,6 +12,18 @@ async function handle(res) {
 }
 
 export const api = {
+  affiliateMe: () => fetch(`${API_URL}/affiliates/me`, { headers: authHeaders() }).then(handle),
+  affiliateRegister: () => fetch(`${API_URL}/affiliates/register`, { method: "POST", headers: authHeaders() }).then(handle),
+  affiliateReferrals: () => fetch(`${API_URL}/affiliates/me/referrals`, { headers: authHeaders() }).then(handle),
+  affiliateCommissions: () => fetch(`${API_URL}/affiliates/me/commissions`, { headers: authHeaders() }).then(handle),
+  affiliateRules: () => fetch(`${API_URL}/affiliates/rules`).then(handle),
+  affiliateSetRedotpay: (redotpay_id) =>
+    fetch(`${API_URL}/affiliates/me/redotpay`, {
+      method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ redotpay_id }),
+    }).then(handle),
+  affiliateWithdraw: () => fetch(`${API_URL}/affiliates/withdraw`, { method: "POST", headers: authHeaders() }).then(handle),
+
   register: (phone_number, password) =>
     fetch(`${API_URL}/auth/register`, {
       method: "POST",

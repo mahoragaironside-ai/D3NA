@@ -99,6 +99,8 @@ export default function SiteBuilder() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState(null);
   const [checking, setChecking] = useState(false);
+  const [publishStatus, setPublishStatus] = useState(null);
+  const [siteUrl, setSiteUrl] = useState(null);
   const [previewHtml, setPreviewHtml] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
@@ -112,6 +114,8 @@ export default function SiteBuilder() {
     try {
       const s = await api.getSiteBuildStatus(buildId);
       setStatus(s.payment_status);
+      setPublishStatus(s.publish_status);
+      setSiteUrl(s.site_url);
       if (s.payment_status === "confirmado" && !localStorage.getItem("review_done_" + buildId)) {
         setShowReview(true);
       }
@@ -230,19 +234,54 @@ export default function SiteBuilder() {
             />
           )}
           {status === "confirmado" ? (
-            <>
-              <div style={title}>Pagamento confirmado ✅</div>
-              <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
-                O teu site já está pronto. Descarrega o ficheiro e segue as instruções
-                de publicação que escolheste.
-              </p>
-              <a
-                href={api.siteBuildDownloadUrl(result.build_id)}
-                style={{ ...navBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none", marginTop: 10 }}
-              >
-                Descarregar o meu site
-              </a>
-            </>
+            domainChoice === "d3na" ? (
+              publishStatus === "publicado" ? (
+                <>
+                  <div style={title}>O teu site está no ar ✅</div>
+                  <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
+                    Já publicámos o teu site. Usa a password que criaste no wizard para
+                    entrar no painel de controlo sempre que quiseres alterar algo.
+                  </p>
+                  <a
+                    href={siteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ ...navBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none", marginTop: 10 }}
+                  >
+                    Abrir o meu site
+                  </a>
+                </>
+              ) : (
+                <>
+                  <div style={title}>Pagamento confirmado ✅</div>
+                  <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
+                    Estamos a publicar o teu site — demora cerca de 20 minutos. Volta
+                    a verificar daqui a pouco.
+                  </p>
+                  <button
+                    onClick={() => checkStatus(result.build_id)}
+                    disabled={checking}
+                    style={{ ...navBtn, background: C.surface, color: C.navy, border: `1px solid ${C.navy}`, width: "100%", marginTop: 10 }}
+                  >
+                    {checking ? "A verificar…" : "Verificar se já está pronto"}
+                  </button>
+                </>
+              )
+            ) : (
+              <>
+                <div style={title}>Pagamento confirmado ✅</div>
+                <p style={{ fontSize: 14, color: C.ink, lineHeight: 1.6 }}>
+                  O teu site já está pronto. Descarrega o ficheiro e segue as instruções
+                  de publicação que escolheste.
+                </p>
+                <a
+                  href={api.siteBuildDownloadUrl(result.build_id)}
+                  style={{ ...navBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textDecoration: "none", marginTop: 10 }}
+                >
+                  Descarregar o meu site
+                </a>
+              </>
+            )
           ) : (
             <>
               <div style={title}>Falta só o pagamento</div>
@@ -401,7 +440,7 @@ export default function SiteBuilder() {
         {step === 8 && (
           <>
             <div style={title}>Onde vai ficar o site?</div>
-            <div style={subtitle}>Em ambos os casos recebes o ficheiro do site pronto após o pagamento.</div>
+            <div style={subtitle}>Em qualquer caso, o teu site fica pronto assim que o pagamento for confirmado.</div>
             <button style={optBtn(domainChoice === "netlify")} onClick={() => setDomainChoice("netlify")}>
               <div style={{ fontWeight: 600 }}>Publicar grátis (recomendado)</div>
               <div style={{ fontSize: 12, color: C.inkSoft }}>Sem hospedagem própria? Fica no ar em segundos, sem custos</div>
@@ -409,6 +448,10 @@ export default function SiteBuilder() {
             <button style={optBtn(domainChoice === "proprio")} onClick={() => setDomainChoice("proprio")}>
               <div style={{ fontWeight: 600 }}>Já tenho hospedagem</div>
               <div style={{ fontSize: 12, color: C.inkSoft }}>Ex: teunegocio.com — recebes o ficheiro para carregares no teu servidor</div>
+            </button>
+            <button style={optBtn(domainChoice === "d3na")} onClick={() => setDomainChoice("d3na")}>
+              <div style={{ fontWeight: 600 }}>A D3NA publica por mim</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Sem trabalho nenhum da tua parte — fica pronto cerca de 20 minutos depois do pagamento confirmado</div>
             </button>
             {domainChoice === "netlify" && (
               <div style={{ background: C.navySoft, borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12.5, color: C.ink, lineHeight: 1.6 }}>
