@@ -114,6 +114,16 @@ export const api = {
       headers: { "x-admin-key": adminKey },
     }).then(handle),
 
+  adminPendingPublishSiteBuilds: (adminKey) =>
+    fetch(`${API_URL}/site-builds/admin/pending-publish`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
+  adminPublishSiteBuild: (buildId, siteUrl, adminKey) =>
+    fetch(`${API_URL}/site-builds/${buildId}/publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+      body: JSON.stringify({ site_url: siteUrl }),
+    }).then(handle),
+
   createSiteBuild: (payload) =>
     fetch(`${API_URL}/site-builds`, {
       method: "POST",

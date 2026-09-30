@@ -475,11 +475,13 @@ function PagamentosTab({ adminKey }) {
   const [subs, setSubs] = useState([]);
   const [sites, setSites] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [pendingPublish, setPendingPublish] = useState([]);
 
   function load() {
     api.adminPending(adminKey).then(setSubs).catch(() => {});
     api.adminPendingSiteBuilds(adminKey).then(setSites).catch(() => {});
     api.adminPendingCourses(adminKey).then(setCourses).catch(() => {});
+    api.adminPendingPublishSiteBuilds(adminKey).then(setPendingPublish).catch(() => {});
   }
 
   useEffect(load, [adminKey]);
@@ -496,8 +498,61 @@ function PagamentosTab({ adminKey }) {
       <SectionTitle>Construtor de sites — pendentes ({sites.length})</SectionTitle>
       <PendingList items={sites} idKey="build_id" labelKey="company_name" onConfirm={(id) => api.adminConfirmSiteBuild(id, adminKey).then(load)} />
 
+      <SectionTitle>Construtor de sites — à espera de publicação ({pendingPublish.length})</SectionTitle>
+      <PendingPublishList items={pendingPublish} onPublish={(id, url) => api.adminPublishSiteBuild(id, url, adminKey).then(load)} />
+
       <SectionTitle>Curso — pendentes ({courses.length})</SectionTitle>
       <PendingList items={courses} idKey="enrollment_id" labelKey="phone_number" onConfirm={(id) => api.adminConfirmCourse(id, adminKey).then(load)} />
+    </div>
+  );
+}
+
+function PendingPublishList({ items, onPublish }) {
+  if (items.length === 0) return <div style={{ color: C.inkSoft, fontSize: 13, padding: 12 }}>Ninguém à espera de publicação.</div>;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {items.map((s) => (
+        <PublishRow key={s.build_id} item={s} onPublish={onPublish} />
+      ))}
+    </div>
+  );
+}
+
+function PublishRow({ item, onPublish }) {
+  const [url, setUrl] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function enviar() {
+    if (!url.trim()) return;
+    setSending(true);
+    try {
+      await onPublish(item.build_id, url.trim());
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{item.company_name}</div>
+      <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 8 }}>
+        {item.contact_info || ""} · plano {item.tier} · pago {new Date(item.created_at).toLocaleString("pt-PT")}
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Link do Netlify (ex: https://o-teu-site.netlify.app)"
+          style={{ flex: 1, border: `1px solid ${C.border}`, borderRadius: 10, padding: "8px 10px", fontSize: 13 }}
+        />
+        <button
+          onClick={enviar}
+          disabled={sending || !url.trim()}
+          style={{ background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+        >
+          {sending ? "…" : "Publicar"}
+        </button>
+      </div>
     </div>
   );
 }
