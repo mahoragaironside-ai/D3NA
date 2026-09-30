@@ -383,8 +383,8 @@ function SectionTitle({ children }) {
   return <div style={{ fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 700, color: C.ink, margin: "24px 0 12px" }}>{children}</div>;
 }
 
-function Card({ children }) {
-  return <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>{children}</div>;
+function Card({ children, glow }) {
+  return <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, boxShadow: glow ? `0 0 24px ${C.navy}55` : "none" }}>{children}</div>;
 }
 
 // ---------- Dashboard ----------
@@ -420,7 +420,7 @@ function DashboardTab({ adminKey }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
-        <Card><Stat label="Lucro total confirmado" value={`${Number(summary.receita_total).toLocaleString("pt-PT")} AOA`} /></Card>
+        <Card glow><Stat label="Lucro total confirmado" value={`${Number(summary.receita_total).toLocaleString("pt-PT")} AOA`} /></Card>
         <Card><Stat label="Utilizadores" value={summary.total_utilizadores} /></Card>
         <Card><Stat label="Pendentes: subscrições" value={summary.pendentes.subscricoes} /></Card>
         <Card><Stat label="Pendentes: sites" value={summary.pendentes.sites} /></Card>
