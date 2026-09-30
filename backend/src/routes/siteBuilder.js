@@ -130,9 +130,10 @@ router.post("/:id/confirm", requireAdminKey, async (req, res) => {
 // aguardam o upload manual no Netlify.
 router.get("/admin/pending-publish", requireAdminKey, async (req, res) => {
   const result = await query(
-    `SELECT build_id, company_name, contact_info, tier, created_at
+    `SELECT build_id, company_name, contact_info, tier, created_at, publish_status
      FROM site_builds
-     WHERE domain_choice = 'd3na' AND payment_status = 'confirmado' AND publish_status = 'pendente'
+     WHERE domain_choice = 'd3na' AND payment_status = 'confirmado'
+       AND publish_status IN ('pendente', 'atualizacao_pedida')
      ORDER BY created_at ASC`
   );
   res.json(result.rows);
@@ -191,6 +192,103 @@ router.get("/:id/download", async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: "Não foi possível gerar o ficheiro final: " + e.message });
   }
+});
+
+// Pedido de atualizacao — o cliente, a partir do painel, avisa que quer que
+// a D3NA volte a publicar o site com as alteracoes mais recentes.
+router.post("/:id/panel/request-update", async (req, res) => {
+  const { password } = req.body;
+  const check = await query(
+    "SELECT panel_password_hash, domain_choice, publish_status FROM site_builds WHERE build_id = $1",
+    [req.params.id]
+  );
+  if (check.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  const site = check.rows[0];
+  const ok = site.panel_password_hash && password && (await bcrypt.compare(password, site.panel_password_hash));
+  if (!ok) return res.status(401).json({ error: "Password incorreta." });
+
+  if (site.domain_choice !== "d3na") {
+    return res.status(400).json({ error: "Esta opção só se aplica a sites publicados pela D3NA." });
+  }
+  if (site.publish_status !== "publicado") {
+    return res.status(400).json({ error: "O site ainda não foi publicado — não há nada para atualizar." });
+  }
+
+  await query("UPDATE site_builds SET publish_status = 'atualizacao_pedida' WHERE build_id = $1", [req.params.id]);
+  res.json({ status: "atualizacao_pedida" });
+});
+
+// Login no painel de controlo — verifica a password que o proprio cliente
+// definiu no wizard (nunca vista pelo dono do D3NA) e devolve os dados
+// editaveis do site.
+router.post("/:id/panel/login", async (req, res) => {
+  const { password } = req.body;
+  const result = await query("SELECT * FROM site_builds WHERE build_id = $1", [req.params.id]);
+  if (result.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  const site = result.rows[0];
+  if (!site.panel_password_hash) {
+    return res.status(403).json({ error: "Este site ainda não tem painel de controlo ativado." });
+  }
+  const ok = password && (await bcrypt.compare(password, site.panel_password_hash));
+  if (!ok) return res.status(401).json({ error: "Password incorreta." });
+
+  res.json({
+    company_name: site.company_name,
+    company_description: site.company_description,
+    contact_links: site.contact_links ? JSON.parse(site.contact_links) : [],
+    catalog_items: site.catalog_items ? JSON.parse(site.catalog_items) : [],
+    gallery_items: site.gallery_items ? JSON.parse(site.gallery_items) : [],
+    color_scheme: site.color_scheme,
+    font_choice: site.font_choice,
+    logo_choice: site.logo_choice,
+    domain_choice: site.domain_choice,
+    structure_choice: site.structure_choice,
+    site_url: site.site_url,
+  });
+});
+
+// Guarda as alteracoes feitas no painel. Volta a confirmar a password em cada
+// pedido, porque este acesso e por site (nao ha sessao/login persistente).
+router.patch("/:id/panel", async (req, res) => {
+  const {
+    password, company_name, company_description, contact_links,
+    catalog_items, gallery_items, color_scheme, font_choice, logo_choice,
+  } = req.body;
+
+  const check = await query("SELECT panel_password_hash FROM site_builds WHERE build_id = $1", [req.params.id]);
+  if (check.rows.length === 0) return res.status(404).json({ error: "Construção não encontrada." });
+
+  const hash = check.rows[0].panel_password_hash;
+  const ok = hash && password && (await bcrypt.compare(password, hash));
+  if (!ok) return res.status(401).json({ error: "Password incorreta." });
+
+  await query(
+    `UPDATE site_builds SET
+       company_name = COALESCE($2, company_name),
+       company_description = COALESCE($3, company_description),
+       contact_links = COALESCE($4, contact_links),
+       catalog_items = COALESCE($5, catalog_items),
+       gallery_items = COALESCE($6, gallery_items),
+       color_scheme = COALESCE($7, color_scheme),
+       font_choice = COALESCE($8, font_choice),
+       logo_choice = COALESCE($9, logo_choice)
+     WHERE build_id = $1`,
+    [
+      req.params.id,
+      company_name || null,
+      company_description || null,
+      contact_links ? JSON.stringify(contact_links) : null,
+      catalog_items ? JSON.stringify(catalog_items) : null,
+      gallery_items ? JSON.stringify(gallery_items) : null,
+      color_scheme || null,
+      font_choice || null,
+      logo_choice || null,
+    ]
+  );
+
+  res.json({ status: "guardado" });
 });
 
 export default router;

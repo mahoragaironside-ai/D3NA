@@ -534,7 +534,17 @@ function PublishRow({ item, onPublish }) {
 
   return (
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{item.company_name}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{item.company_name}</div>
+        <span style={{
+          fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4,
+          padding: "2px 8px", borderRadius: 999,
+          background: item.publish_status === "atualizacao_pedida" ? "#f5a623" : C.navySoft,
+          color: item.publish_status === "atualizacao_pedida" ? "#fff" : C.navy,
+        }}>
+          {item.publish_status === "atualizacao_pedida" ? "Atualização" : "Novo"}
+        </span>
+      </div>
       <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 8 }}>
         {item.contact_info || ""} · plano {item.tier} · pago {new Date(item.created_at).toLocaleString("pt-PT")}
       </div>

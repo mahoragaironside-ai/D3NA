@@ -7,6 +7,7 @@ import Chat from "./pages/Chat.jsx";
 import AdminPanel from "./pages/AdminPanel.jsx";
 import AffiliatePanel from "./pages/AffiliatePanel.jsx";
 import SiteBuilder from "./pages/SiteBuilder.jsx";
+import SitePanel from "./pages/SitePanel.jsx";
 import PaymentModal from "./components/PaymentModal.jsx";
 import PhoneVerifyBanner from "./components/PhoneVerifyBanner.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -16,6 +17,10 @@ export default function App() {
   if (window.location.pathname === "/admin") return <AdminPanel />;
   if (window.location.pathname === "/afiliado") return <AffiliatePanel />;
   if (window.location.pathname === "/construtor") return <SiteBuilder />;
+  if (window.location.pathname.startsWith("/painel/")) {
+    const buildId = window.location.pathname.split("/painel/")[1];
+    return <SitePanel buildId={buildId} />;
+  }
 
   return <MainApp />;
 }

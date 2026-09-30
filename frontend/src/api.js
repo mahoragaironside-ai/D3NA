@@ -136,6 +136,27 @@ export const api = {
 
   siteBuildDownloadUrl: (buildId) => `${API_URL}/site-builds/${buildId}/download`,
 
+  siteBuildPanelLogin: (buildId, password) =>
+    fetch(`${API_URL}/site-builds/${buildId}/panel/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    }).then(handle),
+
+  siteBuildPanelSave: (buildId, payload) =>
+    fetch(`${API_URL}/site-builds/${buildId}/panel`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).then(handle),
+
+  siteBuildPanelRequestUpdate: (buildId, password) =>
+    fetch(`${API_URL}/site-builds/${buildId}/panel/request-update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    }).then(handle),
+
   previewSiteBuild: async (payload) => {
     const res = await fetch(`${API_URL}/site-builds/preview`, {
       method: "POST",
