@@ -76,7 +76,7 @@ export default function AdminPanel() {
 
   return (
     <div data-admin-theme="neural" style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
-      <div style={{ display: "flex", overflowX: "auto", background: C.surface, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 10 }}>
+      <div style={{ display: "flex", overflowX: "auto", background: C.surface, borderTop: `1px solid ${C.border}`, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         {MENU.map((m) => {
           const Icon = m.icon;
           const active = tab === m.id;
@@ -101,7 +101,7 @@ export default function AdminPanel() {
         })}
       </div>
 
-      <div style={{ padding: 18 }}>
+      <div style={{ padding: "18px 18px 88px" }}>
         {tab === "dashboard" && <DashboardTab adminKey={adminKey} />}
         {tab === "pagamentos" && <PagamentosTab adminKey={adminKey} />}
         {tab === "utilizadores" && <UtilizadoresTab adminKey={adminKey} />}
