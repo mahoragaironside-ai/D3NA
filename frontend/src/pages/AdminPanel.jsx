@@ -240,6 +240,32 @@ function ApoioClienteTab({ adminKey }) {
   );
 }
 
+function BotaoFlutuante({ onAction }) {
+  const [aberto, setAberto] = useState(false);
+  const acoes = [
+    { id: "log", label: "Registar hoje" },
+    { id: "divida", label: "Adicionar dívida" },
+    { id: "despesa", label: "Adicionar despesa" },
+    { id: "missao", label: "Adicionar missão" },
+  ];
+  return (
+    <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 50 }}>
+      {aberto && (
+        <div style={{ position: "absolute", bottom: 60, right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 8, display: "flex", flexDirection: "column", gap: 4, minWidth: 180, boxShadow: "0 8px 24px rgba(0,0,0,0.3)" }}>
+          {acoes.map((a) => (
+            <button key={a.id} onClick={() => { setAberto(false); onAction(a.id); }} style={{ background: "none", border: "none", textAlign: "left", padding: "10px 12px", fontSize: 13, color: C.ink, cursor: "pointer", borderRadius: 8 }}>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <button onClick={() => setAberto((a) => !a)} style={{ width: 52, height: 52, borderRadius: "50%", background: C.navy, border: "none", color: "#fff", fontSize: 26, cursor: "pointer", boxShadow: `0 4px 16px ${C.navy}88` }}>
+        {aberto ? "×" : "+"}
+      </button>
+    </div>
+  );
+}
+
 function PessoalTab({ adminKey }) {
   const [summary, setSummary] = useState(null);
   const [debts, setDebts] = useState([]);
@@ -358,6 +384,13 @@ function PessoalTab({ adminKey }) {
         {goals.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem metas registadas.</div>}
       </div>
 
+      <BotaoFlutuante onAction={(id) => {
+        if (id === "log") setShowLogForm(true);
+        if (id === "divida") alert("Usa o formulário de dívidas abaixo (atalho directo a chegar em breve).");
+        if (id === "despesa") alert("Secção de despesas a chegar em breve nesta aba.");
+        if (id === "missao") alert("Criação rápida de missão a chegar em breve nesta aba.");
+      }} />
+
       <SectionTitle>Missões / Agenda ({missions.length})</SectionTitle>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {missions.map((m) => (
@@ -421,7 +454,7 @@ function DashboardTab({ adminKey }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
         <Card glow><Stat label="Lucro total confirmado" value={`${Number(summary.receita_total).toLocaleString("pt-PT")} AOA`} /></Card>
-        <Card><Stat label="Utilizadores" value={summary.total_utilizadores} /></Card>
+        <Card glow><Stat label="Utilizadores" value={summary.total_utilizadores} /></Card>
         <Card><Stat label="Pendentes: subscrições" value={summary.pendentes.subscricoes} /></Card>
         <Card><Stat label="Pendentes: sites" value={summary.pendentes.sites} /></Card>
         <Card><Stat label="Pendentes: curso" value={summary.pendentes.curso} /></Card>
