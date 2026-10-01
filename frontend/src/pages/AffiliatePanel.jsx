@@ -137,7 +137,9 @@ function AffiliateDashboard() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
-          <IconBadge><User size={18} color={T.textSoft} /></IconBadge>
+          <button onClick={() => setTab("perfil")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+            <IconBadge><User size={18} color={T.textSoft} /></IconBadge>
+          </button>
         </div>
       </div>
 
@@ -193,9 +195,9 @@ function AffiliateDashboard() {
 
             {/* Indicadores rapidos */}
             <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-              <QuickStat icon={<Users size={16} color={T.blue3} />} label="Indicados" value={String(totalIndicados)} accent={T.blue3} />
-              <QuickStat icon={<RefreshCw size={16} color={T.electric2} />} label="Conversões" value={String(totalConversoes)} accent={T.electric2} />
-              <QuickStat icon={<Coins size={16} color={T.cyan} />} label="Comissões" value={fmt(totalComissoesGanhas)} accent={T.cyan} />
+              <QuickStat icon={<Users size={16} color={T.blue3} />} label="Indicados" value={String(totalIndicados)} accent={T.blue3} onClick={() => setTab("indicados")} />
+              <QuickStat icon={<RefreshCw size={16} color={T.electric2} />} label="Conversões" value={String(totalConversoes)} accent={T.electric2} onClick={() => setTab("indicados")} />
+              <QuickStat icon={<Coins size={16} color={T.cyan} />} label="Comissões" value={fmt(totalComissoesGanhas)} accent={T.cyan} onClick={() => setTab("comissoes")} />
             </div>
 
             {/* Link de indicacao */}
@@ -304,6 +306,16 @@ function AffiliateDashboard() {
           </Section>
         )}
 
+        {tab === "perfil" && (
+          <Section icon={<User size={16} color={T.electric2} />} title="A tua conta">
+            <div style={{ color: T.white, fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{affiliate.phone_number || "—"}</div>
+            <div style={{ color: T.textSoft, fontSize: 12, marginBottom: 16 }}>Código de afiliado: {affiliate.referral_code}</div>
+            <button onClick={() => { localStorage.removeItem("access_token"); window.location.reload(); }} style={{ ...btnGhostSmall, color: T.pink, borderColor: "rgba(255,61,119,0.35)" }}>
+              Sair da conta
+            </button>
+          </Section>
+        )}
+
         {tab === "regras" && rules && (
           <Section icon={<FileText size={16} color={T.electric2} />} title="Tabela de comissões">
             {Object.entries(rules).filter(([k]) => k !== "aoa_usd_rate" && k !== "saque_minimo_usd").map(([key, r]) => (
@@ -328,7 +340,7 @@ function AffiliateDashboard() {
         <BottomItem icon={<Home size={18} />} label="Início" active={tab === "resumo"} onClick={() => setTab("resumo")} />
         <BottomItem icon={<Users size={18} />} label="Indicados" active={tab === "indicados"} onClick={() => setTab("indicados")} />
         <BottomItem icon={<Coins size={18} />} label="Comissões" active={tab === "comissoes"} onClick={() => setTab("comissoes")} />
-        <BottomItem icon={<User size={18} />} label="Perfil" active={false} onClick={() => {}} />
+        <BottomItem icon={<User size={18} />} label="Perfil" active={tab === "perfil"} onClick={() => setTab("perfil")} />
       </div>
     </div>
   );
@@ -366,9 +378,9 @@ function NavPill({ icon, label, active, onClick }) {
     </button>
   );
 }
-function QuickStat({ icon, label, value, accent }) {
+function QuickStat({ icon, label, value, accent, onClick }) {
   return (
-    <div style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 14, padding: 12 }}>
+    <div onClick={onClick} style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 14, padding: 12, cursor: onClick ? "pointer" : "default" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {icon}
         <ChevronRight size={13} color={T.textSoft} />
