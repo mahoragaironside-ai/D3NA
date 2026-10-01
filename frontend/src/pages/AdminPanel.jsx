@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, RefreshCw, LayoutDashboard, Wallet, Users, ClipboardList, Star, HeartHandshake, Network, MessageCircle, Link2, Check, X, ChevronLeft } from "lucide-react";
+import { CheckCircle2, RefreshCw, LayoutDashboard, Wallet, Users, ClipboardList, Star, HeartHandshake, Network, MessageCircle, Link2, Check, X, ChevronLeft, Home, Briefcase, Megaphone, Settings, Send } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
