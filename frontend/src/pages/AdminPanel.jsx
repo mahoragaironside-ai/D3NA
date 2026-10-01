@@ -30,6 +30,59 @@ function useUnreadSupportCount(adminKey, unlocked) {
   return count;
 }
 
+const GRUPOS = {
+  negocios: ["pagamentos", "utilizadores", "indicadores", "apoio_cliente", "afiliados", "organograma"],
+  definicoes: ["registo", "pessoal"],
+};
+
+function NavInferior({ tab, setTab }) {
+  const [sheet, setSheet] = useState(null); // 'negocios' | 'definicoes' | null
+
+  const itensNoGrupo = sheet ? GRUPOS[sheet].map((id) => MENU.find((m) => m.id === id)).filter(Boolean) : [];
+
+  function clicarCategoria(cat) {
+    if (cat === "inicio") { setTab("dashboard"); setSheet(null); return; }
+    if (cat === "marketing") { alert("Marketing — auto-promoção automática do D3NA. Funcionalidade futura, ainda por construir."); return; }
+    setSheet(cat);
+  }
+
+  const activo = { color: C.navy };
+  const inactivo = { color: C.inkSoft };
+
+  return (
+    <>
+      {sheet && (
+        <div onClick={() => setSheet(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 65 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ position: "fixed", bottom: 64, left: 0, right: 0, background: C.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 10, zIndex: 66 }}>
+            {itensNoGrupo.map((m) => {
+              const Icon = m.icon;
+              return (
+                <button key={m.id} onClick={() => { setTab(m.id); setSheet(null); }} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", padding: "12px 10px", fontSize: 14, color: C.ink, cursor: "pointer", textAlign: "left" }}>
+                  <Icon size={16} /> {m.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", background: C.surface, borderTop: `1px solid ${C.border}`, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <button onClick={() => clicarCategoria("inicio")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...(tab === "dashboard" ? activo : inactivo) }}>
+          <Home size={18} /><span style={{ fontSize: 11 }}>Início</span>
+        </button>
+        <button onClick={() => clicarCategoria("negocios")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...(GRUPOS.negocios.includes(tab) ? activo : inactivo) }}>
+          <Briefcase size={18} /><span style={{ fontSize: 11 }}>Negócios</span>
+        </button>
+        <button onClick={() => clicarCategoria("marketing")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...inactivo }}>
+          <Megaphone size={18} /><span style={{ fontSize: 11 }}>Marketing</span>
+        </button>
+        <button onClick={() => clicarCategoria("definicoes")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...(GRUPOS.definicoes.includes(tab) ? activo : inactivo) }}>
+          <Settings size={18} /><span style={{ fontSize: 11 }}>Definições</span>
+        </button>
+      </div>
+    </>
+  );
+}
+
 export default function AdminPanel() {
   const [adminKey, setAdminKey] = useState("");
   const [unlocked, setUnlocked] = useState(false);
@@ -76,30 +129,7 @@ export default function AdminPanel() {
 
   return (
     <div data-admin-theme="neural" style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
-      <div style={{ display: "flex", overflowX: "auto", background: C.surface, borderTop: `1px solid ${C.border}`, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-        {MENU.map((m) => {
-          const Icon = m.icon;
-          const active = tab === m.id;
-          return (
-            <button
-              key={m.id}
-              onClick={() => setTab(m.id)}
-              style={{
-                display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", padding: "12px 14px",
-                background: "none", border: "none", borderBottom: active ? `2px solid ${C.navy}` : "2px solid transparent",
-                color: active ? C.navy : C.inkSoft, fontSize: 13, fontWeight: active ? 700 : 500, cursor: "pointer",
-              }}
-            >
-              <Icon size={15} /> {m.label}
-              {m.id === "apoio_cliente" && unreadSupport > 0 && (
-                <span style={{ background: C.red || "#c0392b", color: "#fff", borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginLeft: 2 }}>
-                  {unreadSupport}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <NavInferior tab={tab} setTab={setTab} />
 
       <div style={{ padding: "18px 18px 88px" }}>
         {tab === "dashboard" && <DashboardTab adminKey={adminKey} />}
