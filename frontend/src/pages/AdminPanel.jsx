@@ -569,6 +569,137 @@ function AfiliadosTab({ adminKey }) {
   );
 }
 
+function AfiliadosTab({ adminKey }) {
+  const [afiliados, setAfiliados] = useState([]);
+  const [saques, setSaques] = useState([]);
+  const [detalhe, setDetalhe] = useState(null);
+  const [vista, setVista] = useState("lista"); // "lista" | "saques" | "detalhe"
+
+  function loadLista() {
+    api.adminAffiliatesList(adminKey).then(setAfiliados).catch(() => {});
+    api.adminAffiliateWithdrawalsPending(adminKey).then(setSaques).catch(() => {});
+  }
+
+  useEffect(loadLista, [adminKey]);
+
+  function abrirDetalhe(aff) {
+    api.adminAffiliateDetail(aff.affiliate_id, adminKey).then(setDetalhe).catch(() => {});
+    setVista("detalhe");
+  }
+
+  async function confirmarSaque(id) {
+    await api.adminAffiliateConfirmWithdrawal(id, adminKey);
+    loadLista();
+  }
+  async function rejeitarSaque(id) {
+    await api.adminAffiliateRejectWithdrawal(id, adminKey);
+    loadLista();
+  }
+
+  if (vista === "detalhe" && detalhe) {
+    const a = detalhe.affiliate;
+    return (
+      <div>
+        <button onClick={() => { setVista("lista"); setDetalhe(null); }} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", color: C.navy, fontSize: 13, cursor: "pointer", marginBottom: 12 }}>
+          <ChevronLeft size={15} /> Voltar à lista
+        </button>
+        <SectionTitle>{a.phone_number} — código {a.referral_code}</SectionTitle>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 16 }}>
+          <Card><Stat label="Saldo atual" value={`${Number(a.balance_aoa).toLocaleString("pt-PT")} Kz`} /></Card>
+          <Card><Stat label="Indicados" value={detalhe.referrals.length} /></Card>
+          <Card><Stat label="Comissões (histórico)" value={detalhe.commissions.length} /></Card>
+          <Card><Stat label="RedotPay" value={a.redotpay_id ? "configurado" : "não configurado"} /></Card>
+        </div>
+
+        <SectionTitle>Indicados ({detalhe.referrals.length})</SectionTitle>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+          {detalhe.referrals.map((r) => (
+            <div key={r.user_id} style={{ display: "flex", justifyContent: "space-between", borderBottom: `1px solid ${C.border}`, padding: "8px 0", fontSize: 13 }}>
+              <span>{r.phone_number}</span>
+              <span style={{ color: r.subscription_status === "ativo" ? C.green : C.inkSoft }}>{r.subscription_status === "ativo" ? "Plano ativo" : "Sem plano"}</span>
+            </div>
+          ))}
+          {detalhe.referrals.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem indicados ainda.</div>}
+        </div>
+
+        <SectionTitle>Comissões ({detalhe.commissions.length})</SectionTitle>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+          {detalhe.commissions.map((c) => (
+            <div key={c.commission_id} style={{ display: "flex", justifyContent: "space-between", borderBottom: `1px solid ${C.border}`, padding: "8px 0", fontSize: 13 }}>
+              <span>{new Date(c.created_at).toLocaleDateString("pt-PT")} — {c.source_type}</span>
+              <span style={{ color: C.green, fontWeight: 600 }}>+{Number(c.amount_aoa).toLocaleString("pt-PT")} Kz</span>
+            </div>
+          ))}
+          {detalhe.commissions.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem comissões ainda.</div>}
+        </div>
+
+        <SectionTitle>Saques ({detalhe.withdrawals.length})</SectionTitle>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {detalhe.withdrawals.map((w) => (
+            <div key={w.withdrawal_id} style={{ display: "flex", justifyContent: "space-between", borderBottom: `1px solid ${C.border}`, padding: "8px 0", fontSize: 13 }}>
+              <span>{new Date(w.created_at).toLocaleDateString("pt-PT")} — {Number(w.amount_aoa).toLocaleString("pt-PT")} Kz</span>
+              <span style={{ color: w.status === "pago" ? C.green : w.status === "rejeitado" ? C.red : C.inkSoft }}>{w.status}</span>
+            </div>
+          ))}
+          {detalhe.withdrawals.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem saques ainda.</div>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        <button onClick={() => setVista("lista")} style={{ background: vista === "lista" ? C.navy : C.surface, color: vista === "lista" ? "#fff" : C.ink, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Afiliados</button>
+        <button onClick={() => setVista("saques")} style={{ background: vista === "saques" ? C.navy : C.surface, color: vista === "saques" ? "#fff" : C.ink, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Saques pendentes ({saques.length})</button>
+      </div>
+
+      {vista === "lista" && (
+        <>
+          <SectionTitle>Afiliados ({afiliados.length})</SectionTitle>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {afiliados.map((a) => (
+              <div key={a.affiliate_id} onClick={() => abrirDetalhe(a)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{a.phone_number} <span style={{ color: C.inkSoft, fontWeight: 400 }}>· {a.referral_code}</span></div>
+                  <div style={{ fontSize: 12, color: C.inkSoft }}>{a.total_referidos} indicado(s) · saldo {Number(a.balance_aoa).toLocaleString("pt-PT")} Kz</div>
+                </div>
+                <Link2 size={16} color={C.inkSoft} />
+              </div>
+            ))}
+            {afiliados.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Ainda não há afiliados registados.</div>}
+          </div>
+        </>
+      )}
+
+      {vista === "saques" && (
+        <>
+          <SectionTitle>Saques pendentes ({saques.length})</SectionTitle>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {saques.map((w) => (
+              <div key={w.withdrawal_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{w.phone_number} <span style={{ color: C.inkSoft, fontWeight: 400 }}>· {w.referral_code}</span></div>
+                <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 10 }}>
+                  {Number(w.amount_aoa).toLocaleString("pt-PT")} Kz · RedotPay: {w.redotpay_id} · pedido {new Date(w.created_at).toLocaleString("pt-PT")}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => confirmarSaque(w.withdrawal_id)} style={{ display: "flex", alignItems: "center", gap: 6, background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                    <Check size={14} /> Pago
+                  </button>
+                  <button onClick={() => rejeitarSaque(w.withdrawal_id)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", color: C.red, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                    <X size={14} /> Rejeitar
+                  </button>
+                </div>
+              </div>
+            ))}
+            {saques.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem saques pendentes.</div>}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function EmBreve({ texto }) {
   return <div style={{ color: C.inkSoft, fontSize: 14, textAlign: "center", padding: 40 }}>{texto}</div>;
 }

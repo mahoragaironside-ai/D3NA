@@ -20,6 +20,14 @@ export const api = {
   adminAffiliateRejectWithdrawal: (id, adminKey) =>
     fetch(`${API_URL}/affiliates/admin/withdrawals/${id}/reject`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
 
+  adminAffiliatesList: (adminKey) => fetch(`${API_URL}/affiliates/admin/list`, { headers: { "x-admin-key": adminKey } }).then(handle),
+  adminAffiliateDetail: (id, adminKey) => fetch(`${API_URL}/affiliates/admin/${id}`, { headers: { "x-admin-key": adminKey } }).then(handle),
+  adminAffiliateWithdrawalsPending: (adminKey) => fetch(`${API_URL}/affiliates/admin/withdrawals/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),
+  adminAffiliateConfirmWithdrawal: (id, adminKey) =>
+    fetch(`${API_URL}/affiliates/admin/withdrawals/${id}/confirm`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
+  adminAffiliateRejectWithdrawal: (id, adminKey) =>
+    fetch(`${API_URL}/affiliates/admin/withdrawals/${id}/reject`, { method: "POST", headers: { "x-admin-key": adminKey } }).then(handle),
+
   affiliateMe: () => fetch(`${API_URL}/affiliates/me`, { headers: authHeaders() }).then(handle),
   affiliateRegister: () => fetch(`${API_URL}/affiliates/register`, { method: "POST", headers: authHeaders() }).then(handle),
   affiliateReferrals: () => fetch(`${API_URL}/affiliates/me/referrals`, { headers: authHeaders() }).then(handle),
