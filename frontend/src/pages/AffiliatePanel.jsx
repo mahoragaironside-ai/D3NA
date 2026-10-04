@@ -31,6 +31,7 @@ function AffiliateDashboard() {
   const [notAffiliate, setNotAffiliate] = useState(false);
   const [erroCarregar, setErroCarregar] = useState(false);
   const [tentativaAtual, setTentativaAtual] = useState(0);
+  const [ultimoErro, setUltimoErro] = useState("");
   const [referrals, setReferrals] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [rules, setRules] = useState(null);
@@ -73,6 +74,7 @@ function AffiliateDashboard() {
         const msg = String(e.message || "");
         if (msg.includes("Ainda não")) { setNotAffiliate(true); setLoading(false); return; }
         if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); return; }
+        setUltimoErro(msg);
         // qualquer outro erro (backend a dormir, rede instavel): tenta de novo no proximo ciclo
       }
     }
@@ -121,6 +123,9 @@ function AffiliateDashboard() {
         <div style={{ textAlign: "center", maxWidth: 300 }}>
           <div style={{ color: "#91A7C4", marginBottom: 14, fontSize: 14 }}>
             Não foi possível carregar os teus dados. O servidor pode estar a acordar — tenta de novo em alguns segundos.
+          </div>
+          <div style={{ color: "#FF3D77", marginBottom: 14, fontSize: 12, fontFamily: "monospace" }}>
+            Erro real: {ultimoErro || "(sem detalhe)"}
           </div>
           <button onClick={load} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#007BFF", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
             Tentar novamente
