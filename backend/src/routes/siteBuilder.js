@@ -14,7 +14,8 @@ router.post("/preview", (req, res) => {
   try {
     const contact_links = req.body.contact_links ? JSON.parse(req.body.contact_links || "[]") : [];
     const catalog_items = req.body.catalog_items ? JSON.parse(req.body.catalog_items || "[]") : [];
-    const html = gerarSite({ ...req.body, contact_links, catalog_items });
+    const gallery_items = req.body.gallery_items ? JSON.parse(req.body.gallery_items || "[]") : [];
+    const html = gerarSite({ ...req.body, contact_links, catalog_items, gallery_items });
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.send(html);
   } catch (e) {
