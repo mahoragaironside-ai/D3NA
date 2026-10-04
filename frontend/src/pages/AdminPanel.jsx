@@ -35,7 +35,7 @@ const GRUPOS = {
   definicoes: ["registo", "pessoal"],
 };
 
-function NavInferior({ tab, setTab }) {
+function NavInferior({ tab, setTab, unreadSupport }) {
   const [sheet, setSheet] = useState(null); // 'negocios' | 'definicoes' | null
 
   const itensNoGrupo = sheet ? GRUPOS[sheet].map((id) => MENU.find((m) => m.id === id)).filter(Boolean) : [];
@@ -70,7 +70,15 @@ function NavInferior({ tab, setTab }) {
           <Home size={18} /><span style={{ fontSize: 11 }}>Início</span>
         </button>
         <button onClick={() => clicarCategoria("negocios")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...(GRUPOS.negocios.includes(tab) ? activo : inactivo) }}>
-          <Briefcase size={18} /><span style={{ fontSize: 11 }}>Negócios</span>
+          <div style={{ position: "relative" }}>
+            <Briefcase size={18} />
+            {unreadSupport > 0 && (
+              <span style={{ position: "absolute", top: -4, right: -8, background: C.red || "#c0392b", color: "#fff", borderRadius: 999, fontSize: 9, fontWeight: 700, padding: "1px 5px", lineHeight: 1.3 }}>
+                {unreadSupport}
+              </span>
+            )}
+          </div>
+          <span style={{ fontSize: 11 }}>Negócios</span>
         </button>
         <button onClick={() => clicarCategoria("marketing")} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", padding: "10px 0", cursor: "pointer", ...inactivo }}>
           <Megaphone size={18} /><span style={{ fontSize: 11 }}>Marketing</span>
@@ -129,7 +137,7 @@ export default function AdminPanel() {
 
   return (
     <div data-admin-theme="neural" style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
-      <NavInferior tab={tab} setTab={setTab} />
+      <NavInferior tab={tab} setTab={setTab} unreadSupport={unreadSupport} />
 
       <div style={{ padding: "18px 18px 88px" }}>
         {tab === "dashboard" && <DashboardTab adminKey={adminKey} />}
