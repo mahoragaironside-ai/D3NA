@@ -38,7 +38,10 @@ router.post("/:projectId/suppliers", async (req, res) => {
 
   try {
     const result = await findSuppliers({ productName, location: memory.location, isImport, notes: req.body.notes });
-    await query("INSERT INTO messages (project_id, role, content) VALUES ($1, 'assistant', $2)", [req.params.projectId, result.content]);
+    const textoParaHistorico = result.found
+      ? `Encontrei ${result.suppliers.length} fornecedor(es) para "${productName}".`
+      : (result.message || `Não encontrei fornecedores de "${productName}" com as condições pedidas.`);
+    await query("INSERT INTO messages (project_id, role, content) VALUES ($1, 'assistant', $2)", [req.params.projectId, textoParaHistorico]);
     await logSupplierSearch(req.userId);
     res.json({ ...result, searches_remaining: limitCheck.isPremium ? null : limitCheck.remaining - 1 });
   } catch (e) {

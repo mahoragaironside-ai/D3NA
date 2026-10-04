@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Mic, Square, Loader2, Search, MoreVertical } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
+import SupplierCards from "../components/SupplierCards.jsx";
 import ReportCard from "../components/ReportCard.jsx";
 import ProgressPanel from "../components/ProgressPanel.jsx";
 import AdBreak from "../components/AdBreak.jsx";
@@ -186,7 +187,7 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
     setMessages((m) => [...m, { role: "user", content: `🔍 Pesquisar fornecedores de: ${productHint}`, type: "text" }]);
     try {
       const result = await api.searchSuppliers(project.project_id, productHint);
-      setMessages((m) => [...m, { role: "assistant", content: result.content, type: "text" }]);
+      setMessages((m) => [...m, { role: "assistant", type: "suppliers", supplierResult: result }]);
     } catch (e) {
       const msg = e.message?.includes("bairro") ? e.message : "Não consegui pesquisar agora: " + e.message;
       setMessages((m) => [...m, { role: "assistant", content: msg, type: "text" }]);
@@ -256,6 +257,7 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
         )}
         {messages.map((m, i) => {
           if (m.type === "report") return <div key={i}><ReportCard report={m.report} /></div>;
+          if (m.type === "suppliers") return <div key={i} style={{ alignSelf: "flex-start", maxWidth: "92%", width: "100%" }}><SupplierCards result={m.supplierResult} /></div>;
           const isUser = m.role === "user";
           return (
             <div key={i} style={{ alignSelf: isUser ? "flex-end" : "flex-start", maxWidth: "85%" }}>

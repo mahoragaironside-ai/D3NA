@@ -3,36 +3,45 @@ import { SERPER_API_KEY, GROQ_API_KEY } from "../config.js";
 // Pesquisa de fornecedores — Serper.dev faz a pesquisa real (resultados do Google),
 // um modelo Groq normal escreve a resposta final, formatada em lista com links clicáveis.
 
-const SUPPLIER_SYSTEM_PROMPT = `És um assistente de pesquisa de fornecedores para um pequeno
+const SUPPLIER_SYSTEM_PROMPT = `És um motor de pesquisa de fornecedores para um pequeno
 empreendedor angolano. Vais receber RESULTADOS DE PESQUISA REAIS DA INTERNET — a tua tarefa é
-ESCREVER a resposta final a partir DESSES resultados, nunca inventar nada que não esteja lá.
+EXTRAIR dessas fontes os fornecedores relevantes, nunca inventar nada que não esteja lá.
 
-FORMATO OBRIGATÓRIO DA RESPOSTA (segue isto à risca):
-- Lista numerada, NUNCA uma tabela markdown (tabelas ficam ilegíveis em ecrãs pequenos).
-- Para cada fornecedor, exactamente este formato:
+RESPONDE APENAS COM JSON VÁLIDO, SEM TEXTO À VOLTA, NESTE FORMATO EXACTO:
+{
+  "found": true ou false,
+  "referencePrice": número ou null,
+  "message": "texto curto, só quando found=false ou quando há algo importante a avisar, senão null",
+  "suppliers": [
+    {
+      "name": "nome do fornecedor ou loja",
+      "price": "valor em Kwanzas, texto curto, ex: '2.500 Kz'",
+      "location": "bairro/cidade, ou 'não especificado'",
+      "contactType": "whatsapp" ou "website" ou "other",
+      "contactUrl": "URL completo, wa.me/... para whatsapp",
+      "reputation": "nota curta sobre reputação, ou null se não houver informação"
+    }
+  ]
+}
 
-**1. Nome do fornecedor**
-📍 Localização: [cidade/bairro ou "não especificado"]
-💰 Preço: [valor ou "não disponível"]
-⭐ Reputação: [o que os resultados dizem, ou "sem informação — recomenda-se confirmar antes de negociar"]
-[📱 Contactar via WhatsApp](https://wa.me/NUMERO) — ou, se não houver WhatsApp, [🔗 Ver site/contacto](URL)
-
-- NUNCA menciones onde encontraste a informação (não digas "site X", "Facebook", "Instagram" como
-  fonte) — o link clicável já resolve isso, não precisas de nomear a plataforma no texto.
-- Máximo de 10 a 15 fornecedores no total — escolhe os MELHORES (mistura de preço baixo E boa
-  reputação/informação completa), não despejes tudo o que a pesquisa trouxe. Ignora resultados
-  fracos (sem contacto nem preço nem localização) se já tiveres opções melhores suficientes.
-- ORDENA a lista: primeiro os que têm melhor equilíbrio preço/qualidade, não por ordem aleatória.
-- Se a pessoa mencionar um preço de referência que já paga hoje, procura ACTIVAMENTE por opções
-  mais baratas nos resultados e destaca-as no topo com "💚 Mais barato que o teu preço actual".
-- Se for pesquisa de importação: separa claramente "FORNECEDORES INTERNACIONAIS" de "AGENTES DE
-  IMPORTAÇÃO/DESPACHANTES" com um subtítulo em negrito entre os dois grupos.
-- Se um resultado for claramente antigo, avisa que pode estar desatualizado.
+REGRAS OBRIGATÓRIAS:
+- Se o utilizador mencionar um preço que já encontrou/paga (referencePrice), inclui NO ARRAY
+  suppliers APENAS fornecedores com preço estritamente MENOR que esse valor. Nunca incluas
+  fornecedores a preço igual ou superior ao referencePrice.
+- Se não encontrares NENHUM fornecedor mais barato que o referencePrice, define found=false,
+  suppliers=[] e message a explicar isso claramente (ex: "Não encontrei fornecedores com preço
+  abaixo de X Kz — o preço que já tens parece ser competitivo.").
+- Usa a localização específica dada pelo utilizador (bairro/cidade), não a província ou país,
+  excepto se for pesquisa de importação, nesse caso usa os preços do país de origem do produto.
+- Máximo 10 fornecedores, ordenados do mais barato para o mais caro.
+- NUNCA menciones de onde tiraste a informação (não digas "site X", "Facebook") — isso fica só
+  no contactUrl.
+- Sem emojis, sem floreios, tom directo e profissional, nada que pareça "gerado por IA".
 - Usa APENAS informação presente nos resultados fornecidos — nunca inventes preços, nomes ou
-  contactos que não estejam lá.
-- Termina SEMPRE com uma linha curta a lembrar que a pessoa deve confirmar reputação e condições
-  diretamente com o fornecedor antes de pagar qualquer adiantamento.
-- Responde em português, direto, sem floreios, sem introduções longas.`;
+  contactos.
+- Se um resultado for claramente antigo (mais de 1-2 anos), não o incluas, a não ser que seja a
+  única opção disponível — nesse caso adiciona uma nota em reputation.
+`;
 
 async function serperSearch(query) {
   const response = await fetch("https://google.serper.dev/search", {
@@ -114,6 +123,7 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
       },
       body: JSON.stringify({
         model: "openai/gpt-oss-120b",
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: SUPPLIER_SYSTEM_PROMPT },
           { role: "user", content: userQuery },
@@ -127,6 +137,18 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
     return response.json();
   });
 
-  const content = data.choices?.[0]?.message?.content || "Não encontrei resultados úteis para esta pesquisa.";
-  return { content, searchedWeb: true };
+  const raw = data.choices?.[0]?.message?.content || "{}";
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    parsed = { found: false, suppliers: [], message: "Não consegui organizar os resultados desta pesquisa." };
+  }
+  return {
+    found: parsed.found !== false && (parsed.suppliers?.length > 0),
+    referencePrice: parsed.referencePrice || null,
+    message: parsed.message || null,
+    suppliers: Array.isArray(parsed.suppliers) ? parsed.suppliers : [],
+    searchedWeb: true,
+  };
 }
