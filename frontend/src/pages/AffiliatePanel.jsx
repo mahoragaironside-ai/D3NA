@@ -29,6 +29,7 @@ function AffiliateDashboard() {
   const [loading, setLoading] = useState(true);
   const [affiliate, setAffiliate] = useState(null);
   const [notAffiliate, setNotAffiliate] = useState(false);
+  const [erroCarregar, setErroCarregar] = useState(false);
   const [referrals, setReferrals] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [rules, setRules] = useState(null);
@@ -54,6 +55,7 @@ function AffiliateDashboard() {
 
   async function load() {
     setLoading(true);
+    setErroCarregar(false);
     try {
       const me = await api.affiliateMe();
       setAffiliate(me);
@@ -61,7 +63,8 @@ function AffiliateDashboard() {
       const [r, c, ru] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules()]);
       setReferrals(r); setCommissions(c); setRules(ru);
     } catch (e) {
-      if (String(e.message).includes("Ainda não")) setNotAffiliate(true);
+      if (String(e.message).includes("Ainda não")) { setNotAffiliate(true); }
+      else { setErroCarregar(true); }
     } finally {
       setLoading(false);
     }
@@ -101,6 +104,21 @@ function AffiliateDashboard() {
   }
 
   if (loading) return <Centered>A carregar…</Centered>;
+
+  if (erroCarregar || !affiliate) {
+    return (
+      <Centered>
+        <div style={{ textAlign: "center", maxWidth: 300 }}>
+          <div style={{ color: "#91A7C4", marginBottom: 14, fontSize: 14 }}>
+            Não foi possível carregar os teus dados. O servidor pode estar a acordar — tenta de novo em alguns segundos.
+          </div>
+          <button onClick={load} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#007BFF", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
+            Tentar novamente
+          </button>
+        </div>
+      </Centered>
+    );
+  }
 
   if (notAffiliate) {
     return (
