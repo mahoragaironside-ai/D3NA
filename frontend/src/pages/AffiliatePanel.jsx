@@ -63,7 +63,9 @@ function AffiliateDashboard() {
       const [r, c, ru] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules()]);
       setReferrals(r); setCommissions(c); setRules(ru);
     } catch (e) {
-      if (String(e.message).includes("Ainda não")) { setNotAffiliate(true); }
+      const msg = String(e.message || "");
+      if (msg.includes("Ainda não")) { setNotAffiliate(true); }
+      else if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); }
       else { setErroCarregar(true); }
     } finally {
       setLoading(false);
