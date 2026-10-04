@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
 
-export default function Auth({ onAuthenticated }) {
+export default function Auth({ onAuthenticated, brand = "Consultor Digital" }) {
   const [mode, setMode] = useState("login");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +28,7 @@ export default function Auth({ onAuthenticated }) {
   return (
     <div style={{ minHeight: "100vh", background: C.navy, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "-apple-system, sans-serif" }}>
       <form onSubmit={submit} style={{ background: C.surface, borderRadius: 16, padding: 28, width: 320, maxWidth: "100%" }}>
-        <div style={{ fontSize: 12, letterSpacing: 1, color: C.inkSoft, textTransform: "uppercase", fontWeight: 600 }}>Consultor Digital</div>
+        <div style={{ fontSize: 12, letterSpacing: 1, color: C.inkSoft, textTransform: "uppercase", fontWeight: 600 }}>{brand}</div>
         <div style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: C.ink, margin: "4px 0 20px" }}>
           {mode === "login" ? "Entrar" : "Criar conta"}
         </div>

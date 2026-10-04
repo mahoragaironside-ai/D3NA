@@ -21,7 +21,7 @@ const T = {
 
 export default function AffiliatePanel() {
   const [authed, setAuthed] = useState(!!localStorage.getItem("access_token"));
-  if (!authed) return <Auth onAuthenticated={() => setAuthed(true)} />;
+  if (!authed) return <Auth onAuthenticated={() => setAuthed(true)} brand="D3NA — Afiliados" />;
   return <AffiliateDashboard />;
 }
 
