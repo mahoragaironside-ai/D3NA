@@ -30,6 +30,7 @@ function AffiliateDashboard() {
   const [affiliate, setAffiliate] = useState(null);
   const [notAffiliate, setNotAffiliate] = useState(false);
   const [erroCarregar, setErroCarregar] = useState(false);
+  const [tentativaAtual, setTentativaAtual] = useState(0);
   const [referrals, setReferrals] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [rules, setRules] = useState(null);
@@ -56,20 +57,27 @@ function AffiliateDashboard() {
   async function load() {
     setLoading(true);
     setErroCarregar(false);
-    try {
-      const me = await api.affiliateMe();
-      setAffiliate(me);
-      setRedotpayId(me.redotpay_id || "");
-      const [r, c, ru] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules()]);
-      setReferrals(r); setCommissions(c); setRules(ru);
-    } catch (e) {
-      const msg = String(e.message || "");
-      if (msg.includes("Ainda não")) { setNotAffiliate(true); }
-      else if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); }
-      else { setErroCarregar(true); }
-    } finally {
-      setLoading(false);
+    const pausas = [0, 4000, 8000, 12000, 16000, 20000]; // total ate ~60s de tentativas automaticas
+    for (let i = 0; i < pausas.length; i++) {
+      setTentativaAtual(i + 1);
+      if (pausas[i] > 0) await new Promise((r) => setTimeout(r, pausas[i]));
+      try {
+        const me = await api.affiliateMe();
+        setAffiliate(me);
+        setRedotpayId(me.redotpay_id || "");
+        const [r, c, ru] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules()]);
+        setReferrals(r); setCommissions(c); setRules(ru);
+        setLoading(false);
+        return;
+      } catch (e) {
+        const msg = String(e.message || "");
+        if (msg.includes("Ainda não")) { setNotAffiliate(true); setLoading(false); return; }
+        if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); return; }
+        // qualquer outro erro (backend a dormir, rede instavel): tenta de novo no proximo ciclo
+      }
     }
+    setErroCarregar(true);
+    setLoading(false);
   }
 
   async function tornarAfiliado() {
@@ -105,7 +113,7 @@ function AffiliateDashboard() {
     }
   }
 
-  if (loading) return <Centered>A carregar…</Centered>;
+  if (loading) return <Centered>{tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"}</Centered>;
 
   if (erroCarregar || !affiliate) {
     return (
