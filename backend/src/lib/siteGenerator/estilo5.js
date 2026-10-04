@@ -92,6 +92,12 @@ export function estilo5(dados, primary, secondary, iniciais, corpo, fontFamily =
   header {
     padding: 40px 20px 20px; text-align: center;
   }
+  header .hero-cta {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+    background: ${secondary}; color: ${primary}; border: none; border-radius: 30px;
+    padding: 11px 22px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    text-decoration: none;
+  }
   header .badge {
     display: inline-block; background: ${primary}22; color: ${primary}; border-radius: 20px;
     padding: 6px 16px; font-size: 12px; margin-bottom: 14px; font-weight: 600;
@@ -164,6 +170,7 @@ export function estilo5(dados, primary, secondary, iniciais, corpo, fontFamily =
 <header>
   <h1>${company_name}</h1>
   <p>${company_description ? company_description.slice(0, 60) : "Tudo o que precisa, num só lugar"}</p>
+  <a class="hero-cta" href="#" onclick="event.preventDefault(); (document.getElementById('catalogo')||document.getElementById('galeria')||document.getElementById('sobre')||document.getElementById('contacto'))?.scrollIntoView({behavior:'smooth'});">Saiba mais ↓</a>
 </header>
 
 <section>  ${corpo || `

@@ -90,6 +90,12 @@ export function estilo4(dados, primary, secondary, iniciais, corpo, fontFamily =
   .menu-ad-inner { width: 320px; height: 50px; transform: scale(0.53125); transform-origin: top left; }
 
   header { padding: 70px 24px 30px; text-align: center; }
+  header .hero-cta {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+    background: ${secondary}; color: ${primary}; border: none; border-radius: 30px;
+    padding: 11px 22px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    text-decoration: none;
+  }
   header .badge { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-soft); }
   header h1 {
     font-size: 40px; font-weight: 700; margin: 14px 0; text-decoration: underline;
@@ -156,6 +162,7 @@ export function estilo4(dados, primary, secondary, iniciais, corpo, fontFamily =
 <header>
   <h1>${company_name}</h1>
   <p>${company_description ? company_description.slice(0, 80) : "Uma história contada com propósito"}</p>
+  <a class="hero-cta" href="#" onclick="event.preventDefault(); (document.getElementById('catalogo')||document.getElementById('galeria')||document.getElementById('sobre')||document.getElementById('contacto'))?.scrollIntoView({behavior:'smooth'});">Saiba mais ↓</a>
 </header>
 
 <section>  ${corpo || `

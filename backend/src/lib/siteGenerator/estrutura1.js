@@ -105,6 +105,12 @@ export function estilo3(dados, primary, secondary, iniciais, corpo, fontFamily =
   }
   header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
   header p { font-size: 15px; opacity: 0.9; }
+  header .hero-cta {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+    background: ${secondary}; color: ${primary}; border: none; border-radius: 30px;
+    padding: 11px 22px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    text-decoration: none;
+  }
   header .badge {
     display: inline-block; background: rgba(255,255,255,0.18); border-radius: 20px;
     padding: 6px 16px; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.5px;
@@ -176,6 +182,7 @@ export function estilo3(dados, primary, secondary, iniciais, corpo, fontFamily =
 <header>
   <h1>${company_name}</h1>
   <p>${company_description ? company_description.slice(0, 60) : "Qualidade que se sente"}</p>
+  <a class="hero-cta" href="#" onclick="event.preventDefault(); (document.getElementById('catalogo')||document.getElementById('galeria')||document.getElementById('sobre')||document.getElementById('contacto'))?.scrollIntoView({behavior:'smooth'});">Saiba mais ↓</a>
 </header>
 
 <section>
