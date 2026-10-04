@@ -255,3 +255,13 @@ CREATE TABLE IF NOT EXISTS affiliate_withdrawals (
 );
 
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS affiliate_id UUID REFERENCES affiliates(affiliate_id);
+
+ALTER TABLE affiliates ADD COLUMN IF NOT EXISTS notifications_seen_at TIMESTAMPTZ DEFAULT now();
+
+CREATE TABLE IF NOT EXISTS affiliate_notifications (
+  notification_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id      UUID REFERENCES affiliates(affiliate_id) ON DELETE CASCADE,
+  title             TEXT NOT NULL,
+  message           TEXT NOT NULL,
+  created_at        TIMESTAMPTZ DEFAULT now()
+);

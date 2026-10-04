@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Home, Users, Coins, FileText, Bell, User, Wallet, Eye, EyeOff,
-  Link2, Copy, Share2, Plus, ChevronRight, RefreshCw, BarChart3, Check,
+  Link2, Copy, Share2, Plus, ChevronRight, RefreshCw, BarChart3, Check, X,
 } from "lucide-react";
 import { api } from "../api.js";
 import { fmt } from "../tokens.js";
@@ -38,8 +38,19 @@ function AffiliateDashboard() {
   const [balanceHidden, setBalanceHidden] = useState(false);
   const [periodo, setPeriodo] = useState(7);
   const [copiado, setCopiado] = useState(false);
+  const [naoLidas, setNaoLidas] = useState(0);
+  const [notifs, setNotifs] = useState([]);
+  const [mostrarNotifs, setMostrarNotifs] = useState(false);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); api.affiliateNotificationsUnreadCount().then((r) => setNaoLidas(r.count)).catch(() => {}); }, []);
+
+  async function abrirNotificacoes() {
+    const lista = await api.affiliateNotifications().catch(() => []);
+    setNotifs(lista);
+    setMostrarNotifs(true);
+    await api.affiliateNotificationsMarkSeen().catch(() => {});
+    setNaoLidas(0);
+  }
 
   async function load() {
     setLoading(true);
@@ -124,6 +135,24 @@ function AffiliateDashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 20% 0%, ${T.bg2} 0%, ${T.bg0} 55%)`, fontFamily: "Inter, -apple-system, sans-serif", paddingBottom: 84 }}>
+      {mostrarNotifs && (
+        <div onClick={() => setMostrarNotifs(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 90, display: "flex", alignItems: "flex-end" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: T.surfaceStrong, border: `1px solid ${T.border}`, borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%", maxHeight: "70vh", overflowY: "auto", padding: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontWeight: 700, color: T.white, fontSize: 15 }}>Notificações</div>
+              <button onClick={() => setMostrarNotifs(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={18} color={T.textSoft} /></button>
+            </div>
+            {notifs.length === 0 && <div style={{ color: T.textSoft, fontSize: 13 }}>Sem notificações ainda.</div>}
+            {notifs.map((n) => (
+              <div key={n.notification_id} style={{ borderBottom: `1px solid ${T.border}`, padding: "10px 0" }}>
+                <div style={{ fontWeight: 700, color: T.white, fontSize: 14 }}>{n.title}</div>
+                <div style={{ color: T.textSoft, fontSize: 13, marginTop: 2 }}>{n.message}</div>
+                <div style={{ color: T.textSoft, fontSize: 11, marginTop: 4 }}>{new Date(n.created_at).toLocaleString("pt-PT")}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 16px 0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -137,6 +166,14 @@ function AffiliateDashboard() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
+          <button onClick={abrirNotificacoes} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", position: "relative" }}>
+            <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
+            {naoLidas > 0 && (
+              <span style={{ position: "absolute", top: -2, right: -2, background: T.pink, color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 10, minWidth: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                {naoLidas}
+              </span>
+            )}
+          </button>
           <button onClick={() => setTab("perfil")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
             <IconBadge><User size={18} color={T.textSoft} /></IconBadge>
           </button>

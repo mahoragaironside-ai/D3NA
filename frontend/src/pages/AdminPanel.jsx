@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, RefreshCw, LayoutDashboard, Wallet, Users, ClipboardList, Star, HeartHandshake, Network, MessageCircle, Link2, Check, X, ChevronLeft, Home, Briefcase, Megaphone, Settings, Send } from "lucide-react";
+import { CheckCircle2, RefreshCw, LayoutDashboard, Wallet, Users, ClipboardList, Star, HeartHandshake, Network, MessageCircle, Link2, Check, X, ChevronLeft, Home, Briefcase, Megaphone, Settings, Send, Bell } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
@@ -518,9 +518,10 @@ function AfiliadosTab({ adminKey }) {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
         <button onClick={() => setVista("lista")} style={{ background: vista === "lista" ? C.navy : C.surface, color: vista === "lista" ? "#fff" : C.ink, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Afiliados</button>
         <button onClick={() => setVista("saques")} style={{ background: vista === "saques" ? C.navy : C.surface, color: vista === "saques" ? "#fff" : C.ink, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" }}>Saques pendentes ({saques.length})</button>
+        <button onClick={() => setVista("notificacoes")} style={{ background: vista === "notificacoes" ? C.navy : C.surface, color: vista === "notificacoes" ? "#fff" : C.ink, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><Bell size={13} /> Notificações</button>
       </div>
 
       {vista === "lista" && (
@@ -540,6 +541,8 @@ function AfiliadosTab({ adminKey }) {
           </div>
         </>
       )}
+
+      {vista === "notificacoes" && <NotificacoesTab adminKey={adminKey} afiliados={afiliados} />}
 
       {vista === "saques" && (
         <>
@@ -565,6 +568,63 @@ function AfiliadosTab({ adminKey }) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function NotificacoesTab({ adminKey, afiliados }) {
+  const [titulo, setTitulo] = useState("");
+  const [mensagem, setMensagem] = useState("");
+  const [destino, setDestino] = useState("");
+  const [enviado, setEnviado] = useState("");
+  const [historico, setHistorico] = useState([]);
+
+  function loadHistorico() {
+    api.adminListAffiliateNotifications(adminKey).then(setHistorico).catch(() => {});
+  }
+  useEffect(loadHistorico, [adminKey]);
+
+  async function enviar(e) {
+    e.preventDefault();
+    if (!titulo.trim() || !mensagem.trim()) return;
+    await api.adminSendAffiliateNotification(titulo.trim(), mensagem.trim(), destino || null, adminKey);
+    setTitulo(""); setMensagem(""); setDestino("");
+    setEnviado("Notificação enviada.");
+    setTimeout(() => setEnviado(""), 2500);
+    loadHistorico();
+  }
+
+  return (
+    <div>
+      <SectionTitle>Enviar notificação aos afiliados</SectionTitle>
+      <Card>
+        <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título" style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 13 }} />
+          <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Mensagem / dica" rows={3} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 13, fontFamily: "inherit", resize: "vertical" }} />
+          <select value={destino} onChange={(e) => setDestino(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", fontSize: 13 }}>
+            <option value="">Todos os afiliados</option>
+            {afiliados.map((a) => (
+              <option key={a.affiliate_id} value={a.affiliate_id}>{a.phone_number} · {a.referral_code}</option>
+            ))}
+          </select>
+          <button type="submit" style={{ background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Enviar</button>
+          {enviado && <div style={{ color: C.green, fontSize: 12.5 }}>{enviado}</div>}
+        </form>
+      </Card>
+
+      <SectionTitle>Histórico ({historico.length})</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {historico.map((n) => (
+          <div key={n.notification_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{n.title}</div>
+            <div style={{ fontSize: 13, color: C.inkSoft, margin: "4px 0" }}>{n.message}</div>
+            <div style={{ fontSize: 11.5, color: C.inkSoft }}>
+              {n.affiliate_id ? `Para: ${n.phone_number} (${n.referral_code})` : "Para: todos os afiliados"} · {new Date(n.created_at).toLocaleString("pt-PT")}
+            </div>
+          </div>
+        ))}
+        {historico.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Ainda não enviaste nenhuma notificação.</div>}
+      </div>
     </div>
   );
 }

@@ -12,6 +12,16 @@ async function handle(res) {
 }
 
 export const api = {
+  affiliateNotifications: () => fetch(`${API_URL}/affiliates/me/notifications`, { headers: authHeaders() }).then(handle),
+  affiliateNotificationsUnreadCount: () => fetch(`${API_URL}/affiliates/me/notifications/unread-count`, { headers: authHeaders() }).then(handle),
+  affiliateNotificationsMarkSeen: () => fetch(`${API_URL}/affiliates/me/notifications/seen`, { method: "POST", headers: authHeaders() }).then(handle),
+  adminSendAffiliateNotification: (title, message, affiliate_id, adminKey) =>
+    fetch(`${API_URL}/affiliates/admin/notifications`, {
+      method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+      body: JSON.stringify({ title, message, affiliate_id: affiliate_id || null }),
+    }).then(handle),
+  adminListAffiliateNotifications: (adminKey) => fetch(`${API_URL}/affiliates/admin/notifications`, { headers: { "x-admin-key": adminKey } }).then(handle),
+
   adminAffiliatesList: (adminKey) => fetch(`${API_URL}/affiliates/admin/list`, { headers: { "x-admin-key": adminKey } }).then(handle),
   adminAffiliateDetail: (id, adminKey) => fetch(`${API_URL}/affiliates/admin/${id}`, { headers: { "x-admin-key": adminKey } }).then(handle),
   adminAffiliateWithdrawalsPending: (adminKey) => fetch(`${API_URL}/affiliates/admin/withdrawals/pending`, { headers: { "x-admin-key": adminKey } }).then(handle),

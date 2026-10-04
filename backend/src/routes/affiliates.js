@@ -160,4 +160,58 @@ router.post("/admin/weekly-payout", requireAdminKey, async (req, res) => {
   res.json({ afiliados_pagos: pagos.length, detalhe: pagos });
 });
 
+
+router.get("/me/notifications", requireAuth, async (req, res) => {
+  const aff = await query("SELECT affiliate_id FROM affiliates WHERE user_id = $1", [req.userId]);
+  if (aff.rows.length === 0) return res.status(404).json({ error: "Ainda não és afiliado." });
+  const result = await query(
+    `SELECT * FROM affiliate_notifications
+     WHERE affiliate_id = $1 OR affiliate_id IS NULL
+     ORDER BY created_at DESC LIMIT 50`,
+    [aff.rows[0].affiliate_id]
+  );
+  res.json(result.rows);
+});
+
+router.get("/me/notifications/unread-count", requireAuth, async (req, res) => {
+  const aff = await query("SELECT affiliate_id, notifications_seen_at FROM affiliates WHERE user_id = $1", [req.userId]);
+  if (aff.rows.length === 0) return res.status(404).json({ error: "Ainda não és afiliado." });
+  const result = await query(
+    `SELECT COUNT(*) FROM affiliate_notifications
+     WHERE (affiliate_id = $1 OR affiliate_id IS NULL) AND created_at > $2`,
+    [aff.rows[0].affiliate_id, aff.rows[0].notifications_seen_at]
+  );
+  res.json({ count: Number(result.rows[0].count) });
+});
+
+router.post("/me/notifications/seen", requireAuth, async (req, res) => {
+  const result = await query(
+    "UPDATE affiliates SET notifications_seen_at = now() WHERE user_id = $1 RETURNING notifications_seen_at",
+    [req.userId]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ error: "Ainda não és afiliado." });
+  res.json(result.rows[0]);
+});
+
+router.post("/admin/notifications", requireAdminKey, async (req, res) => {
+  const { title, message, affiliate_id } = req.body;
+  if (!title || !message) return res.status(400).json({ error: "Título e mensagem são obrigatórios." });
+  const result = await query(
+    "INSERT INTO affiliate_notifications (affiliate_id, title, message) VALUES ($1, $2, $3) RETURNING *",
+    [affiliate_id || null, title, message]
+  );
+  res.status(201).json(result.rows[0]);
+});
+
+router.get("/admin/notifications", requireAdminKey, async (req, res) => {
+  const result = await query(
+    `SELECT n.*, a.referral_code, u.phone_number
+     FROM affiliate_notifications n
+     LEFT JOIN affiliates a ON a.affiliate_id = n.affiliate_id
+     LEFT JOIN users u ON u.user_id = a.user_id
+     ORDER BY n.created_at DESC LIMIT 100`
+  );
+  res.json(result.rows);
+});
+
 export default router;
