@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "./config.js"; // forca leitura das chaves logo no arranque
 import dns from "node:dns";
 dns.setDefaultResultOrder("ipv4first");
 console.log("=== DEBUG TAVILY_API_KEY presente:", !!process.env.TAVILY_API_KEY, "==="); // corrige "fetch failed" em redes móveis com IPv6 instável

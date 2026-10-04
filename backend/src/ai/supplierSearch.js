@@ -1,3 +1,5 @@
+import { SERPER_API_KEY, GROQ_API_KEY } from "../config.js";
+
 // Pesquisa de fornecedores — Serper.dev faz a pesquisa real (resultados do Google),
 // um modelo Groq normal escreve a resposta final, formatada em lista com links clicáveis.
 
@@ -36,7 +38,7 @@ async function serperSearch(query) {
   const response = await fetch("https://google.serper.dev/search", {
     method: "POST",
     headers: {
-      "X-API-KEY": process.env.SERPER_API_KEY,
+      "X-API-KEY": SERPER_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -77,10 +79,10 @@ async function comRetry(fn, tentativas = 2) {
 }
 
 export async function findSuppliers({ productName, location, isImport, notes }) {
-  if (!process.env.SERPER_API_KEY) {
+  if (!SERPER_API_KEY) {
     throw new Error("SERPER_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
   }
-  if (!process.env.GROQ_API_KEY) {
+  if (!GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY não configurada — a pesquisa de fornecedores não está disponível.");
   }
 
@@ -108,7 +110,7 @@ export async function findSuppliers({ productName, location, isImport, notes }) 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        Authorization: `Bearer ${GROQ_API_KEY}`,
       },
       body: JSON.stringify({
         model: "openai/gpt-oss-120b",
