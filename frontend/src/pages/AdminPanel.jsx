@@ -684,9 +684,9 @@ function DashboardTab({ adminKey }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
         <Card glow><Stat label="Lucro total confirmado" value={`${Number(summary.receita_total).toLocaleString("pt-PT")} AOA`} /></Card>
         <Card glow><Stat label="Utilizadores" value={summary.total_utilizadores} /></Card>
-        <Card><Stat label="Pendentes: subscrições" value={summary.pendentes.subscricoes} /></Card>
-        <Card><Stat label="Pendentes: sites" value={summary.pendentes.sites} /></Card>
-        <Card><Stat label="Pendentes: curso" value={summary.pendentes.curso} /></Card>
+        <Card glow={summary.pendentes.subscricoes > 0}><Stat label="Pendentes: subscrições" value={summary.pendentes.subscricoes} /></Card>
+        <Card glow={summary.pendentes.sites > 0}><Stat label="Pendentes: sites" value={summary.pendentes.sites} /></Card>
+        <Card glow={summary.pendentes.curso > 0}><Stat label="Pendentes: curso" value={summary.pendentes.curso} /></Card>
       </div>
 
       <SectionTitle>Receita ao longo do tempo</SectionTitle>
