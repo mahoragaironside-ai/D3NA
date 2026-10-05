@@ -91,7 +91,25 @@ function NavInferior({ tab, setTab, unreadSupport }) {
   );
 }
 
+function useFaviconAdmin() {
+  useEffect(() => {
+    let link = document.querySelector('link[rel="icon"]');
+    const original = link ? link.href : null;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    const svg = encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#050A16"/><path d="M9 7h8a8 8 0 0 1 0 16H9V19h8a4 4 0 0 0 0-8H9z" fill="#075BFF"/><circle cx="23" cy="9" r="2" fill="#5B93F0"/></svg>'
+    );
+    link.href = "data:image/svg+xml," + svg;
+    return () => { if (link && original) link.href = original; };
+  }, []);
+}
+
 export default function AdminPanel() {
+  useFaviconAdmin();
   const [adminKey, setAdminKey] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [error, setError] = useState("");
