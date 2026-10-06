@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { C } from "../tokens.js";
-import { LOGO_TEMPLATES, LOGO_FONTS, LOGO_KEYFRAMES } from "../components/logoTemplates.js";
+import { LOGO_TEMPLATES, LOGO_FONTS, LOGO_KEYFRAMES } from "../components/logoTemplates.jsx";
 
 const CORES = [
   { id: "azul", primary: "#16305C", secondary: "#FFFFFF", label: "Azul & Branco" },
