@@ -265,3 +265,69 @@ CREATE TABLE IF NOT EXISTS affiliate_notifications (
   message           TEXT NOT NULL,
   created_at        TIMESTAMPTZ DEFAULT now()
 );
+
+-- ===== Curso guiado por IA =====
+CREATE TABLE IF NOT EXISTS user_courses (
+  course_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  topic TEXT NOT NULL,
+  level VARCHAR(20),
+  plan JSONB,
+  status VARCHAR(20) DEFAULT 'ativo',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS course_lessons (
+  lesson_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id UUID REFERENCES user_courses(course_id) ON DELETE CASCADE,
+  module_number INT,
+  lesson_number INT,
+  title TEXT,
+  summary TEXT,
+  video_id TEXT,
+  video_minutes NUMERIC,
+  extra_minutes NUMERIC,
+  transcript TEXT,
+  content_status VARCHAR(20) DEFAULT 'pendente',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS lesson_points (
+  point_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  lesson_id UUID REFERENCES course_lessons(lesson_id) ON DELETE CASCADE,
+  position INT,
+  kind VARCHAR(10) DEFAULT 'video',
+  timestamp_sec INT,
+  title TEXT,
+  explanation_parts JSONB,
+  check_question TEXT
+);
+CREATE TABLE IF NOT EXISTS user_point_progress (
+  user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  point_id UUID REFERENCES lesson_points(point_id) ON DELETE CASCADE,
+  status VARCHAR(20) DEFAULT 'bloqueado',
+  attempts INT DEFAULT 0,
+  last_answer TEXT,
+  last_feedback TEXT,
+  doubts JSONB DEFAULT '[]',
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (user_id, point_id)
+);
+CREATE TABLE IF NOT EXISTS lesson_tests (
+  test_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+  lesson_id UUID REFERENCES course_lessons(lesson_id) ON DELETE CASCADE,
+  questions JSONB,
+  answers JSONB,
+  score NUMERIC,
+  weak_points JSONB,
+  homework_feedback TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS video_cache (
+  topic_key TEXT PRIMARY KEY,
+  video_id TEXT,
+  title TEXT,
+  minutes NUMERIC,
+  has_captions BOOLEAN,
+  transcript TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);

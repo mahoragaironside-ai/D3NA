@@ -74,14 +74,18 @@ function formatarResultados(resultados, rotulo) {
   ).join("\n\n");
 }
 
-async function comRetry(fn, tentativas = 2) {
+async function comRetry(fn, tentativas = 4) {
   let ultimoErro;
   for (let i = 0; i < tentativas; i++) {
     try {
       return await fn();
     } catch (e) {
       ultimoErro = e;
-      if (i < tentativas - 1) await new Promise((r) => setTimeout(r, 1200));
+      const is429 = e.message?.includes("429") || e.message?.includes("Rate limit");
+      if (i < tentativas - 1) {
+        const espera = is429 ? 4000 + i * 2000 : 1200;
+        await new Promise((r) => setTimeout(r, espera));
+      }
     }
   }
   throw ultimoErro;

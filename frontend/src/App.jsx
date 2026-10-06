@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Curso from "./pages/Curso.jsx";
 import { Menu } from "lucide-react";
 import { api } from "./api.js";
 import { C } from "./tokens.js";
@@ -8,6 +9,7 @@ import AdminPanel from "./pages/AdminPanel.jsx";
 import AffiliatePanel from "./pages/AffiliatePanel.jsx";
 import SiteBuilder from "./pages/SiteBuilder.jsx";
 import SitePanel from "./pages/SitePanel.jsx";
+import LogoBuilder from "./pages/LogoBuilder.jsx";
 import PaymentModal from "./components/PaymentModal.jsx";
 import PhoneVerifyBanner from "./components/PhoneVerifyBanner.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -17,6 +19,7 @@ export default function App() {
   if (window.location.pathname === "/admin") return <AdminPanel />;
   if (window.location.pathname === "/afiliado") return <AffiliatePanel />;
   if (window.location.pathname === "/construtor") return <SiteBuilder />;
+  if (window.location.pathname === "/logotipo") return <LogoBuilder />;
   if (window.location.pathname.startsWith("/painel/")) {
     const buildId = window.location.pathname.split("/painel/")[1];
     return <SitePanel buildId={buildId} />;
@@ -36,6 +39,7 @@ function MainApp() {
   const [projectList, setProjectList] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [phoneNoticeDismissed, setPhoneNoticeDismissed] = useState(localStorage.getItem("phone_notice_dismissed") === "1");
+  const [showCourse, setShowCourse] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -107,19 +111,15 @@ function MainApp() {
     setPhoneNoticeDismissed(true);
   }
 
-  async function onOpenCourse() {
-    setLoadingBoot(true);
-    const p = await api.createProject("Curso de Marketing Digital", "curso_marketing");
-    const full = await api.getProject(p.project_id);
-    setProject(full);
-    await refreshProjectList();
+  function onOpenCourse() {
+    setShowCourse(true);
     if (window.innerWidth < 768) setSidebarOpen(false);
-    setLoadingBoot(false);
   }
 
   if (loadingBoot) return <Centered>A carregar…</Centered>;
   if (!user) return <Auth onAuthenticated={onAuthenticated} />;
   if (!project) return <Centered>A preparar o teu projeto…</Centered>;
+  if (showCourse) return <Curso onBack={() => setShowCourse(false)} />;
 
   return (
     <div style={{ height: "100vh", display: "flex", background: C.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: C.ink, overflow: "hidden" }}>

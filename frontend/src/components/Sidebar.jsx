@@ -28,8 +28,7 @@ export default function Sidebar({ open, onToggle, projects, currentId, onSelect,
           <PenSquare size={15} /> Nova consulta
         </button>
 
-        {isPremium && (
-          <button
+        <button
             onClick={onOpenCourse}
             className="course-btn"
             style={{
@@ -38,9 +37,8 @@ export default function Sidebar({ open, onToggle, projects, currentId, onSelect,
               fontSize: 13.5, fontWeight: 700, cursor: "pointer",
             }}
           >
-            <GraduationCap size={16} /> Curso de Marketing Digital
+            <GraduationCap size={16} /> Os meus cursos
           </button>
-        )}
 
         <div style={{ padding: "0 10px 4px", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: C.inkSoft, textTransform: "uppercase" }}>
           Conversas recentes
