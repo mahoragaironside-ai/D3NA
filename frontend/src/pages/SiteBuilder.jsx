@@ -50,9 +50,9 @@ const FONTES = [
 ];
 
 const TIERS = [
-  { id: "basico", label: "Básico", price: "1.500 Kz", desc: "Efeitos visuais + catálogo" },
-  { id: "pro", label: "Pro", price: "25.000 Kz", desc: "Tudo do Básico + domínio próprio + IA + sem anúncios + automação + tráfego pago incluído", destaque: true },
-  { id: "personalizado", label: "Personalizado", price: "Em breve", desc: "Totalmente à tua medida — disponível brevemente", disabled: true },
+  { id: "basico", label: "Básico", price: "1.500 Kz" },
+  { id: "pro", label: "Pro", price: "25.000 Kz", tag: "PREMIUM", destaque: true },
+  { id: "personalizado", label: "Personalizado", price: "Em breve", disabled: true },
 ];
 
 // Itens de exemplo automáticos — a pessoa não insere fotos/produtos no wizard;
@@ -213,36 +213,67 @@ export default function SiteBuilder() {
       <div style={wrap}>
         <div style={card}>
           <div style={title}>Criar o meu site</div>
-          <div style={subtitle}>Escolhe o tipo de construção.</div>
+          <div style={{ ...subtitle, marginBottom: 20 }}>Escolhe o tipo de construção.</div>
 
-          {TIERS.map((t) => (
-            <button
-              key={t.id}
-              disabled={t.disabled}
-              onClick={() => !t.disabled && setTier(t.id)}
-              style={{
-                display: "block", width: "100%", textAlign: "left",
-                background: t.destaque ? C.navy : C.bg,
-                color: t.destaque ? "#fff" : C.ink,
-                border: t.destaque ? "none" : `1px solid ${C.border}`,
-                borderRadius: 14, padding: "16px 16px", marginBottom: 10,
-                cursor: t.disabled ? "default" : "pointer",
-                opacity: t.disabled ? 0.55 : 1,
-                position: "relative", overflow: "hidden",
-                boxShadow: t.destaque ? "0 0 0 2px " + C.navy + ", 0 0 22px rgba(22,48,92,0.55)" : "none",
-                animation: t.destaque ? "ledGlow 2.2s ease-in-out infinite" : "none",
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: 16 }}>{t.label}</div>
-              <div style={{ fontSize: 13, opacity: 0.9, margin: "2px 0 4px" }}>{t.price}</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>{t.desc}</div>
-            </button>
-          ))}
+          {TIERS.map((t) => {
+            const conteudoBtn = (
+              <button
+                key={t.id}
+                disabled={t.disabled}
+                onClick={() => !t.disabled && setTier(t.id)}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  width: "100%", textAlign: "left", boxSizing: "border-box",
+                  background: t.destaque ? "#0d1b33" : C.bg,
+                  color: t.destaque ? "#fff" : C.ink,
+                  border: t.destaque ? "none" : `1px solid ${C.border}`,
+                  borderRadius: 14, padding: "18px 18px",
+                  cursor: t.disabled ? "default" : "pointer",
+                  opacity: t.disabled ? 0.45 : 1,
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontWeight: 800, fontSize: 17 }}>{t.label}</span>
+                    {t.tag && (
+                      <span style={{
+                        fontSize: 9.5, fontWeight: 800, letterSpacing: 1,
+                        background: "linear-gradient(90deg, #E0AA4E, #fff6d9, #E0AA4E)",
+                        color: "#15181F", padding: "3px 8px", borderRadius: 20,
+                      }}>{t.tag}</span>
+                    )}
+                    {t.disabled && (
+                      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 0.5, color: C.inkSoft, border: `1px solid ${C.border}`, padding: "3px 8px", borderRadius: 20 }}>EM BREVE</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 14, opacity: 0.85, marginTop: 4 }}>{t.price}</div>
+                </div>
+                <span style={{ fontSize: 20, opacity: t.disabled ? 0.3 : 0.7 }}>›</span>
+              </button>
+            );
+
+            if (!t.destaque) {
+              return <div key={t.id} style={{ marginBottom: 12 }}>{conteudoBtn}</div>;
+            }
+
+            return (
+              <div key={t.id} className="tier-pro-wrap" style={{ marginBottom: 12 }}>
+                <div className="tier-pro-inner">{conteudoBtn}</div>
+              </div>
+            );
+          })}
 
           <style>{`
-            @keyframes ledGlow {
-              0%, 100% { box-shadow: 0 0 0 2px ${C.navy}, 0 0 14px rgba(22,48,92,0.4); }
-              50% { box-shadow: 0 0 0 2px ${C.navy}, 0 0 28px rgba(22,48,92,0.85); }
+            .tier-pro-wrap {
+              padding: 2px; border-radius: 16px;
+              background: linear-gradient(120deg, #E0AA4E, #16305C, #E0AA4E, #4b6fb0, #E0AA4E);
+              background-size: 300% 300%;
+              animation: ledTrace 3.5s linear infinite;
+            }
+            .tier-pro-inner { border-radius: 14px; overflow: hidden; }
+            @keyframes ledTrace {
+              0% { background-position: 0% 50%; }
+              100% { background-position: 100% 50%; }
             }
           `}</style>
         </div>
