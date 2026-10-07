@@ -164,6 +164,7 @@ function MainApp() {
             subscription={subscription}
             onUpgrade={onUpgrade}
             onProjectUpdate={refreshProjectList}
+            onOpenCourse={onOpenCourse}
           />
         </div>
       </div>

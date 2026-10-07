@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Mic, Square, Loader2, Search, MoreVertical } from "lucide-react";
+import { Send, Mic, Square, Loader2, Search, Plus, Globe, GraduationCap, X } from "lucide-react";
 import { api } from "../api.js";
 import { C } from "../tokens.js";
 import SupplierCards from "../components/SupplierCards.jsx";
@@ -16,8 +16,9 @@ const CHIPS = [
   "Quero analisar uma decisão",
 ];
 
-export default function Chat({ project, onProjectUpdate, subscription, onUpgrade }) {
+export default function Chat({ project, onProjectUpdate, subscription, onUpgrade, onOpenCourse }) {
   const [showReview, setShowReview] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
 
   useEffect(() => {
     const sub = subscription && subscription.latest;
@@ -218,15 +219,17 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
         </div>
       )}
 
-      <div style={{ padding: "10px 16px 0", display: "flex", justifyContent: "flex-end" }}>
-        <button
-          onClick={() => setShowTools((s) => !s)}
-          title="Ferramentas e progresso"
-          style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-        >
-          <MoreVertical size={16} color={C.inkSoft} />
-        </button>
-      </div>
+      {showTools && (
+        <div style={{ padding: "10px 16px 0", display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setShowTools(false)}
+            title="Fechar progresso"
+            style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <X size={16} color={C.inkSoft} />
+          </button>
+        </div>
+      )}
 
       {showTools && (
         <div style={{ padding: "8px 16px 0" }}>
@@ -293,17 +296,45 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
           </div>
         )}
         {audioError && <div style={{ color: C.red, fontSize: 12.5, marginBottom: 6 }}>{audioError}</div>}
+        {showAttachMenu && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+            <button onClick={() => { setShowAttachMenu(false); searchSuppliers(); }} disabled={searchingSuppliers} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", borderRadius: 10, padding: "10px 12px", fontSize: 13.5, fontWeight: 600, color: C.ink, cursor: "pointer", textAlign: "left" }}>
+              {searchingSuppliers ? <Loader2 size={17} color={C.navy} style={{ animation: "spin 1s linear infinite" }} /> : <Search size={17} color={C.navy} />}
+              {searchingSuppliers ? "A pesquisar…" : "Pesquisar fornecedores reais"}
+            </button>
+            <button onClick={() => { setShowAttachMenu(false); window.open("/construtor", "_blank"); }} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", borderRadius: 10, padding: "10px 12px", fontSize: 13.5, fontWeight: 600, color: C.ink, cursor: "pointer", textAlign: "left" }}>
+              <Globe size={17} color={C.navy} /> Construtor de sites
+            </button>
+            {onOpenCourse && (
+              <button onClick={() => { setShowAttachMenu(false); onOpenCourse(); }} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", borderRadius: 10, padding: "10px 12px", fontSize: 13.5, fontWeight: 600, color: C.ink, cursor: "pointer", textAlign: "left" }}>
+                <GraduationCap size={17} color={C.navy} /> Curso de marketing
+              </button>
+            )}
+          </div>
+        )}
         <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+          <button
+            onClick={() => setShowAttachMenu((s) => !s)}
+            title="Mais opções"
+            style={{
+              width: 40, height: 40, borderRadius: 999, border: "none",
+              background: showAttachMenu ? C.navy : C.navySoft, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", flexShrink: 0, transition: "background 0.15s, transform 0.15s",
+              transform: showAttachMenu ? "rotate(45deg)" : "none",
+            }}>
+            <Plus size={19} color={showAttachMenu ? "#fff" : C.navy} />
+          </button>
           <button
             onClick={toggleRecording}
             disabled={isTranscribing}
             title={isRecording ? "Parar gravação" : "Gravar áudio"}
             style={{
-              width: 40, height: 40, borderRadius: 12, border: `1px solid ${isRecording ? C.red : C.border}`,
-              background: isRecording ? C.redBg : C.bg, display: "flex", alignItems: "center", justifyContent: "center",
+              width: 40, height: 40, borderRadius: 999, border: `1px solid ${isRecording ? C.red : C.border}`,
+              background: isRecording ? C.redBg : C.surface, display: "flex", alignItems: "center", justifyContent: "center",
               cursor: isTranscribing ? "default" : "pointer", flexShrink: 0,
+              boxShadow: isRecording ? "0 0 0 4px " + C.redBg : "none", transition: "box-shadow 0.2s",
             }}>
-            {isRecording ? <Square size={16} color={C.red} /> : <Mic size={17} color={C.inkSoft} />}
+            {isRecording ? <Square size={15} color={C.red} /> : <Mic size={17} color={C.inkSoft} />}
           </button>
           <textarea
             value={input}
@@ -311,10 +342,10 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
             placeholder="Exemplo: Tenho 100.000 Kz e quero começar um negócio..."
             rows={1}
-            style={{ flex: 1, resize: "none", border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 12px", fontSize: 14, fontFamily: "inherit", outline: "none", maxHeight: 90 }}
+            style={{ flex: 1, resize: "none", border: `1px solid ${C.border}`, borderRadius: 20, padding: "10px 16px", fontSize: 14.5, fontFamily: "inherit", outline: "none", maxHeight: 90, background: C.surface }}
           />
           <button onClick={() => send(input)} disabled={loading || !input.trim()}
-            style={{ width: 40, height: 40, borderRadius: 12, border: "none", background: loading || !input.trim() ? C.border : C.navy, display: "flex", alignItems: "center", justifyContent: "center", cursor: loading || !input.trim() ? "default" : "pointer", flexShrink: 0 }}>
+            style={{ width: 40, height: 40, borderRadius: 999, border: "none", background: loading || !input.trim() ? C.border : C.navy, display: "flex", alignItems: "center", justifyContent: "center", cursor: loading || !input.trim() ? "default" : "pointer", flexShrink: 0, boxShadow: loading || !input.trim() ? "none" : "0 2px 8px rgba(22,48,92,0.25)", transition: "box-shadow 0.15s" }}>
             <Send size={16} color="#fff" />
           </button>
         </div>
