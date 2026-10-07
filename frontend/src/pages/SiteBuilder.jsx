@@ -7,15 +7,6 @@ import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
 import ContactLinksPicker from "../components/ContactLinksPicker.jsx";
 
-const NEGOCIOS = {
-  vendas: ["Cosméticos", "Infoprodutos", "Roupas", "Utensílios", "Eletrónicos"],
-  servicos: [
-    "Soldadura industrial", "Designer", "Serralheiro", "Eletricista", "Costureiro",
-    "Biscateiro", "Jardinagem", "Limpeza", "Carpintaria", "Pedreiro",
-    "Ladrilhagem", "Montagem de teto falso", "Pastelaria", "Cozinheiro",
-  ],
-};
-
 const CORES = [
   { id: "azul", primary: "#16305C", secondary: "#FFFFFF", label: "Azul & Branco" },
   { id: "verde", primary: "#1E7A52", secondary: "#F5F6F8", label: "Verde & Cinza claro" },
@@ -58,6 +49,12 @@ const FONTES = [
   { id: "suave", label: "Suave", family: "Tahoma, Geneva, sans-serif" },
 ];
 
+const TIERS = [
+  { id: "basico", label: "Básico", price: "1.500 Kz", desc: "Efeitos visuais + catálogo" },
+  { id: "pro", label: "Pro", price: "25.000 Kz", desc: "Tudo do Básico + domínio próprio + IA + sem anúncios + automação + tráfego pago incluído", destaque: true },
+  { id: "personalizado", label: "Personalizado", price: "Em breve", desc: "Totalmente à tua medida — disponível brevemente", disabled: true },
+];
+
 // Itens de exemplo automáticos — a pessoa não insere fotos/produtos no wizard;
 // isso fica para o futuro painel de controlo. As imagens são placeholders
 // genéricos (placehold.co), não fotos reais, só para dar corpo à pré-visualização.
@@ -80,8 +77,6 @@ function gerarItensExemplo(tipo, corPrimaria, nomeNegocio) {
 
 export default function SiteBuilder() {
   const [step, setStep] = useState(1);
-  const [businessCategory, setBusinessCategory] = useState("");
-  const [businessType, setBusinessType] = useState("");
   const [colorScheme, setColorScheme] = useState("");
   const [fontChoice, setFontChoice] = useState("");
   const [structureChoice, setStructureChoice] = useState(null);
@@ -131,11 +126,9 @@ export default function SiteBuilder() {
     setPreviewError("");
     try {
       const cor = (CORES.find((c) => c.id === colorScheme) || CORES[0]).primary;
-      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, businessType) : [];
-      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, businessType) : [];
+      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, companyName) : [];
+      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, companyName) : [];
       const html = await api.previewSiteBuild({
-        business_category: businessCategory,
-        business_type: businessType,
         color_scheme: colorScheme,
         font_choice: fontChoice,
         structure_choice: structureChoice,
@@ -156,7 +149,7 @@ export default function SiteBuilder() {
   }
 
   useEffect(() => {
-    if (step === 7) carregarPreview();
+    if (step === 6) carregarPreview();
   }, [step]);
 
   async function submit() {
@@ -164,11 +157,9 @@ export default function SiteBuilder() {
     setError("");
     try {
       const cor = (CORES.find((c) => c.id === colorScheme) || CORES[0]).primary;
-      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, businessType) : [];
-      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, businessType) : [];
+      const catalogAuto = precisaCatalogo ? gerarItensExemplo("catalogo", cor, companyName) : [];
+      const galleryAuto = precisaGaleria ? gerarItensExemplo("galeria", cor, companyName) : [];
       const r = await api.createSiteBuild({
-        business_category: businessCategory,
-        business_type: businessType,
         color_scheme: colorScheme,
         font_choice: fontChoice,
         structure_choice: structureChoice,
@@ -194,15 +185,13 @@ export default function SiteBuilder() {
   }
 
   const canNext = {
-    1: businessCategory && businessType,
-    2: !!colorScheme,
-    3: !!fontChoice,
-    4: !!structureChoice,
-    5: !!styleChoice,
-    6: companyName && contactLinks.length > 0 && !!logoChoice,
-    7: true,
-    8: !!domainChoice && panelPassword.length >= 4 && panelPassword === panelPasswordConfirm,
-    9: !!tier,
+    1: !!colorScheme,
+    2: !!fontChoice,
+    3: !!structureChoice,
+    4: !!styleChoice,
+    5: companyName && contactLinks.length > 0 && !!logoChoice,
+    6: true,
+    7: !!domainChoice && panelPassword.length >= 4 && panelPassword === panelPasswordConfirm,
   };
 
   const wrap = { minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", display: "flex", justifyContent: "center", padding: "16px 12px" };
@@ -218,6 +207,48 @@ export default function SiteBuilder() {
   const navBtn = { background: C.navy, color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer" };
   const backBtn = { background: "none", border: "none", color: C.inkSoft, fontSize: 14, cursor: "pointer" };
   const selectedColor = CORES.find((c) => c.id === colorScheme) || CORES[0];
+
+  if (!tier) {
+    return (
+      <div style={wrap}>
+        <div style={card}>
+          <div style={title}>Criar o meu site</div>
+          <div style={subtitle}>Escolhe o tipo de construção.</div>
+
+          {TIERS.map((t) => (
+            <button
+              key={t.id}
+              disabled={t.disabled}
+              onClick={() => !t.disabled && setTier(t.id)}
+              style={{
+                display: "block", width: "100%", textAlign: "left",
+                background: t.destaque ? C.navy : C.bg,
+                color: t.destaque ? "#fff" : C.ink,
+                border: t.destaque ? "none" : `1px solid ${C.border}`,
+                borderRadius: 14, padding: "16px 16px", marginBottom: 10,
+                cursor: t.disabled ? "default" : "pointer",
+                opacity: t.disabled ? 0.55 : 1,
+                position: "relative", overflow: "hidden",
+                boxShadow: t.destaque ? "0 0 0 2px " + C.navy + ", 0 0 22px rgba(22,48,92,0.55)" : "none",
+                animation: t.destaque ? "ledGlow 2.2s ease-in-out infinite" : "none",
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{t.label}</div>
+              <div style={{ fontSize: 13, opacity: 0.9, margin: "2px 0 4px" }}>{t.price}</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>{t.desc}</div>
+            </button>
+          ))}
+
+          <style>{`
+            @keyframes ledGlow {
+              0%, 100% { box-shadow: 0 0 0 2px ${C.navy}, 0 0 14px rgba(22,48,92,0.4); }
+              50% { box-shadow: 0 0 0 2px ${C.navy}, 0 0 28px rgba(22,48,92,0.85); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
 
   if (result) {
     return (
@@ -311,33 +342,14 @@ export default function SiteBuilder() {
   return (
     <div style={wrap}>
       <div style={card}>
-        <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-          Construtor de sites · Passo {step} de 9
+        <div style={{ fontSize: 11, color: C.inkSoft, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>Construtor de sites · Passo {step} de 7</span>
+          <button onClick={() => setTier("")} style={{ background: "none", border: "none", color: C.navy, fontSize: 11, cursor: "pointer", textDecoration: "underline" }}>
+            Plano {TIERS.find((t) => t.id === tier)?.label}
+          </button>
         </div>
 
         {step === 1 && (
-          <>
-            <div style={title}>Qual é o seu negócio?</div>
-            <div style={subtitle}>Escolhe a categoria e depois o tipo exato.</div>
-            <button style={optBtn(businessCategory === "vendas")} onClick={() => { setBusinessCategory("vendas"); setBusinessType(""); }}>Vendas</button>
-            <button style={optBtn(businessCategory === "servicos")} onClick={() => { setBusinessCategory("servicos"); setBusinessType(""); }}>Prestação de serviços</button>
-            {businessCategory && !businessType && (
-              <div style={{ marginTop: 12 }}>
-                {NEGOCIOS[businessCategory].map((t) => (
-                  <button key={t} style={optBtn(businessType === t)} onClick={() => setBusinessType(t)}>{t}</button>
-                ))}
-              </div>
-            )}
-            {businessType && (
-              <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", background: C.navySoft, borderRadius: 10, padding: "10px 14px" }}>
-                <span style={{ fontSize: 14, color: C.navy, fontWeight: 600 }}>{businessType}</span>
-                <button onClick={() => setBusinessType("")} style={{ background: "none", border: "none", color: C.navy, fontSize: 12.5, textDecoration: "underline", cursor: "pointer" }}>Trocar</button>
-              </div>
-            )}
-          </>
-        )}
-
-        {step === 2 && (
           <>
             <div style={title}>Cores do site</div>
             <div style={subtitle}>Cor principal e cor secundária.</div>
@@ -353,7 +365,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <>
             <div style={title}>Tipo de letra</div>
             <div style={subtitle}>A fonte usada em todo o texto do site. Combina com qualquer Estilo visual.</div>
@@ -366,7 +378,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <>
             <div style={title}>Estrutura do site</div>
             <div style={subtitle}>Como as secções do site se organizam. A pré-visualização atualiza-se sozinha.</div>
@@ -382,7 +394,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 5 && (
+        {step === 4 && (
           <>
             <div style={title}>Estilo visual</div>
             <div style={subtitle}>O acabamento e os pequenos efeitos. A pré-visualização atualiza-se sozinha.</div>
@@ -398,7 +410,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 6 && (
+        {step === 5 && (
           <>
             <div style={title}>Dados da empresa</div>
             <input placeholder="Nome da empresa" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
@@ -410,7 +422,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 7 && (
+        {step === 6 && (
           <>
             <div style={title}>Confere tudo antes de pagar</div>
             <div style={subtitle}>É assim que o site vai ficar. Se algo não estiver bem, volta atrás e muda.</div>
@@ -428,7 +440,7 @@ export default function SiteBuilder() {
               />
             )}
             <div style={{ marginTop: 14, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.9 }}>
-              <div><strong style={{ color: C.ink }}>Negócio:</strong> {businessType}</div>
+              <div><strong style={{ color: C.ink }}>Plano:</strong> {TIERS.find((t) => t.id === tier)?.label}</div>
               <div><strong style={{ color: C.ink }}>Cores:</strong> {selectedColor.label}</div>
               <div><strong style={{ color: C.ink }}>Fonte:</strong> {FONTES.find((f) => f.id === fontChoice)?.label}</div>
               <div><strong style={{ color: C.ink }}>Estrutura:</strong> {ESTRUTURAS.find((e) => e.id === structureChoice)?.label}</div>
@@ -437,7 +449,7 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 8 && (
+        {step === 7 && (
           <>
             <div style={title}>Onde vai ficar o site?</div>
             <div style={subtitle}>Em qualquer caso, o teu site fica pronto assim que o pagamento for confirmado.</div>
@@ -492,28 +504,14 @@ export default function SiteBuilder() {
           </>
         )}
 
-        {step === 9 && (
-          <>
-            <div style={title}>Nível do site</div>
-            <button style={optBtn(tier === "basico")} onClick={() => setTier("basico")}>
-              <div style={{ fontWeight: 700 }}>Básico — 1.500 Kz</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo</div>
-            </button>
-            <button style={optBtn(tier === "pro")} onClick={() => setTier("pro")}>
-              <div style={{ fontWeight: 700 }}>Pro — 25.000 Kz</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Efeitos visuais + catálogo + domínio próprio + IA + sem anúncios + automação + tráfego pago incluído</div>
-            </button>
-          </>
-        )}
-
         {error && <div style={{ color: C.red, fontSize: 13, marginTop: 10 }}>{error}</div>}
 
         <div style={navRow}>
           {step > 1 ? <button style={backBtn} onClick={() => setStep((s) => s - 1)}>Voltar</button> : <span />}
-          {step < 9 ? (
+          {step < 7 ? (
             <button style={navBtn} disabled={!canNext[step]} onClick={() => setStep((s) => s + 1)}>Continuar</button>
           ) : (
-            <button style={navBtn} disabled={!canNext[9] || submitting} onClick={submit}>
+            <button style={navBtn} disabled={!canNext[7] || submitting} onClick={submit}>
               {submitting ? "A enviar…" : "Construir site"}
             </button>
           )}
