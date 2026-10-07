@@ -263,9 +263,10 @@ export default function Chat({ project, onProjectUpdate, subscription, onUpgrade
             <div key={i} style={{ alignSelf: isUser ? "flex-end" : "flex-start", maxWidth: "85%" }}>
               <div style={{
                 background: isUser ? C.navy : C.surface, color: isUser ? "#fff" : C.ink,
-                border: isUser ? "none" : `1px solid ${C.border}`, borderRadius: 14,
-                borderBottomRightRadius: isUser ? 4 : 14, borderBottomLeftRadius: isUser ? 14 : 4,
-                padding: "10px 14px", fontSize: 14, lineHeight: 1.5,
+                border: isUser ? "none" : `1px solid ${C.border}`, borderRadius: 16,
+                borderBottomRightRadius: isUser ? 4 : 16, borderBottomLeftRadius: isUser ? 16 : 4,
+                padding: "11px 15px", fontSize: 14.5, lineHeight: 1.55,
+                boxShadow: isUser ? "0 2px 10px rgba(22,48,92,0.18)" : "0 1px 3px rgba(0,0,0,0.04)",
               }}>
                 {m.content}
               </div>

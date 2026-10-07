@@ -4,8 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>D3NA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
+        --font-sans: "Plus Jakarta Sans", -apple-system, system-ui, sans-serif;
+        --font-serif: "Fraunces", Georgia, serif;
         --bg: #F5F6F8; --surface: #FFFFFF; --ink: #15181F; --ink-soft: #5B6270; --border: #E3E6EB;
         --navy: #1E56E8; --navy-soft: #E8EEFF; --green: #1E7A52; --green-bg: #EAF5EF;
         --amber: #946B1D; --amber-bg: #FAF1E1; --red: #B03A2E; --red-bg: #FBEAE8;
@@ -15,7 +20,7 @@
         --navy: #3B7BFF; --navy-soft: #16233F; --green: #3FBE8B; --green-bg: #163229;
         --amber: #E0AA4E; --amber-bg: #3A2E15; --red: #E27263; --red-bg: #3B1D1A;
       }
-      body { background: var(--bg); }
+      body { background: var(--bg); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
       [data-admin-theme="neural"] {
         --bg: #050A16; --surface: #111B30; --ink: #ECEEF2; --ink-soft: #93A0BF; --border: #1B2942;
         --navy: #075BFF; --navy-soft: #0A1224; --green: #3FD6A0; --green-bg: #0E2A22;

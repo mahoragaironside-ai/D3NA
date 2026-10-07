@@ -139,7 +139,7 @@ function MainApp() {
       />
 
       <div className="app-main" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <div style={{ background: C.navy, color: "#fff", padding: "16px 18px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ background: C.navy, color: "#fff", padding: "18px 20px", display: "flex", alignItems: "center", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <Menu size={16} color="#fff" />
@@ -147,10 +147,10 @@ function MainApp() {
           )}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <img src="/logo.png" alt="" style={{ width: 22, height: 22, borderRadius: 6, objectFit: "cover" }} />
-              <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: 0.6 }}>D3NA</span>
+              <img src="/logo.png" alt="" style={{ width: 26, height: 26, borderRadius: 7, objectFit: "cover" }} />
+              <span style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 600, letterSpacing: 0.2 }}>D3NA</span>
             </div>
-            <div style={{ fontSize: 12.5, fontWeight: 500, fontFamily: "Georgia, serif", opacity: 0.78, marginTop: 2 }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 500, fontFamily: "var(--font-serif)", fontStyle: "italic", opacity: 0.75, marginTop: 3 }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
           </div>
         </div>
 
