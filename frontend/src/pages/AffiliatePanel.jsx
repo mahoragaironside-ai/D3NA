@@ -117,6 +117,21 @@ function AffiliateDashboard() {
 
   if (loading) return <Centered>{tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"}</Centered>;
 
+  if (notAffiliate) {
+    return (
+      <Centered>
+        <div style={{ textAlign: "center", maxWidth: 320 }}>
+          <div style={{ fontFamily: "Inter, -apple-system, sans-serif", fontSize: 22, fontWeight: 700, color: T.white, marginBottom: 10 }}>
+            Programa de afiliados D3NA
+          </div>
+          <div style={{ color: T.textSoft, marginBottom: 20 }}>Ainda não és afiliado. Cria o teu link e começa a ganhar comissões.</div>
+          <button onClick={tornarAfiliado} style={btnPrimary}>Tornar-me afiliado</button>
+          {msg && <div style={{ color: T.pink, marginTop: 12 }}>{msg}</div>}
+        </div>
+      </Centered>
+    );
+  }
+
   if (erroCarregar || !affiliate) {
     return (
       <Centered>
@@ -130,21 +145,6 @@ function AffiliateDashboard() {
           <button onClick={load} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#007BFF", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
             Tentar novamente
           </button>
-        </div>
-      </Centered>
-    );
-  }
-
-  if (notAffiliate) {
-    return (
-      <Centered>
-        <div style={{ textAlign: "center", maxWidth: 320 }}>
-          <div style={{ fontFamily: "Inter, -apple-system, sans-serif", fontSize: 22, fontWeight: 700, color: T.white, marginBottom: 10 }}>
-            Programa de afiliados D3NA
-          </div>
-          <div style={{ color: T.textSoft, marginBottom: 20 }}>Ainda não és afiliado. Cria o teu link e começa a ganhar comissões.</div>
-          <button onClick={tornarAfiliado} style={btnPrimary}>Tornar-me afiliado</button>
-          {msg && <div style={{ color: T.pink, marginTop: 12 }}>{msg}</div>}
         </div>
       </Centered>
     );
