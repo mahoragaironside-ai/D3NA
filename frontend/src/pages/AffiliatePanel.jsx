@@ -115,7 +115,7 @@ function AffiliateDashboard() {
     }
   }
 
-  if (loading) return <Centered>{tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"}</Centered>;
+  if (loading) return <Centered><LoadingOrbs label={tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"} /></Centered>;
 
   if (notAffiliate) {
     return (
@@ -473,6 +473,37 @@ function Row({ children }) {
 function EmptyRow({ children }) {
   return <div style={{ color: T.textSoft, fontSize: 13, padding: "8px 0" }}>{children}</div>;
 }
+function LoadingOrbs({ label }) {
+  const cores = [T.electric2, T.cyan, T.blue3];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
+      <style>{`
+        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes orbPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+      `}</style>
+      <div style={{ position: "relative", width: 72, height: 72 }}>
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(0,198,255,0.10) 0%, transparent 70%)`,
+        }} />
+        <div style={{ position: "absolute", inset: 0, animation: "orbitSpin 1.6s linear infinite" }}>
+          {cores.map((cor, i) => (
+            <div key={i} style={{
+              position: "absolute", top: "50%", left: "50%", width: 14, height: 14, borderRadius: "50%",
+              background: cor,
+              boxShadow: `0 0 10px ${cor}, 0 0 20px ${cor}`,
+              transform: `rotate(${i * 120}deg) translate(26px) rotate(${-i * 120}deg)`,
+              marginTop: -7, marginLeft: -7,
+              animation: `orbPulse ${1.2 + i * 0.2}s ease-in-out infinite`,
+            }} />
+          ))}
+        </div>
+      </div>
+      {label && <div style={{ color: T.textSoft, fontSize: 13 }}>{label}</div>}
+    </div>
+  );
+}
+
 function Centered({ children }) {
   return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg0, color: T.textSoft }}>{children}</div>;
 }
