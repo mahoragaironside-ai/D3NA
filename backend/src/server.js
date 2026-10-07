@@ -22,6 +22,7 @@ import supportRoutes from "./routes/support.js";
 import personalRoutes from "./routes/personal.js";
 import affiliateRoutes from "./routes/affiliates.js";
 import courseRoutes from "./routes/courses.js";
+import coursesAdminRoutes from "./routes/coursesAdmin.js";
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN || "*" }));
@@ -46,6 +47,7 @@ app.use("/support", supportRoutes);
 app.use("/personal", personalRoutes);
 app.use("/affiliates", affiliateRoutes);
 app.use("/courses", courseRoutes);
+app.use("/courses-admin", coursesAdminRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

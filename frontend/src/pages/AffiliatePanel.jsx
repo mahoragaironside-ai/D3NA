@@ -71,7 +71,7 @@ function AffiliateDashboard() {
         setLoading(false);
         return;
       } catch (e) {
-        const msg = String(e.message || "");
+        const msg = (e && (e.message || e.toString())) || "erro desconhecido sem mensagem";
         if (msg.includes("Ainda não")) { setNotAffiliate(true); setLoading(false); return; }
         if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); return; }
         setUltimoErro(msg);

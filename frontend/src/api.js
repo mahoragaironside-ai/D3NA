@@ -7,7 +7,7 @@ function authHeaders() {
 
 async function handle(res) {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Erro de rede.");
+  if (!res.ok) throw new Error((data.error || "Erro de rede.") + ` [HTTP ${res.status}]`);
   return data;
 }
 
