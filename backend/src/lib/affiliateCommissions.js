@@ -42,6 +42,19 @@ export async function awardCommissionDirect(affiliateId, sourceType, referenceId
 
 // Corre semanalmente (via cron externo). Paga 5 AOA por cada conta registada
 // com link de afiliado que ainda nao tem plano ativo, uma vez por semana no maximo.
+// Credita ao afiliado a diferenca entre o preco de revenda e o preco de compra
+// de um link de uso unico do Construtor, quando o cliente final paga e o admin confirma.
+export async function awardResaleDifference(affiliateId, diffAmount, buildId) {
+  if (!diffAmount || diffAmount <= 0) return null;
+  const commission = await query(
+    `INSERT INTO affiliate_commissions (affiliate_id, source_type, amount_aoa, reference_id)
+     VALUES ($1, 'revenda_link', $2, $3) RETURNING *`,
+    [affiliateId, diffAmount, buildId]
+  );
+  await query("UPDATE affiliates SET balance_aoa = balance_aoa + $1 WHERE affiliate_id = $2", [diffAmount, affiliateId]);
+  return commission.rows[0];
+}
+
 export async function runWeeklyPassiveIncome() {
   const result = await query(`
     WITH novos AS (

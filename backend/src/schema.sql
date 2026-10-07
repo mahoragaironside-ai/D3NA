@@ -331,3 +331,19 @@ CREATE TABLE IF NOT EXISTS video_cache (
   transcript TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS resale_links (
+  link_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id    UUID REFERENCES affiliates(affiliate_id) ON DELETE CASCADE,
+  access_code     VARCHAR(20) UNIQUE NOT NULL,
+  company_price   NUMERIC(12,2) NOT NULL,
+  resale_price    NUMERIC(12,2) NOT NULL,
+  status          VARCHAR(20) DEFAULT 'pendente_pagamento',
+  payment_reference TEXT,
+  build_id        UUID REFERENCES site_builds(build_id),
+  created_at      TIMESTAMPTZ DEFAULT now(),
+  paid_at         TIMESTAMPTZ,
+  used_at         TIMESTAMPTZ
+);
+
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS resale_link_id UUID REFERENCES resale_links(link_id);

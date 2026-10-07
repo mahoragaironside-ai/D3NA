@@ -214,4 +214,73 @@ router.get("/admin/notifications", requireAdminKey, async (req, res) => {
   res.json(result.rows);
 });
 
+
+function generateAccessCode() {
+  return crypto.randomBytes(5).toString("base64url").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+}
+
+router.post("/me/resale-links", requireAuth, async (req, res) => {
+  const aff = await query("SELECT affiliate_id FROM affiliates WHERE user_id = $1", [req.userId]);
+  if (aff.rows.length === 0) return res.status(404).json({ error: "Ainda não és afiliado." });
+
+  const resalePrice = Number(req.body.resale_price);
+  const companyPrice = Number(process.env.RESALE_LINK_COMPANY_PRICE) || 2400;
+  if (!resalePrice || resalePrice <= companyPrice) {
+    return res.status(400).json({ error: `O preço de revenda tem de ser maior que ${companyPrice} AOA (o preço de compra).` });
+  }
+
+  let code, inserted;
+  for (let tentativa = 0; tentativa < 5 && !inserted; tentativa++) {
+    code = generateAccessCode();
+    try {
+      const result = await query(
+        `INSERT INTO resale_links (affiliate_id, access_code, company_price, resale_price, payment_reference)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [aff.rows[0].affiliate_id, code, companyPrice, resalePrice, process.env.PAYMENT_REFERENCE_SITE_BASICO]
+      );
+      inserted = result.rows[0];
+    } catch (e) {
+      if (e.code !== "23505") throw e;
+    }
+  }
+  if (!inserted) return res.status(500).json({ error: "Não foi possível gerar um código único. Tenta novamente." });
+
+  res.status(201).json({
+    ...inserted,
+    payment_url: process.env.PAYMENT_URL,
+    payment_amount: companyPrice,
+    payment_currency: process.env.PAYMENT_CURRENCY || "AOA",
+  });
+});
+
+router.get("/me/resale-links", requireAuth, async (req, res) => {
+  const aff = await query("SELECT affiliate_id FROM affiliates WHERE user_id = $1", [req.userId]);
+  if (aff.rows.length === 0) return res.status(404).json({ error: "Ainda não és afiliado." });
+  const result = await query(
+    "SELECT * FROM resale_links WHERE affiliate_id = $1 ORDER BY created_at DESC",
+    [aff.rows[0].affiliate_id]
+  );
+  res.json(result.rows);
+});
+
+router.get("/admin/resale-links/pending", requireAdminKey, async (req, res) => {
+  const result = await query(
+    `SELECT rl.*, a.referral_code, u.phone_number
+     FROM resale_links rl
+     JOIN affiliates a ON a.affiliate_id = rl.affiliate_id
+     JOIN users u ON u.user_id = a.user_id
+     WHERE rl.status = 'pendente_pagamento' ORDER BY rl.created_at ASC`
+  );
+  res.json(result.rows);
+});
+
+router.post("/admin/resale-links/:id/confirm", requireAdminKey, async (req, res) => {
+  const result = await query(
+    "UPDATE resale_links SET status = 'disponivel', paid_at = now() WHERE link_id = $1 AND status = 'pendente_pagamento' RETURNING *",
+    [req.params.id]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ error: "Link não encontrado ou já processado." });
+  res.json(result.rows[0]);
+});
+
 export default router;
