@@ -198,7 +198,6 @@ function AffiliateDashboard() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
           <button onClick={abrirNotificacoes} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", position: "relative" }}>
             <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
             {naoLidas > 0 && (
