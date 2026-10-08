@@ -6,6 +6,7 @@ import { C } from "../tokens.js";
 import MiniPreview from "../components/MiniPreview.jsx";
 import LogoPreview from "../components/LogoPreview.jsx";
 import ContactLinksPicker from "../components/ContactLinksPicker.jsx";
+import OptionPicker from "../components/OptionPicker.jsx";
 
 const CORES = [
   { id: "azul", primary: "#16305C", secondary: "#FFFFFF", label: "Azul & Branco" },
@@ -384,15 +385,18 @@ export default function SiteBuilder() {
           <>
             <div style={title}>Cores do site</div>
             <div style={subtitle}>Cor principal e cor secundária.</div>
-            {CORES.map((c) => (
-              <button key={c.id} style={optBtn(colorScheme === c.id)} onClick={() => setColorScheme(c.id)}>
-                <span style={{ display: "inline-flex", gap: 4, marginRight: 8, verticalAlign: "middle" }}>
-                  <span style={{ width: 14, height: 14, borderRadius: 4, background: c.primary, display: "inline-block" }} />
-                  <span style={{ width: 14, height: 14, borderRadius: 4, background: c.secondary, display: "inline-block", border: `1px solid ${C.border}` }} />
+            <OptionPicker
+              items={CORES}
+              selectedId={colorScheme}
+              onSelect={setColorScheme}
+              getLabel={(c) => c.label}
+              renderItem={(c) => (
+                <span style={{ display: "flex", gap: 6 }}>
+                  <span style={{ width: 32, height: 32, borderRadius: 8, background: c.primary, display: "inline-block" }} />
+                  <span style={{ width: 32, height: 32, borderRadius: 8, background: c.secondary, display: "inline-block", border: `1px solid ${C.border}` }} />
                 </span>
-                {c.label}
-              </button>
-            ))}
+              )}
+            />
           </>
         )}
 
