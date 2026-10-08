@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Home, Users, Coins, FileText, Bell, User, Wallet, Eye, EyeOff,
-  Link2, Copy, Share2, Plus, ChevronRight, RefreshCw, BarChart3, Check, X,
+  Link2, Copy, Share2, Plus, ChevronRight, RefreshCw, BarChart3, Check, X, ShoppingBag, TrendingUp, Clock,
 } from "lucide-react";
 import { api } from "../api.js";
 import { fmt } from "../tokens.js";
@@ -41,6 +41,11 @@ function AffiliateDashboard() {
   const [balanceHidden, setBalanceHidden] = useState(false);
   const [periodo, setPeriodo] = useState(7);
   const [copiado, setCopiado] = useState(false);
+  const [resaleLinks, setResaleLinks] = useState([]);
+  const [novoPreco, setNovoPreco] = useState("");
+  const [compraMsg, setCompraMsg] = useState("");
+  const [ultimoLinkComprado, setUltimoLinkComprado] = useState(null);
+  const [codigoCopiado, setCodigoCopiado] = useState("");
   const [naoLidas, setNaoLidas] = useState(0);
   const [notifs, setNotifs] = useState([]);
   const [mostrarNotifs, setMostrarNotifs] = useState(false);
@@ -66,8 +71,8 @@ function AffiliateDashboard() {
         const me = await api.affiliateMe();
         setAffiliate(me);
         setRedotpayId(me.redotpay_id || "");
-        const [r, c, ru] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules()]);
-        setReferrals(r); setCommissions(c); setRules(ru);
+        const [r, c, ru, rl] = await Promise.all([api.affiliateReferrals(), api.affiliateCommissions(), api.affiliateRules(), api.affiliateResaleLinks()]);
+        setReferrals(r); setCommissions(c); setRules(ru); setResaleLinks(rl);
         setLoading(false);
         return;
       } catch (e) {
@@ -99,6 +104,30 @@ function AffiliateDashboard() {
     setMsg("");
     try { const r = await api.affiliateWithdraw(); setMsg(`Saque pedido: ${fmt(r.amount_aoa)}.`); await load(); }
     catch (e) { setMsg(e.message); }
+  }
+
+  const PRECO_COMPRA_LINK = 2400;
+
+  async function comprarLink(e) {
+    e.preventDefault();
+    setCompraMsg("");
+    const preco = Number(novoPreco);
+    if (!preco) return;
+    try {
+      const link = await api.affiliateBuyResaleLink(preco);
+      setUltimoLinkComprado(link);
+      setNovoPreco("");
+      const rl = await api.affiliateResaleLinks();
+      setResaleLinks(rl);
+    } catch (e2) {
+      setCompraMsg(e2.message);
+    }
+  }
+
+  function copiarCodigo(codigo) {
+    navigator.clipboard?.writeText(codigo);
+    setCodigoCopiado(codigo);
+    setTimeout(() => setCodigoCopiado(""), 1800);
   }
 
   function copiarLink() {
@@ -231,6 +260,7 @@ function AffiliateDashboard() {
         <NavPill icon={<Users size={15} />} label="Indicados" active={tab === "indicados"} onClick={() => setTab("indicados")} />
         <NavPill icon={<Coins size={15} />} label="Comissões" active={tab === "comissoes"} onClick={() => setTab("comissoes")} />
         <NavPill icon={<FileText size={15} />} label="Regras" active={tab === "regras"} onClick={() => setTab("regras")} />
+        <NavPill icon={<ShoppingBag size={15} />} label="Mercado" active={tab === "mercado"} onClick={() => setTab("mercado")} />
       </div>
 
       <div style={{ padding: "10px 16px" }}>
@@ -374,6 +404,113 @@ function AffiliateDashboard() {
             ))}
           </Section>
         )}
+
+        {tab === "mercado" && (() => {
+          const precoNum = Number(novoPreco) || 0;
+          const lucro = precoNum > PRECO_COMPRA_LINK ? precoNum - PRECO_COMPRA_LINK : 0;
+          return (
+          <>
+            <div style={{
+              position: "relative", overflow: "hidden", borderRadius: 20, padding: 20, marginBottom: 14,
+              background: `linear-gradient(145deg, ${T.surfaceStrong}, ${T.surface})`,
+              border: `1px solid ${T.border}`, boxShadow: `0 0 40px rgba(0,108,255,0.12)`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(0,140,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <ShoppingBag size={18} color={T.electric2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: T.white }}>Comprar link de uso único</div>
+                  <div style={{ fontSize: 12, color: T.textSoft }}>Define o preço de revenda antes de comprar</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                <div style={{ flex: 1, background: T.surfaceSoft, borderRadius: 14, padding: 12, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4 }}>Preço de compra</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: T.white, marginTop: 4 }}>{fmt(PRECO_COMPRA_LINK)}</div>
+                </div>
+                <div style={{ flex: 1, background: "rgba(0,229,168,0.08)", borderRadius: 14, padding: 12, border: "1px solid rgba(0,229,168,0.25)" }}>
+                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4, display: "flex", alignItems: "center", gap: 4 }}>
+                    <TrendingUp size={12} color={T.green} /> O teu lucro
+                  </div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: lucro > 0 ? T.green : T.textSoft, marginTop: 4 }}>
+                    {lucro > 0 ? fmt(lucro) : "—"}
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={comprarLink}>
+                <label style={{ fontSize: 12, color: T.textSoft, marginBottom: 6, display: "block" }}>Preço de revenda (AOA)</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="number" min={PRECO_COMPRA_LINK + 1} value={novoPreco}
+                    onChange={(e) => setNovoPreco(e.target.value)}
+                    placeholder={`Ex: ${PRECO_COMPRA_LINK + 1600}`}
+                    style={{ ...inputStyle, fontSize: 18, fontWeight: 700 }}
+                  />
+                  <button type="submit" disabled={!precoNum || precoNum <= PRECO_COMPRA_LINK} style={{ ...btnPrimary, opacity: (!precoNum || precoNum <= PRECO_COMPRA_LINK) ? 0.5 : 1 }}>
+                    <Plus size={15} /> Comprar
+                  </button>
+                </div>
+              </form>
+              {compraMsg && <div style={{ color: T.pink, fontSize: 12, marginTop: 10 }}>{compraMsg}</div>}
+
+              {ultimoLinkComprado && (
+                <div style={{ marginTop: 16, padding: 14, borderRadius: 14, background: "rgba(0,198,255,0.06)", border: `1px solid rgba(0,198,255,0.3)` }}>
+                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Pagar esta referência para activar</div>
+                  <div style={{ color: T.white, fontWeight: 700, fontSize: 14 }}>{ultimoLinkComprado.payment_reference || "ver no painel de pagamentos"}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                    <span style={{ fontSize: 12, color: T.textSoft }}>Código do link:</span>
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: T.cyan, fontSize: 14, letterSpacing: 1 }}>{ultimoLinkComprado.access_code}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Section icon={<Link2 size={16} color={T.cyan} />} title={`Os teus links (${resaleLinks.length})`}>
+              {resaleLinks.length === 0 && <EmptyRow>Ainda não compraste nenhum link.</EmptyRow>}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {resaleLinks.map((l) => {
+                  const disponivel = l.status === "disponivel";
+                  const vendido = l.status === "usado";
+                  const pendente = l.status === "pendente_pagamento";
+                  const lucroLink = Number(l.resale_price) - Number(l.company_price);
+                  return (
+                    <div key={l.link_id} style={{
+                      borderRadius: 14, padding: 14, background: T.surfaceSoft, border: `1px solid ${T.border}`,
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontFamily: "monospace", fontWeight: 700, color: T.white, fontSize: 15, letterSpacing: 0.5 }}>{l.access_code}</span>
+                          {disponivel && (
+                            <button onClick={() => copiarCodigo(l.access_code)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                              {codigoCopiado === l.access_code ? <Check size={13} color={T.green} /> : <Copy size={13} color={T.textSoft} />}
+                            </button>
+                          )}
+                        </div>
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, display: "flex", alignItems: "center", gap: 4,
+                          color: vendido ? T.green : disponivel ? T.electric2 : T.textSoft,
+                          background: vendido ? "rgba(0,229,168,0.12)" : disponivel ? "rgba(0,198,255,0.10)" : "rgba(145,167,196,0.10)",
+                          border: `1px solid ${vendido ? "rgba(0,229,168,0.35)" : disponivel ? "rgba(0,198,255,0.35)" : T.border}`,
+                        }}>
+                          {pendente && <Clock size={11} />} {vendido && <Check size={11} />}
+                          {pendente ? "Aguarda pagamento" : disponivel ? "Disponível" : vendido ? "Vendido" : l.status}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: 16, fontSize: 12, color: T.textSoft }}>
+                        <span>Venda: <b style={{ color: T.white }}>{fmt(l.resale_price)}</b></span>
+                        {vendido && <span style={{ color: T.green, display: "flex", alignItems: "center", gap: 3 }}><TrendingUp size={12} /> +{fmt(lucroLink)}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Section>
+          </>
+          );
+        })()}
 
         {tab === "perfil" && (
           <Section icon={<User size={16} color={T.electric2} />} title="A tua conta">

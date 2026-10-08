@@ -12,6 +12,13 @@ async function handle(res) {
 }
 
 export const api = {
+  affiliateBuyResaleLink: (resale_price) =>
+    fetch(`${API_URL}/affiliates/me/resale-links`, {
+      method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ resale_price }),
+    }).then(handle),
+  affiliateResaleLinks: () => fetch(`${API_URL}/affiliates/me/resale-links`, { headers: authHeaders() }).then(handle),
+
   affiliateNotifications: () => fetch(`${API_URL}/affiliates/me/notifications`, { headers: authHeaders() }).then(handle),
   affiliateNotificationsUnreadCount: () => fetch(`${API_URL}/affiliates/me/notifications/unread-count`, { headers: authHeaders() }).then(handle),
   affiliateNotificationsMarkSeen: () => fetch(`${API_URL}/affiliates/me/notifications/seen`, { method: "POST", headers: authHeaders() }).then(handle),
