@@ -48,7 +48,7 @@ export function estilo4(dados, primary, secondary, iniciais, corpo, fontFamily =
   .menu-d3na { position: absolute; bottom: 4px; right: 10px; font-size: 8px; color: var(--text-soft); opacity: 0.4; letter-spacing: 0.5px; }
   body { font-family: ${fontFamily}; color: var(--text); line-height: 1.6; background: var(--bg); transition: background 0.3s, color 0.3s; }
 
-  ${logoBadgeCSS(logo_choice, primary, secondary)}
+  ${logoBadgeCSS(logo_choice, primary, secondary, fontFamily)}
   ${adsCarouselCSS(primary)}
 
   .cta-flutuante {
