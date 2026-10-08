@@ -347,3 +347,5 @@ CREATE TABLE IF NOT EXISTS resale_links (
 );
 
 ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS resale_link_id UUID REFERENCES resale_links(link_id);
+
+ALTER TABLE site_builds ADD COLUMN IF NOT EXISTS resale_link_id UUID REFERENCES resale_links(link_id);
