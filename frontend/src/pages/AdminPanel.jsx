@@ -13,6 +13,7 @@ const MENU = [
   { id: "apoio_cliente", label: "Apoio ao Cliente", icon: MessageCircle },
   { id: "afiliados", label: "Apoio ao afiliado", icon: HeartHandshake },
   { id: "organograma", label: "Organograma", icon: Network },
+  { id: "cursos", label: "Cursos", icon: GraduationCap },
   { id: "pessoal", label: "Módulo Pessoal", icon: Star },
 ];
 
@@ -31,7 +32,7 @@ function useUnreadSupportCount(adminKey, unlocked) {
 }
 
 const GRUPOS = {
-  negocios: ["pagamentos", "utilizadores", "indicadores", "apoio_cliente", "afiliados", "organograma"],
+  negocios: ["pagamentos", "utilizadores", "indicadores", "apoio_cliente", "afiliados", "organograma", "cursos"],
   definicoes: ["registo", "pessoal"],
 };
 
@@ -166,6 +167,7 @@ export default function AdminPanel() {
         {tab === "apoio_cliente" && <ApoioClienteTab adminKey={adminKey} />}
         {tab === "afiliados" && <AfiliadosTab adminKey={adminKey} />}
         {tab === "organograma" && <Organograma />}
+        {tab === "cursos" && <CursosTab adminKey={adminKey} />}
         {tab === "pessoal" && <PessoalTab adminKey={adminKey} />}
       </div>
     </div>
@@ -650,6 +652,42 @@ function NotificacoesTab({ adminKey, afiliados }) {
           </div>
         ))}
         {historico.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Ainda não enviaste nenhuma notificação.</div>}
+      </div>
+    </div>
+  );
+}
+
+function CursosTab({ adminKey }) {
+  const [dados, setDados] = useState(null);
+  useEffect(() => {
+    fetch((import.meta.env.VITE_API_URL || "http://localhost:3000") + "/courses-admin/summary", { headers: { "x-admin-key": adminKey } })
+      .then((r) => r.json()).then(setDados).catch(() => {});
+  }, [adminKey]);
+
+  if (!dados) return <div style={{ color: C.inkSoft }}>A carregar…</div>;
+
+  return (
+    <div>
+      <SectionTitle>Curso — resumo</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 20 }}>
+        <Card><Stat label="Cursos criados" value={dados.total_cursos} /></Card>
+        <Card><Stat label="Alunos" value={dados.total_alunos} /></Card>
+        <Card><Stat label="Aulas geradas" value={dados.total_aulas_geradas} /></Card>
+        <Card><Stat label="Testes feitos" value={dados.total_testes} /></Card>
+        <Card><Stat label="Nota média" value={dados.nota_media} /></Card>
+      </div>
+
+      <SectionTitle>Cursos recentes</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {dados.recentes.map((c) => (
+          <div key={c.course_id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{c.topic} <span style={{ fontSize: 11, color: C.inkSoft }}>({c.level})</span></div>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>
+              {c.phone_number} · {c.total_aulas} aulas planeadas · {new Date(c.created_at).toLocaleDateString("pt-PT")}
+            </div>
+          </div>
+        ))}
+        {dados.recentes.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem cursos ainda.</div>}
       </div>
     </div>
   );
