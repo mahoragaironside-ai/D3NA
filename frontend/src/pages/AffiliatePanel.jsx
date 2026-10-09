@@ -4,20 +4,8 @@ import {
   Link2, Copy, Share2, Plus, ChevronRight, RefreshCw, BarChart3, Check, X, ShoppingBag, TrendingUp, Clock,
 } from "lucide-react";
 import { api } from "../api.js";
-import { fmt } from "../tokens.js";
+import { C, fmt } from "../tokens.js";
 import Auth from "./Auth.jsx";
-
-// Paleta propria deste painel (Dark Tech D3NA). Nao toca em tokens.js global
-// para nao afetar Consultor/AdminPanel/SiteBuilder.
-const T = {
-  bg0: "#030914", bg1: "#06101D", bg2: "#081525",
-  surface: "#0A1628", surfaceSoft: "#0D1B30", surfaceStrong: "#101F35",
-  blue: "#006CFF", blue2: "#007BFF", blue3: "#008CFF",
-  electric: "#00A8FF", electric2: "#00C6FF", cyan: "#00E5FF",
-  white: "#F4F8FF", textSoft: "#91A7C4",
-  border: "rgba(0,108,255,0.18)", borderSoft: "rgba(0,108,255,0.10)",
-  green: "#00E5A8", pink: "#FF3D77",
-};
 
 export default function AffiliatePanel() {
   const [authed, setAuthed] = useState(!!localStorage.getItem("access_token"));
@@ -63,7 +51,7 @@ function AffiliateDashboard() {
   async function load() {
     setLoading(true);
     setErroCarregar(false);
-    const pausas = [0, 4000, 8000, 12000, 16000, 20000]; // total ate ~60s de tentativas automaticas
+    const pausas = [0, 4000, 8000, 12000, 16000, 20000];
     for (let i = 0; i < pausas.length; i++) {
       setTentativaAtual(i + 1);
       if (pausas[i] > 0) await new Promise((r) => setTimeout(r, pausas[i]));
@@ -80,7 +68,6 @@ function AffiliateDashboard() {
         if (msg.includes("Ainda não")) { setNotAffiliate(true); setLoading(false); return; }
         if (msg.includes("Token")) { localStorage.removeItem("access_token"); window.location.reload(); return; }
         setUltimoErro(msg);
-        // qualquer outro erro (backend a dormir, rede instavel): tenta de novo no proximo ciclo
       }
     }
     setErroCarregar(true);
@@ -144,18 +131,26 @@ function AffiliateDashboard() {
     }
   }
 
-  if (loading) return <Centered><LoadingOrbs label={tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"} /></Centered>;
+  if (loading) {
+    return (
+      <Centered>
+        <div style={{ color: C.inkSoft, fontSize: 14 }}>
+          {tentativaAtual > 1 ? `A ligar ao servidor… (tentativa ${tentativaAtual})` : "A carregar…"}
+        </div>
+      </Centered>
+    );
+  }
 
   if (notAffiliate) {
     return (
       <Centered>
         <div style={{ textAlign: "center", maxWidth: 320 }}>
-          <div style={{ fontFamily: "Inter, -apple-system, sans-serif", fontSize: 22, fontWeight: 700, color: T.white, marginBottom: 10 }}>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: C.ink, marginBottom: 10 }}>
             Programa de afiliados D3NA
           </div>
-          <div style={{ color: T.textSoft, marginBottom: 20 }}>Ainda não és afiliado. Cria o teu link e começa a ganhar comissões.</div>
+          <div style={{ color: C.inkSoft, marginBottom: 20, fontSize: 14 }}>Ainda não és afiliado. Cria o teu link e começa a ganhar comissões.</div>
           <button onClick={tornarAfiliado} style={btnPrimary}>Tornar-me afiliado</button>
-          {msg && <div style={{ color: T.pink, marginTop: 12 }}>{msg}</div>}
+          {msg && <div style={{ color: C.red, marginTop: 12, fontSize: 13 }}>{msg}</div>}
         </div>
       </Centered>
     );
@@ -165,15 +160,13 @@ function AffiliateDashboard() {
     return (
       <Centered>
         <div style={{ textAlign: "center", maxWidth: 300 }}>
-          <div style={{ color: "#91A7C4", marginBottom: 14, fontSize: 14 }}>
+          <div style={{ color: C.inkSoft, marginBottom: 10, fontSize: 14 }}>
             Não foi possível carregar os teus dados. O servidor pode estar a acordar — tenta de novo em alguns segundos.
           </div>
-          <div style={{ color: "#FF3D77", marginBottom: 14, fontSize: 12, fontFamily: "monospace" }}>
+          <div style={{ color: C.red, marginBottom: 14, fontSize: 12, fontFamily: "monospace" }}>
             Erro real: {ultimoErro || "(sem detalhe)"}
           </div>
-          <button onClick={load} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#007BFF", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
-            Tentar novamente
-          </button>
+          <button onClick={load} style={btnPrimary}>Tentar novamente</button>
         </div>
       </Centered>
     );
@@ -196,181 +189,150 @@ function AffiliateDashboard() {
   const maxBarra = barras.length ? Math.max(...barras.map(([, v]) => v)) : 0;
 
   return (
-    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 20% 0%, ${T.bg2} 0%, ${T.bg0} 55%)`, fontFamily: "Inter, -apple-system, sans-serif", paddingBottom: 84 }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif", paddingBottom: 84 }}>
       {mostrarNotifs && (
-        <div onClick={() => setMostrarNotifs(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 90, display: "flex", alignItems: "flex-end" }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: T.surfaceStrong, border: `1px solid ${T.border}`, borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%", maxHeight: "70vh", overflowY: "auto", padding: 18 }}>
+        <div onClick={() => setMostrarNotifs(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 90, display: "flex", alignItems: "flex-end" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.surface, border: `1px solid ${C.border}`, borderTopLeftRadius: 16, borderTopRightRadius: 16, width: "100%", maxHeight: "70vh", overflowY: "auto", padding: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, color: T.white, fontSize: 15 }}>Notificações</div>
-              <button onClick={() => setMostrarNotifs(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={18} color={T.textSoft} /></button>
+              <div style={{ fontWeight: 700, color: C.ink, fontSize: 15 }}>Notificações</div>
+              <button onClick={() => setMostrarNotifs(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={18} color={C.inkSoft} /></button>
             </div>
-            {notifs.length === 0 && <div style={{ color: T.textSoft, fontSize: 13 }}>Sem notificações ainda.</div>}
+            {notifs.length === 0 && <div style={{ color: C.inkSoft, fontSize: 13 }}>Sem notificações ainda.</div>}
             {notifs.map((n) => (
-              <div key={n.notification_id} style={{ borderBottom: `1px solid ${T.border}`, padding: "10px 0" }}>
-                <div style={{ fontWeight: 700, color: T.white, fontSize: 14 }}>{n.title}</div>
-                <div style={{ color: T.textSoft, fontSize: 13, marginTop: 2 }}>{n.message}</div>
-                <div style={{ color: T.textSoft, fontSize: 11, marginTop: 4 }}>{new Date(n.created_at).toLocaleString("pt-PT")}</div>
+              <div key={n.notification_id} style={{ borderBottom: `1px solid ${C.border}`, padding: "10px 0" }}>
+                <div style={{ fontWeight: 700, color: C.ink, fontSize: 14 }}>{n.title}</div>
+                <div style={{ color: C.inkSoft, fontSize: 13, marginTop: 2 }}>{n.message}</div>
+                <div style={{ color: C.inkSoft, fontSize: 11, marginTop: 4 }}>{new Date(n.created_at).toLocaleString("pt-PT")}</div>
               </div>
             ))}
           </div>
         </div>
       )}
+
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 16px 0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 46, height: 46, borderRadius: 12, background: T.surfaceSoft, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 18px rgba(0,140,255,0.25)` }}>
-            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, color: T.electric, fontSize: 20 }}>D3</span>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: C.navySoft, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontWeight: 800, color: C.navy, fontSize: 17 }}>D3</span>
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 18, color: T.white, letterSpacing: 0.3 }}>D3NA</div>
-            <div style={{ fontSize: 12, color: T.electric2, fontWeight: 600 }}>Afiliados</div>
+            <div style={{ fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 17, color: C.ink }}>D3NA</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, fontWeight: 600 }}>Afiliados</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button onClick={abrirNotificacoes} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", position: "relative" }}>
-            <IconBadge><Bell size={18} color={T.textSoft} /></IconBadge>
+            <IconBadge><Bell size={18} color={C.inkSoft} /></IconBadge>
             {naoLidas > 0 && (
-              <span style={{ position: "absolute", top: -2, right: -2, background: T.pink, color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 10, minWidth: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+              <span style={{ position: "absolute", top: -2, right: -2, background: C.red, color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 10, minWidth: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
                 {naoLidas}
               </span>
             )}
           </button>
           <button onClick={() => setTab("perfil")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-            <IconBadge><User size={18} color={T.textSoft} /></IconBadge>
+            <IconBadge><User size={18} color={C.inkSoft} /></IconBadge>
           </button>
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 20, background: T.surfaceSoft, border: `1px solid ${T.border}` }}>
-          <span style={{ width: 6, height: 6, borderRadius: 6, background: T.green, boxShadow: `0 0 6px ${T.green}` }} />
-          <span style={{ fontSize: 12, color: T.textSoft, fontWeight: 600 }}>Programa de Afiliados</span>
-        </div>
-      </div>
-
-      {/* Saudacao */}
-      <div style={{ padding: "18px 16px 4px" }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: T.white }}>Olá,</div>
-        <div style={{ fontSize: 14, color: T.textSoft, marginTop: 2 }}>Acompanhe o desempenho das suas indicações.</div>
+      <div style={{ padding: "14px 16px 4px" }}>
+        <div style={{ fontFamily: "Georgia, serif", fontSize: 20, fontWeight: 700, color: C.ink }}>Olá,</div>
+        <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 2 }}>Acompanhe o desempenho das suas indicações.</div>
       </div>
 
       {/* Navegacao */}
-      <div style={{ display: "flex", gap: 8, padding: "16px 16px 6px", overflowX: "auto" }}>
-        <NavPill icon={<Home size={15} />} label="Visão geral" active={tab === "resumo"} onClick={() => setTab("resumo")} />
-        <NavPill icon={<Users size={15} />} label="Indicados" active={tab === "indicados"} onClick={() => setTab("indicados")} />
-        <NavPill icon={<Coins size={15} />} label="Comissões" active={tab === "comissoes"} onClick={() => setTab("comissoes")} />
-        <NavPill icon={<FileText size={15} />} label="Regras" active={tab === "regras"} onClick={() => setTab("regras")} />
-        <NavPill icon={<ShoppingBag size={15} />} label="Mercado" active={tab === "mercado"} onClick={() => setTab("mercado")} />
+      <div style={{ display: "flex", gap: 8, padding: "14px 16px 6px", overflowX: "auto" }}>
+        <NavPill icon={<Home size={14} />} label="Visão geral" active={tab === "resumo"} onClick={() => setTab("resumo")} />
+        <NavPill icon={<Users size={14} />} label="Indicados" active={tab === "indicados"} onClick={() => setTab("indicados")} />
+        <NavPill icon={<Coins size={14} />} label="Comissões" active={tab === "comissoes"} onClick={() => setTab("comissoes")} />
+        <NavPill icon={<FileText size={14} />} label="Regras" active={tab === "regras"} onClick={() => setTab("regras")} />
+        <NavPill icon={<ShoppingBag size={14} />} label="Mercado" active={tab === "mercado"} onClick={() => setTab("mercado")} />
       </div>
 
       <div style={{ padding: "10px 16px" }}>
         {tab === "resumo" && (
           <>
-            {/* Saldo */}
-            <div style={{
-              position: "relative", overflow: "hidden", borderRadius: 20, padding: 20, marginBottom: 14,
-              background: `linear-gradient(145deg, ${T.surfaceStrong}, ${T.surface})`,
-              border: `1px solid ${T.border}`, boxShadow: `0 0 40px rgba(0,108,255,0.12)`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(0,140,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Wallet size={18} color={T.electric2} />
-                </div>
-                <div style={{ fontSize: 13, color: T.textSoft, fontWeight: 600 }}>Saldo disponível</div>
-                <button onClick={() => setBalanceHidden((v) => !v)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                  {balanceHidden ? <EyeOff size={16} color={T.textSoft} /> : <Eye size={16} color={T.textSoft} />}
+            <Card glow>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Wallet size={16} color={C.inkSoft} />
+                <div style={{ fontSize: 12.5, color: C.inkSoft, fontWeight: 600 }}>Saldo disponível</div>
+                <button onClick={() => setBalanceHidden((v) => !v)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: "auto" }}>
+                  {balanceHidden ? <EyeOff size={15} color={C.inkSoft} /> : <Eye size={15} color={C.inkSoft} />}
                 </button>
               </div>
-              <div style={{ fontSize: 34, fontWeight: 800, color: T.white, marginTop: 10, letterSpacing: 0.3 }}>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 30, fontWeight: 700, color: C.ink, marginTop: 8 }}>
                 {balanceHidden ? "•••• Kz" : fmt(affiliate.balance_aoa)}
               </div>
-              <div style={{ fontSize: 13, color: T.textSoft, marginTop: 2 }}>
+              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 2 }}>
                 {balanceHidden ? "≈ •••• USD" : `≈ ${affiliate.balance_usd} USD`}
               </div>
-              <svg viewBox="0 0 300 40" style={{ position: "absolute", right: 0, bottom: 0, width: "55%", opacity: 0.35 }}>
-                <path d="M0,30 C40,10 70,35 110,18 C150,4 190,28 230,14 C260,4 280,20 300,8" fill="none" stroke={T.electric2} strokeWidth="2" />
-              </svg>
-            </div>
+            </Card>
 
-            {/* Indicadores rapidos */}
             <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-              <QuickStat icon={<Users size={16} color={T.blue3} />} label="Indicados" value={String(totalIndicados)} accent={T.blue3} onClick={() => setTab("indicados")} />
-              <QuickStat icon={<RefreshCw size={16} color={T.electric2} />} label="Conversões" value={String(totalConversoes)} accent={T.electric2} onClick={() => setTab("indicados")} />
-              <QuickStat icon={<Coins size={16} color={T.cyan} />} label="Comissões" value={fmt(totalComissoesGanhas)} accent={T.cyan} onClick={() => setTab("comissoes")} />
+              <QuickStat icon={<Users size={15} color={C.navy} />} label="Indicados" value={String(totalIndicados)} onClick={() => setTab("indicados")} />
+              <QuickStat icon={<RefreshCw size={15} color={C.green} />} label="Conversões" value={String(totalConversoes)} onClick={() => setTab("indicados")} />
+              <QuickStat icon={<Coins size={15} color={C.navy} />} label="Comissões" value={fmt(totalComissoesGanhas)} onClick={() => setTab("comissoes")} />
             </div>
 
-            {/* Link de indicacao */}
-            <Section icon={<Link2 size={16} color={T.electric2} />} title="Seu link de indicação">
+            <Section icon={<Link2 size={15} color={C.inkSoft} />} title="Seu link de indicação">
               <div style={{ display: "flex", gap: 8 }}>
                 <input readOnly value={referralLink} onClick={(e) => e.target.select()} style={inputStyle} />
                 <button onClick={copiarLink} style={btnPrimarySmall}>
-                  {copiado ? <Check size={15} /> : <Copy size={15} />} {copiado ? "Copiado" : "Copiar"}
+                  {copiado ? <Check size={14} /> : <Copy size={14} />} {copiado ? "Copiado" : "Copiar"}
                 </button>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
-                <div style={{ fontSize: 12, color: T.textSoft }}>Código: <span style={{ color: T.white, fontWeight: 700 }}>{affiliate.referral_code}</span></div>
-                <button onClick={partilharLink} style={btnGhostSmall}><Share2 size={14} /> Partilhar</button>
+                <div style={{ fontSize: 12, color: C.inkSoft }}>Código: <span style={{ color: C.ink, fontWeight: 700 }}>{affiliate.referral_code}</span></div>
+                <button onClick={partilharLink} style={btnGhostSmall}><Share2 size={13} /> Partilhar</button>
               </div>
             </Section>
 
-            {/* RedotPay */}
-            <Section icon={<Wallet size={16} color={T.pink} />} title="Método de recebimento">
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontWeight: 700, color: T.white, fontSize: 15 }}>RedotPay</div>
-                  <div style={{
-                    display: "inline-block", marginTop: 4, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20,
-                    color: affiliate.redotpay_id ? T.green : T.pink,
-                    background: affiliate.redotpay_id ? "rgba(0,229,168,0.12)" : "rgba(255,61,119,0.10)",
-                    border: `1px solid ${affiliate.redotpay_id ? "rgba(0,229,168,0.35)" : "rgba(255,61,119,0.35)"}`,
-                  }}>
-                    {affiliate.redotpay_id ? "Configurado" : "Ainda não configurado"}
-                  </div>
+            <Section icon={<Wallet size={15} color={C.inkSoft} />} title="Método de recebimento">
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontWeight: 700, color: C.ink, fontSize: 14 }}>RedotPay</div>
+                <div style={{
+                  display: "inline-block", marginTop: 4, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20,
+                  color: affiliate.redotpay_id ? C.green : "#935a00",
+                  background: affiliate.redotpay_id ? C.greenBg : C.amberBg,
+                }}>
+                  {affiliate.redotpay_id ? "Configurado" : "Ainda não configurado"}
                 </div>
               </div>
               <form onSubmit={guardarRedotpay} style={{ display: "flex", gap: 8 }}>
                 <input value={redotpayId} onChange={(e) => setRedotpayId(e.target.value)} placeholder="O teu ID/username RedotPay" style={inputStyle} />
-                <button type="submit" style={btnPrimarySmall}><Plus size={15} /> {affiliate.redotpay_id ? "Atualizar" : "Adicionar"}</button>
+                <button type="submit" style={btnPrimarySmall}><Plus size={14} /> {affiliate.redotpay_id ? "Atualizar" : "Adicionar"}</button>
               </form>
               {!affiliate.redotpay_id && (
-                <div style={{ fontSize: 12, color: T.textSoft, marginTop: 8 }}>
+                <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 8 }}>
                   Para solicitar um levantamento, é necessário configurar uma conta RedotPay.
                 </div>
               )}
             </Section>
 
-            {/* Levantamento */}
-            <Section icon={<Wallet size={16} color={T.electric} />} title="Levantamento">
+            <Section icon={<Wallet size={15} color={C.inkSoft} />} title="Levantamento">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ fontSize: 13, color: T.textSoft }}>Mínimo: {rules?.saque_minimo_usd || 5} USD</div>
-                <button onClick={sacar} style={btnPrimary}>Solicitar levantamento <ChevronRight size={15} /></button>
+                <div style={{ fontSize: 13, color: C.inkSoft }}>Mínimo: {rules?.saque_minimo_usd || 5} USD</div>
+                <button onClick={sacar} style={btnPrimary}>Solicitar levantamento</button>
               </div>
-              {msg && <div style={{ color: T.electric2, marginTop: 10, fontSize: 13 }}>{msg}</div>}
+              {msg && <div style={{ color: C.navy, marginTop: 10, fontSize: 13 }}>{msg}</div>}
             </Section>
 
-            {/* Desempenho */}
-            <Section icon={<BarChart3 size={16} color={T.cyan} />} title="Desempenho">
+            <Section icon={<BarChart3 size={15} color={C.inkSoft} />} title="Desempenho">
               <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
                 {[7, 30, 90].map((p) => (
                   <button key={p} onClick={() => setPeriodo(p)} style={p === periodo ? filterActive : filterInactive}>{p} dias</button>
                 ))}
               </div>
               {barras.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "24px 0", color: T.textSoft, fontSize: 13 }}>
-                  <BarChart3 size={26} color={T.textSoft} style={{ marginBottom: 8, opacity: 0.6 }} />
-                  <div>Nenhum dado disponível no período selecionado.</div>
+                <div style={{ textAlign: "center", padding: "20px 0", color: C.inkSoft, fontSize: 13 }}>
+                  Nenhum dado disponível no período selecionado.
                 </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 90, padding: "0 4px" }}>
                   {barras.map(([dia, valor]) => (
                     <div key={dia} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <div style={{
-                        width: "100%", maxWidth: 22, borderRadius: 6,
-                        height: Math.max(6, (valor / maxBarra) * 70),
-                        background: `linear-gradient(180deg, ${T.electric2}, ${T.blue})`,
-                        boxShadow: `0 0 10px rgba(0,198,255,0.35)`,
-                      }} />
-                      <div style={{ fontSize: 10, color: T.textSoft }}>{dia}</div>
+                      <div style={{ width: "100%", maxWidth: 22, borderRadius: 4, height: Math.max(6, (valor / maxBarra) * 70), background: C.navy }} />
+                      <div style={{ fontSize: 10, color: C.inkSoft }}>{dia}</div>
                     </div>
                   ))}
                 </div>
@@ -380,12 +342,12 @@ function AffiliateDashboard() {
         )}
 
         {tab === "indicados" && (
-          <Section icon={<Users size={16} color={T.blue3} />} title={`${totalIndicados} pessoa(s) registada(s) com o teu link`}>
+          <Section icon={<Users size={15} color={C.inkSoft} />} title={`${totalIndicados} pessoa(s) registada(s) com o teu link`}>
             {referrals.length === 0 && <EmptyRow>Ainda não tens indicados.</EmptyRow>}
             {referrals.map((r) => (
               <Row key={r.user_id}>
-                <span style={{ color: T.white }}>{r.phone_number}</span>
-                <span style={{ color: r.subscription_status === "ativo" ? T.green : T.textSoft, fontWeight: 600, fontSize: 12 }}>
+                <span style={{ color: C.ink }}>{r.phone_number}</span>
+                <span style={{ color: r.subscription_status === "ativo" ? C.green : C.inkSoft, fontWeight: 600, fontSize: 12 }}>
                   {r.subscription_status === "ativo" ? "Plano ativo" : "Sem plano"}
                 </span>
               </Row>
@@ -394,12 +356,12 @@ function AffiliateDashboard() {
         )}
 
         {tab === "comissoes" && (
-          <Section icon={<Coins size={16} color={T.cyan} />} title="Histórico de comissões">
+          <Section icon={<Coins size={15} color={C.inkSoft} />} title="Histórico de comissões">
             {commissions.length === 0 && <EmptyRow>Ainda não tens comissões.</EmptyRow>}
             {commissions.map((c) => (
               <Row key={c.commission_id}>
-                <span style={{ color: T.textSoft, fontSize: 13 }}>{new Date(c.created_at).toLocaleDateString("pt-PT")} — {c.source_type}</span>
-                <span style={{ color: T.green, fontWeight: 700 }}>+{fmt(c.amount_aoa)}</span>
+                <span style={{ color: C.inkSoft, fontSize: 13 }}>{new Date(c.created_at).toLocaleDateString("pt-PT")} — {c.source_type}</span>
+                <span style={{ color: C.green, fontWeight: 700 }}>+{fmt(c.amount_aoa)}</span>
               </Row>
             ))}
           </Section>
@@ -410,65 +372,52 @@ function AffiliateDashboard() {
           const lucro = precoNum > PRECO_COMPRA_LINK ? precoNum - PRECO_COMPRA_LINK : 0;
           return (
           <>
-            <div style={{
-              position: "relative", overflow: "hidden", borderRadius: 20, padding: 20, marginBottom: 14,
-              background: `linear-gradient(145deg, ${T.surfaceStrong}, ${T.surface})`,
-              border: `1px solid ${T.border}`, boxShadow: `0 0 40px rgba(0,108,255,0.12)`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(0,140,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <ShoppingBag size={18} color={T.electric2} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: T.white }}>Comprar link de uso único</div>
-                  <div style={{ fontSize: 12, color: T.textSoft }}>Define o preço de revenda antes de comprar</div>
-                </div>
-              </div>
-
+            <Section icon={<ShoppingBag size={15} color={C.inkSoft} />} title="Comprar link de uso único">
+              <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 12 }}>Define o preço de revenda antes de comprar.</div>
               <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-                <div style={{ flex: 1, background: T.surfaceSoft, borderRadius: 14, padding: 12, border: `1px solid ${T.border}` }}>
-                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4 }}>Preço de compra</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: T.white, marginTop: 4 }}>{fmt(PRECO_COMPRA_LINK)}</div>
+                <div style={{ flex: 1, background: C.bg, borderRadius: 10, padding: 12, border: `1px solid ${C.border}` }}>
+                  <div style={{ fontSize: 11, color: C.inkSoft, textTransform: "uppercase", letterSpacing: 0.4 }}>Preço de compra</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginTop: 4 }}>{fmt(PRECO_COMPRA_LINK)}</div>
                 </div>
-                <div style={{ flex: 1, background: "rgba(0,229,168,0.08)", borderRadius: 14, padding: 12, border: "1px solid rgba(0,229,168,0.25)" }}>
-                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4, display: "flex", alignItems: "center", gap: 4 }}>
-                    <TrendingUp size={12} color={T.green} /> O teu lucro
+                <div style={{ flex: 1, background: lucro > 0 ? C.greenBg : C.bg, borderRadius: 10, padding: 12, border: `1px solid ${C.border}` }}>
+                  <div style={{ fontSize: 11, color: C.inkSoft, textTransform: "uppercase", letterSpacing: 0.4, display: "flex", alignItems: "center", gap: 4 }}>
+                    <TrendingUp size={11} /> O teu lucro
                   </div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: lucro > 0 ? T.green : T.textSoft, marginTop: 4 }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: lucro > 0 ? C.green : C.inkSoft, marginTop: 4 }}>
                     {lucro > 0 ? fmt(lucro) : "—"}
                   </div>
                 </div>
               </div>
 
               <form onSubmit={comprarLink}>
-                <label style={{ fontSize: 12, color: T.textSoft, marginBottom: 6, display: "block" }}>Preço de revenda (AOA)</label>
+                <label style={{ fontSize: 12, color: C.inkSoft, marginBottom: 6, display: "block" }}>Preço de revenda (AOA)</label>
                 <div style={{ display: "flex", gap: 8 }}>
                   <input
                     type="number" min={PRECO_COMPRA_LINK + 1} value={novoPreco}
                     onChange={(e) => setNovoPreco(e.target.value)}
                     placeholder={`Ex: ${PRECO_COMPRA_LINK + 1600}`}
-                    style={{ ...inputStyle, fontSize: 18, fontWeight: 700 }}
+                    style={inputStyle}
                   />
                   <button type="submit" disabled={!precoNum || precoNum <= PRECO_COMPRA_LINK} style={{ ...btnPrimary, opacity: (!precoNum || precoNum <= PRECO_COMPRA_LINK) ? 0.5 : 1 }}>
-                    <Plus size={15} /> Comprar
+                    <Plus size={14} /> Comprar
                   </button>
                 </div>
               </form>
-              {compraMsg && <div style={{ color: T.pink, fontSize: 12, marginTop: 10 }}>{compraMsg}</div>}
+              {compraMsg && <div style={{ color: C.red, fontSize: 12, marginTop: 10 }}>{compraMsg}</div>}
 
               {ultimoLinkComprado && (
-                <div style={{ marginTop: 16, padding: 14, borderRadius: 14, background: "rgba(0,198,255,0.06)", border: `1px solid rgba(0,198,255,0.3)` }}>
-                  <div style={{ fontSize: 11, color: T.textSoft, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Pagar esta referência para activar</div>
-                  <div style={{ color: T.white, fontWeight: 700, fontSize: 14 }}>{ultimoLinkComprado.payment_reference || "ver no painel de pagamentos"}</div>
+                <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: C.navySoft, border: `1px solid ${C.border}` }}>
+                  <div style={{ fontSize: 11, color: C.inkSoft, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Pagar esta referência para activar</div>
+                  <div style={{ color: C.ink, fontWeight: 700, fontSize: 14 }}>{ultimoLinkComprado.payment_reference || "ver no painel de pagamentos"}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                    <span style={{ fontSize: 12, color: T.textSoft }}>Código do link:</span>
-                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: T.cyan, fontSize: 14, letterSpacing: 1 }}>{ultimoLinkComprado.access_code}</span>
+                    <span style={{ fontSize: 12, color: C.inkSoft }}>Código do link:</span>
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: C.navy, fontSize: 14, letterSpacing: 1 }}>{ultimoLinkComprado.access_code}</span>
                   </div>
                 </div>
               )}
-            </div>
+            </Section>
 
-            <Section icon={<Link2 size={16} color={T.cyan} />} title={`Os teus links (${resaleLinks.length})`}>
+            <Section icon={<Link2 size={15} color={C.inkSoft} />} title={`Os teus links (${resaleLinks.length})`}>
               {resaleLinks.length === 0 && <EmptyRow>Ainda não compraste nenhum link.</EmptyRow>}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {resaleLinks.map((l) => {
@@ -477,31 +426,27 @@ function AffiliateDashboard() {
                   const pendente = l.status === "pendente_pagamento";
                   const lucroLink = Number(l.resale_price) - Number(l.company_price);
                   return (
-                    <div key={l.link_id} style={{
-                      borderRadius: 14, padding: 14, background: T.surfaceSoft, border: `1px solid ${T.border}`,
-                    }}>
+                    <div key={l.link_id} style={{ borderRadius: 10, padding: 12, background: C.bg, border: `1px solid ${C.border}` }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontFamily: "monospace", fontWeight: 700, color: T.white, fontSize: 15, letterSpacing: 0.5 }}>{l.access_code}</span>
+                          <span style={{ fontFamily: "monospace", fontWeight: 700, color: C.ink, fontSize: 14, letterSpacing: 0.5 }}>{l.access_code}</span>
                           {disponivel && (
                             <button onClick={() => copiarCodigo(l.access_code)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-                              {codigoCopiado === l.access_code ? <Check size={13} color={T.green} /> : <Copy size={13} color={T.textSoft} />}
+                              {codigoCopiado === l.access_code ? <Check size={12} color={C.green} /> : <Copy size={12} color={C.inkSoft} />}
                             </button>
                           )}
                         </div>
                         <span style={{
-                          fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, display: "flex", alignItems: "center", gap: 4,
-                          color: vendido ? T.green : disponivel ? T.electric2 : T.textSoft,
-                          background: vendido ? "rgba(0,229,168,0.12)" : disponivel ? "rgba(0,198,255,0.10)" : "rgba(145,167,196,0.10)",
-                          border: `1px solid ${vendido ? "rgba(0,229,168,0.35)" : disponivel ? "rgba(0,198,255,0.35)" : T.border}`,
+                          fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20,
+                          color: vendido ? C.green : disponivel ? C.navy : "#935a00",
+                          background: vendido ? C.greenBg : disponivel ? C.navySoft : C.amberBg,
                         }}>
-                          {pendente && <Clock size={11} />} {vendido && <Check size={11} />}
                           {pendente ? "Aguarda pagamento" : disponivel ? "Disponível" : vendido ? "Vendido" : l.status}
                         </span>
                       </div>
-                      <div style={{ display: "flex", gap: 16, fontSize: 12, color: T.textSoft }}>
-                        <span>Venda: <b style={{ color: T.white }}>{fmt(l.resale_price)}</b></span>
-                        {vendido && <span style={{ color: T.green, display: "flex", alignItems: "center", gap: 3 }}><TrendingUp size={12} /> +{fmt(lucroLink)}</span>}
+                      <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.inkSoft }}>
+                        <span>Venda: <b style={{ color: C.ink }}>{fmt(l.resale_price)}</b></span>
+                        {vendido && <span style={{ color: C.green }}>+{fmt(lucroLink)}</span>}
                       </div>
                     </div>
                   );
@@ -513,24 +458,24 @@ function AffiliateDashboard() {
         })()}
 
         {tab === "perfil" && (
-          <Section icon={<User size={16} color={T.electric2} />} title="A tua conta">
-            <div style={{ color: T.white, fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{affiliate.phone_number || "—"}</div>
-            <div style={{ color: T.textSoft, fontSize: 12, marginBottom: 16 }}>Código de afiliado: {affiliate.referral_code}</div>
-            <button onClick={() => { localStorage.removeItem("access_token"); window.location.reload(); }} style={{ ...btnGhostSmall, color: T.pink, borderColor: "rgba(255,61,119,0.35)" }}>
+          <Section icon={<User size={15} color={C.inkSoft} />} title="A tua conta">
+            <div style={{ color: C.ink, fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{affiliate.phone_number || "—"}</div>
+            <div style={{ color: C.inkSoft, fontSize: 12, marginBottom: 16 }}>Código de afiliado: {affiliate.referral_code}</div>
+            <button onClick={() => { localStorage.removeItem("access_token"); window.location.reload(); }} style={{ ...btnGhostSmall, color: C.red, borderColor: C.border }}>
               Sair da conta
             </button>
           </Section>
         )}
 
         {tab === "regras" && rules && (
-          <Section icon={<FileText size={16} color={T.electric2} />} title="Tabela de comissões">
+          <Section icon={<FileText size={15} color={C.inkSoft} />} title="Tabela de comissões">
             {Object.entries(rules).filter(([k]) => k !== "aoa_usd_rate" && k !== "saque_minimo_usd").map(([key, r]) => (
               <div key={key} style={{ marginBottom: 14 }}>
-                <div style={{ fontWeight: 700, color: T.white, fontSize: 16 }}>{fmt(r.valor_aoa)}</div>
-                <div style={{ color: T.textSoft, fontSize: 13 }}>{r.descricao}</div>
+                <div style={{ fontWeight: 700, color: C.ink, fontSize: 15 }}>{fmt(r.valor_aoa)}</div>
+                <div style={{ color: C.inkSoft, fontSize: 13 }}>{r.descricao}</div>
               </div>
             ))}
-            <div style={{ color: T.textSoft, fontSize: 12, marginTop: 10, borderTop: `1px solid ${T.border}`, paddingTop: 10 }}>
+            <div style={{ color: C.inkSoft, fontSize: 12, marginTop: 10, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
               Saque mínimo: {rules.saque_minimo_usd} USD · Taxa de conversão: {rules.aoa_usd_rate} AOA/USD
             </div>
           </Section>
@@ -538,11 +483,7 @@ function AffiliateDashboard() {
       </div>
 
       {/* Navegacao inferior */}
-      <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-around",
-        padding: "10px 8px", background: "rgba(6,16,29,0.92)", backdropFilter: "blur(10px)",
-        borderTop: `1px solid ${T.border}`,
-      }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-around", padding: "10px 8px", background: C.surface, borderTop: `1px solid ${C.border}` }}>
         <BottomItem icon={<Home size={18} />} label="Início" active={tab === "resumo"} onClick={() => setTab("resumo")} />
         <BottomItem icon={<Users size={18} />} label="Indicados" active={tab === "indicados"} onClick={() => setTab("indicados")} />
         <BottomItem icon={<Coins size={18} />} label="Comissões" active={tab === "comissoes"} onClick={() => setTab("comissoes")} />
@@ -554,100 +495,67 @@ function AffiliateDashboard() {
 
 function Section({ icon, title, children }) {
   return (
-    <div style={{
-      background: T.surface, border: `1px solid ${T.border}`, borderRadius: 16, padding: 16, marginBottom: 14,
-      boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-    }}>
+    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         {icon}
-        <div style={{ fontSize: 13, color: T.textSoft, fontWeight: 600 }}>{title}</div>
+        <div style={{ fontSize: 13, color: C.inkSoft, fontWeight: 600 }}>{title}</div>
       </div>
       {children}
     </div>
   );
 }
+function Card({ children, glow }) {
+  return <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, marginBottom: 14, boxShadow: glow ? `0 0 24px ${C.navy}22` : "none" }}>{children}</div>;
+}
 function IconBadge({ children }) {
-  return <div style={{ width: 36, height: 36, borderRadius: 10, background: T.surfaceSoft, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{children}</div>;
+  return <div style={{ width: 36, height: 36, borderRadius: 10, background: C.surface, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{children}</div>;
 }
 function NavPill({ icon, label, active, onClick }) {
   return (
     <button onClick={onClick} style={{
-      display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", padding: "9px 14px", borderRadius: 12, cursor: "pointer",
-      background: active ? "rgba(0,140,255,0.14)" : "transparent",
-      border: `1px solid ${active ? "rgba(0,168,255,0.45)" : T.border}`,
-      color: active ? T.white : T.textSoft,
-      boxShadow: active ? `0 0 14px rgba(0,140,255,0.25)` : "none",
-      fontSize: 13, fontWeight: 600,
+      display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", padding: "8px 14px", borderRadius: 8, cursor: "pointer",
+      background: active ? C.navy : C.surface,
+      border: `1px solid ${C.border}`,
+      color: active ? "#fff" : C.ink,
+      fontSize: 12.5, fontWeight: 600,
     }}>
-      <span style={{ color: active ? T.electric2 : T.textSoft, display: "flex" }}>{icon}</span>
-      {label}
+      {icon} {label}
     </button>
   );
 }
-function QuickStat({ icon, label, value, accent, onClick }) {
+function QuickStat({ icon, label, value, onClick }) {
   return (
-    <div onClick={onClick} style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 14, padding: 12, cursor: onClick ? "pointer" : "default" }}>
+    <div onClick={onClick} style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12, cursor: onClick ? "pointer" : "default" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {icon}
-        <ChevronRight size={13} color={T.textSoft} />
+        <ChevronRight size={13} color={C.inkSoft} />
       </div>
-      <div style={{ fontSize: 11, color: T.textSoft, marginTop: 8 }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: T.white, marginTop: 2 }}>{value}</div>
+      <div style={{ fontSize: 11, color: C.inkSoft, marginTop: 8 }}>{label}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginTop: 2 }}>{value}</div>
     </div>
   );
 }
 function BottomItem({ icon, label, active, onClick }) {
   return (
-    <button onClick={onClick} style={{ background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: active ? T.electric2 : T.textSoft, cursor: "pointer" }}>
+    <button onClick={onClick} style={{ background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: active ? C.navy : C.inkSoft, cursor: "pointer" }}>
       {icon}
       <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
     </button>
   );
 }
 function Row({ children }) {
-  return <div style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: `1px solid ${T.border}` }}>{children}</div>;
+  return <div style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: `1px solid ${C.border}` }}>{children}</div>;
 }
 function EmptyRow({ children }) {
-  return <div style={{ color: T.textSoft, fontSize: 13, padding: "8px 0" }}>{children}</div>;
+  return <div style={{ color: C.inkSoft, fontSize: 13, padding: "8px 0" }}>{children}</div>;
 }
-function LoadingOrbs({ label }) {
-  const cores = [T.electric2, T.cyan, T.blue3];
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22 }}>
-      <style>{`
-        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes orbPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-      `}</style>
-      <div style={{ position: "relative", width: 72, height: 72 }}>
-        <div style={{
-          position: "absolute", inset: 0, borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(0,198,255,0.10) 0%, transparent 70%)`,
-        }} />
-        <div style={{ position: "absolute", inset: 0, animation: "orbitSpin 1.6s linear infinite" }}>
-          {cores.map((cor, i) => (
-            <div key={i} style={{
-              position: "absolute", top: "50%", left: "50%", width: 14, height: 14, borderRadius: "50%",
-              background: cor,
-              boxShadow: `0 0 10px ${cor}, 0 0 20px ${cor}`,
-              transform: `rotate(${i * 120}deg) translate(26px) rotate(${-i * 120}deg)`,
-              marginTop: -7, marginLeft: -7,
-              animation: `orbPulse ${1.2 + i * 0.2}s ease-in-out infinite`,
-            }} />
-          ))}
-        </div>
-      </div>
-      {label && <div style={{ color: T.textSoft, fontSize: 13 }}>{label}</div>}
-    </div>
-  );
-}
-
 function Centered({ children }) {
-  return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg0, color: T.textSoft }}>{children}</div>;
+  return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}>{children}</div>;
 }
 
-const inputStyle = { flex: 1, padding: "11px 12px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.surfaceSoft, color: T.white, fontSize: 13, minWidth: 0 };
-const btnPrimary = { display: "flex", alignItems: "center", gap: 6, padding: "12px 18px", borderRadius: 12, border: "none", background: `linear-gradient(135deg, ${T.blue3}, ${T.electric})`, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 6px 18px rgba(0,140,255,0.35)" };
-const btnPrimarySmall = { display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", borderRadius: 10, border: "none", background: `linear-gradient(135deg, ${T.blue3}, ${T.electric})`, color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" };
-const btnGhostSmall = { display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textSoft, fontWeight: 600, fontSize: 12, cursor: "pointer" };
-const filterActive = { padding: "7px 14px", borderRadius: 10, border: "none", background: T.blue3, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" };
-const filterInactive = { padding: "7px 14px", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textSoft, fontSize: 12, fontWeight: 600, cursor: "pointer" };
+const inputStyle = { flex: 1, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}`, background: C.bg, color: C.ink, fontSize: 13, minWidth: 0 };
+const btnPrimary = { display: "flex", alignItems: "center", gap: 6, padding: "11px 18px", borderRadius: 10, border: "none", background: C.navy, color: "#fff", fontWeight: 600, fontSize: 13, cursor: "pointer" };
+const btnPrimarySmall = { display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 10, border: "none", background: C.navy, color: "#fff", fontWeight: 600, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" };
+const btnGhostSmall = { display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", borderRadius: 10, border: `1px solid ${C.border}`, background: "transparent", color: C.inkSoft, fontWeight: 600, fontSize: 12, cursor: "pointer" };
+const filterActive = { padding: "6px 14px", borderRadius: 8, border: "none", background: C.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" };
+const filterInactive = { padding: "6px 14px", borderRadius: 8, border: `1px solid ${C.border}`, background: C.surface, color: C.ink, fontSize: 12, fontWeight: 600, cursor: "pointer" };
