@@ -52,15 +52,28 @@ export function estilo1(dados, primary, secondary, iniciais, corpo, fontFamily =
   ${adsCarouselCSS(primary)}
 
   .cta-flutuante {
-    position: fixed; bottom: 20px; right: 16px; z-index: 40;
-    display: flex; align-items: center; gap: 8px;
-    background: ${primary}; color: ${secondary}; text-decoration: none;
-    padding: 13px 18px; border-radius: 30px; font-weight: 700; font-size: 13.5px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    position: fixed; bottom: 22px; right: 18px; z-index: 40;
+    display: flex; align-items: center; gap: 9px;
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: ${secondary}; text-decoration: none;
+    padding: 12px 20px 12px 14px; border-radius: 999px; font-weight: 700; font-size: 13.5px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.25);
     animation: ctaEntrar 0.5s ease 1s both;
+  }
+  .cta-flutuante::before {
+    content: ""; position: absolute; inset: -6px; border-radius: 999px;
+    border: 1.5px solid ${primary}; opacity: 0; animation: ctaRing 2.6s ease-out infinite;
+  }
+  .cta-flutuante { position: fixed; }
+  .cta-icone {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: ${primary}; display: flex; align-items: center; justify-content: center;
   }
   .cta-flutuante:active { transform: scale(0.96); }
   @keyframes ctaEntrar { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes ctaRing { 0% { opacity: 0.5; transform: scale(0.92); } 100% { opacity: 0; transform: scale(1.18); } }
   ${catalogoCSS(primary)}
   ${galeriaCSS(primary)}
 
@@ -129,7 +142,7 @@ export function estilo1(dados, primary, secondary, iniciais, corpo, fontFamily =
 <div class="watermark-d3na">D3NA</div>
 
 <nav>
-  <div class="marca">${logoBadgeHTML(logo_choice, iniciais)} ${company_name}</div>
+  <div class="marca">${logoBadgeHTML(logo_choice, iniciais, primary, secondary, fontFamily)} ${company_name}</div>
   <div class="direita">
     <button class="theme-btn" id="themeBtn" title="Alternar tema">🌙</button>
     <button class="menu-btn" onclick="document.getElementById('menuDrop').classList.toggle('on')">
@@ -222,7 +235,7 @@ ${(() => {
   const wa = (contact_links || []).find((c) => c.platform === "whatsapp");
   const alvo = wa ? wa.link : "#contacto";
   const externo = wa ? `target="_blank"` : "";
-  return `<a class="cta-flutuante" href="${alvo}" ${externo}>💬 Fale connosco</a>`;
+  return `<a class="cta-flutuante" href="${alvo}" ${externo}><span class="cta-icone"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="${secondary}" d="M12 2C6.48 2 2 6.03 2 11c0 2.4 1.05 4.58 2.77 6.21L4 22l5.15-1.49c.92.24 1.88.37 2.85.37 5.52 0 10-4.03 10-9S17.52 2 12 2zm-2.5 10.5h-2V10h2v2.5zm4 0h-2V10h2v2.5zm4 0h-2V10h2v2.5z"/></svg></span>Fale connosco</a>`;
 })()}
 </body>
 </html>`;
