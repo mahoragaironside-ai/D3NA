@@ -307,7 +307,7 @@ function BotaoFlutuante({ onAction }) {
     { id: "missao", label: "Adicionar missão" },
   ];
   return (
-    <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 50 }}>
+    <div style={{ position: "fixed", bottom: "calc(76px + env(safe-area-inset-bottom, 0px))", right: 20, zIndex: 70 }}>
       {aberto && (
         <div style={{ position: "absolute", bottom: 60, right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 8, display: "flex", flexDirection: "column", gap: 4, minWidth: 180, boxShadow: "0 8px 24px rgba(0,0,0,0.3)" }}>
           {acoes.map((a) => (
