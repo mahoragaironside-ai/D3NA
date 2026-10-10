@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, GraduationCap, Lock, Check, ChevronDown, Clock, BookOpen, Timer, MessageCircle, ArrowRight } from "lucide-react";
+import { ArrowLeft, GraduationCap, Lock, Check, ChevronDown, Clock, BookOpen, Timer, MessageCircle, ArrowRight, Trophy } from "lucide-react";
 import { C } from "../tokens.js";
 import PaymentModal from "../components/PaymentModal.jsx";
 
@@ -112,13 +112,14 @@ function Ponto({ p, index, open, onToggle, onChanged }) {
       <button onClick={blocked ? undefined : onToggle} disabled={blocked}
         style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: "transparent", border: "none", color: "inherit", textAlign: "left", cursor: blocked ? "default" : "pointer" }}>
         <span style={circle}>{done ? <Check size={15} /> : blocked ? <Lock size={13} /> : index}</span>
-        <span style={{ flex: 1, fontWeight: 700, fontSize: 14.5 }}>{p.title}</span>
+        <span style={{ flex: 1, fontWeight: 700, fontSize: 14.5 }}>{p.title}{p.kind === "extra" && <span style={{ ...chip, marginLeft: 8, background: "rgba(230,160,40,.2)", color: "#d89a1d", fontWeight: 800, fontSize: 11 }}>PONTO EXTRA</span>}</span>
         {!blocked && <ChevronDown size={18} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s", opacity: 0.6 }} />}
       </button>
 
       {open && !blocked && (
         <div style={{ padding: "0 14px 14px" }}>
           <div style={{ borderLeft: "3px solid " + ACCENT, boxShadow: "-4px 0 14px -4px rgba(124,106,232,.7)", background: SOFT, borderRadius: "0 10px 10px 0", padding: "12px 13px", marginBottom: 12 }}>
+            {p.kind === "extra" && <div style={{ fontSize: 12, fontWeight: 700, color: "#d89a1d", marginBottom: 8 }}>Isto não foi dito no vídeo, mas é essencial.</div>}
             {visible.map((t, i) => (
               <p key={i} style={{ margin: i === visible.length - 1 ? 0 : "0 0 10px", fontSize: 15.5, lineHeight: 1.65, animation: "dnaUp .5s ease both", animationDelay: (i * 0.08) + "s" }}>{t}</p>
             ))}
@@ -289,6 +290,8 @@ export default function Curso({ onBack }) {
   const free = (l) => l.module_number === 1 && l.lesson_number === 1;
 
   const modules = [...new Set(lessons.map((l) => l.module_number))];
+  const isDone = (l) => l.points_total > 0 && l.points_done === l.points_total;
+  const nextTodo = lessons.find((l) => !isDone(l) && (enrolled || free(l)));
   const pts = lesson ? lesson.points : [];
   const L = lesson ? lesson.lesson : null;
   const vm = L ? Math.round(Number(L.video_minutes) || 0) : 0;
@@ -361,6 +364,12 @@ export default function Curso({ onBack }) {
               <span style={chip}>{lessons.length} aulas</span>
               <span style={chip}>{modules.length} módulos</span>
             </div>
+            {nextTodo && (
+              <button style={{ ...btn, width: "100%", justifyContent: "center", marginBottom: 14 }} onClick={() => go("A preparar a aula…", () => loadLesson(nextTodo.lesson_id))}>
+                {nextTodo.points_done > 0 ? "Continuar" : "Começar"}: {nextTodo.title} <ArrowRight size={16} />
+              </button>
+            )}
+            {!nextTodo && enrolled && lessons.length > 0 && <div style={{ ...card, display: "flex", alignItems: "center", gap: 10, fontWeight: 700 }}><Trophy size={20} color={ACCENT} /> Curso concluído. Parabéns!</div>}
             {modules.map((m) => (
               <div key={m} style={{ marginBottom: 8 }}>
                 <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: ACCENT, margin: "6px 2px 8px" }}>Módulo {m}</div>
@@ -373,7 +382,8 @@ export default function Curso({ onBack }) {
                       <span style={{ display: "block", fontWeight: 700, fontSize: 14.5 }}>{l.title}</span>
                       <span style={{ display: "block", fontSize: 12.5, opacity: 0.7, marginTop: 3, lineHeight: 1.4 }}>{l.summary}</span>
                     </span>
-                    {!enrolled && (free(l)
+                    {isDone(l) ? <span style={{ ...chip, background: "rgba(46,158,91,.18)", color: "#2e9e5b", fontWeight: 700 }}><Check size={13} /> Concluída</span> : l.points_done > 0 ? <span style={chip}>{l.points_done}/{l.points_total}</span> : null}
+                    {!enrolled && !isDone(l) && (free(l)
                       ? <span style={{ ...chip, background: "rgba(46,158,91,.18)", color: "#2e9e5b", fontWeight: 700, animation: "dnaGreen 2.2s ease-in-out infinite" }}>Grátis</span>
                       : <Lock size={16} style={{ opacity: 0.55 }} />)}
                   </button>

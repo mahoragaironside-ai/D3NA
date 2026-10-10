@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { query } from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { callChatModel } from "../ai/orchestrator.js";
+import { callChatModel as rawChat } from "../ai/orchestrator.js";
+
+async function callChatModel(opts) {
+  const t = await rawChat(opts);
+  return typeof t === "string" ? t.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "") : t;
+}
 
 const router = Router();
 const generating = new Set();
@@ -34,34 +39,55 @@ async function requireEnrollment(req, res, next) {
 const isFree = (x) => Number(x.module_number) === 1 && Number(x.lesson_number) === 1;
 const LOCKED = "Esta aula faz parte da inscricao semanal.";
 
+async function getTranscript(videoId) {
+  try {
+    const mod = await import("youtube-transcript");
+    const YT = mod.YoutubeTranscript || (mod.default && mod.default.YoutubeTranscript);
+    if (!YT) return null;
+    let items;
+    try { items = await YT.fetchTranscript(videoId, { lang: "pt" }); }
+    catch (e) { items = await YT.fetchTranscript(videoId); }
+    const text = (items || []).map((i) => String(i.text || "")).join(" ").replace(/\s+/g, " ").trim();
+    return text.length > 300 ? text : null;
+  } catch (e) {
+    console.error("Transcricao:", e.message);
+    return null;
+  }
+}
+
 async function findVideo(topicKey, searchText) {
-  const cached = await query(`SELECT * FROM video_cache WHERE topic_key = $1`, [topicKey]);
-  if (cached.rowCount) return cached.rows[0];
+  const cached = await query("SELECT * FROM video_cache WHERE topic_key = $1", [topicKey]);
+  if (cached.rowCount) {
+    const c = cached.rows[0];
+    if (!c.transcript) {
+      const t = await getTranscript(c.video_id);
+      if (t) {
+        await query("UPDATE video_cache SET transcript = $2, has_captions = true WHERE topic_key = $1", [topicKey, t]);
+        c.transcript = t;
+      }
+    }
+    return c;
+  }
   const key = process.env.YOUTUBE_API_KEY;
   if (!key) return null;
   try {
-    const sp = new URLSearchParams({
-      part: "snippet", q: searchText, type: "video", videoDuration: "medium",
-      videoEmbeddable: "true", relevanceLanguage: "pt", maxResults: "3", key,
-    });
+    const sp = new URLSearchParams({ part: "snippet", q: searchText, type: "video", videoDuration: "medium", videoEmbeddable: "true", relevanceLanguage: "pt", maxResults: "5", key });
     const sj = await (await fetch("https://www.googleapis.com/youtube/v3/search?" + sp)).json();
     const ids = (sj.items || []).map((i) => i.id && i.id.videoId).filter(Boolean);
     if (!ids.length) return null;
     const vp = new URLSearchParams({ part: "contentDetails,snippet", id: ids.join(","), key });
     const vj = await (await fetch("https://www.googleapis.com/youtube/v3/videos?" + vp)).json();
-    const v = (vj.items || [])[0];
-    if (!v) return null;
-    const row = {
-      topic_key: topicKey,
-      video_id: v.id,
-      title: v.snippet.title,
-      minutes: isoToMinutes(v.contentDetails.duration),
-    };
-    await query(
-      `INSERT INTO video_cache (topic_key, video_id, title, minutes, has_captions)
-       VALUES ($1,$2,$3,$4,false) ON CONFLICT (topic_key) DO NOTHING`,
-      [row.topic_key, row.video_id, row.title, row.minutes]
-    );
+    const cands = vj.items || [];
+    if (!cands.length) return null;
+    let pick = null;
+    let text = null;
+    for (const v of cands) {
+      const t = await getTranscript(v.id);
+      if (t) { pick = v; text = t; break; }
+    }
+    if (!pick) pick = cands[0];
+    const row = { topic_key: topicKey, video_id: pick.id, title: pick.snippet.title, minutes: isoToMinutes(pick.contentDetails.duration), transcript: text, has_captions: !!text };
+    await query("INSERT INTO video_cache (topic_key, video_id, title, minutes, has_captions, transcript) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (topic_key) DO NOTHING", [row.topic_key, row.video_id, row.title, row.minutes, row.has_captions, row.transcript]);
     return row;
   } catch (e) {
     console.error("YouTube:", e.message);
@@ -74,9 +100,11 @@ const PLAN_SYSTEM = `Es um professor experiente. Escreve em portugues. Devolve A
 Maximo 3 modulos e 3 aulas por modulo, ordenados do basico ao avancado, adequados ao pedido do aluno.`;
 
 const POINTS_SYSTEM = `Es um professor claro e paciente. Escreve em portugues. Devolve APENAS JSON:
-{"points":[{"title":"...","explanation_parts":["...","...","..."],"check_question":"..."}]}
+{"points":[{"kind":"video|extra","title":"...","explanation_parts":["...","...","..."],"check_question":"..."}]}
 Exactamente 4 pontos. Cada explicacao tem 3 partes curtas (2 a 3 frases cada), com exemplos simples.
 A check_question pede ao aluno que explique o ponto com as proprias palavras.
+Se receberes a TRANSCRICAO DO VIDEO: pelo menos 2 pontos devem ter kind "video" e explicar o que o video realmente disse, sem inventar nada que la nao esteja. Os restantes podem ter kind "extra": conceitos essenciais que o video NAO disse mas que o aluno precisa de saber, so se tiveres certeza de que estao correctos. Se nao tiveres certeza, faz mais pontos "video".
+Se NAO receberes transcricao, explica o tema da aula normalmente.
 So afirma o que tens certeza.`;
 
 async function generateLesson(lesson, userId) {
@@ -87,7 +115,7 @@ async function generateLesson(lesson, userId) {
     messages: [{
       role: "user",
       content: `Curso: ${lesson.topic}\nNivel: ${lesson.level}\nAula: ${lesson.title}\nResumo: ${lesson.summary}` +
-        (video ? `\nVideo da aula: ${video.title}` : ""),
+        (video ? `\nVideo da aula (titulo): ${video.title}` : "") + (video && video.transcript ? `\n\nTRANSCRICAO DO VIDEO:\n${String(video.transcript).slice(0, 14000)}` : ""),
     }],
     maxTokens: 2500,
     jsonMode: true,
@@ -99,8 +127,8 @@ async function generateLesson(lesson, userId) {
     const p = points[i];
     const ins = await query(
       `INSERT INTO lesson_points (lesson_id, position, kind, title, explanation_parts, check_question)
-       VALUES ($1,$2,'texto',$3,$4,$5) RETURNING point_id`,
-      [lesson.lesson_id, i + 1, p.title, JSON.stringify(p.explanation_parts || []), p.check_question]
+       VALUES ($1,$2,$6,$3,$4,$5) RETURNING point_id`,
+      [lesson.lesson_id, i + 1, p.title, JSON.stringify(p.explanation_parts || []), p.check_question, video && video.transcript ? (p.kind === "extra" ? "extra" : "video") : "texto"]
     );
     await query(
       `INSERT INTO user_point_progress (user_id, point_id, status) VALUES ($1,$2,$3)
@@ -148,6 +176,14 @@ router.post("/", requireAuth, requireEnrollment, async (req, res) => {
         );
       }
     }
+    try {
+      const f1 = await query("SELECT l.*, c.topic, c.level FROM course_lessons l JOIN user_courses c ON c.course_id = l.course_id WHERE l.course_id = $1 AND l.module_number = 1 AND l.lesson_number = 1", [course.course_id]);
+      if (f1.rowCount) {
+        const fid = f1.rows[0].lesson_id;
+        generating.add(fid);
+        generateLesson(f1.rows[0], req.userId).catch((e) => console.error("pre-geracao:", e.message)).finally(() => generating.delete(fid));
+      }
+    } catch (e) { console.error(e); }
     res.status(201).json({ course });
   } catch (e) {
     console.error(e);
@@ -204,7 +240,7 @@ router.get("/lessons/:lessonId", requireAuth, requireEnrollment, async (req, res
     );
     const points = pts.rows.map((p) =>
       p.status === "bloqueado"
-        ? { point_id: p.point_id, position: p.position, title: p.title, status: p.status }
+        ? { point_id: p.point_id, position: p.position, title: p.title, kind: p.kind, status: p.status }
         : p
     );
     res.json({
@@ -232,9 +268,9 @@ router.get("/:courseId", requireAuth, requireEnrollment, async (req, res) => {
     ]);
     if (!c.rowCount) return res.status(404).json({ error: "Curso nao encontrado." });
     const l = await query(
-      `SELECT lesson_id, module_number, lesson_number, title, summary, content_status
-       FROM course_lessons WHERE course_id = $1 ORDER BY module_number, lesson_number`,
-      [req.params.courseId]
+      `SELECT l.lesson_id, l.module_number, l.lesson_number, l.title, l.summary, l.content_status, (SELECT count(*) FROM lesson_points p WHERE p.lesson_id = l.lesson_id)::int AS points_total, (SELECT count(*) FROM lesson_points p JOIN user_point_progress u ON u.point_id = p.point_id AND u.user_id = $2 WHERE p.lesson_id = l.lesson_id AND u.status = 'compreendido')::int AS points_done
+       FROM course_lessons l WHERE l.course_id = $1 ORDER BY l.module_number, l.lesson_number`,
+      [req.params.courseId, req.userId]
     );
     res.json({ course: c.rows[0], lessons: l.rows, enrolled: !!req.enrolled });
   } catch (e) {
