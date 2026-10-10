@@ -148,9 +148,9 @@ function MainApp() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <img src="/logo.png" alt="" style={{ width: 26, height: 26, borderRadius: 7, objectFit: "cover" }} />
-              <span style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 600, letterSpacing: 0.2 }}>D3NA</span>
+              <span style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 600, letterSpacing: 0.2, textShadow: "0 0 18px rgba(95,150,255,0.35)" }}>D3NA</span>
             </div>
-            <div style={{ fontSize: 12.5, fontWeight: 500, fontFamily: "var(--font-serif)", fontStyle: "italic", opacity: 0.75, marginTop: 3 }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 500, fontFamily: "var(--font-serif)", fontStyle: "italic", opacity: 0.75, marginTop: 3, borderBottom: "1px solid rgba(95,150,255,0.3)", display: "inline-block", paddingBottom: 2 }}>{project.project.name || "Decisões de negócio, com clareza"}</div>
           </div>
         </div>
 
