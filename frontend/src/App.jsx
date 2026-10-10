@@ -138,8 +138,8 @@ function MainApp() {
         onOpenCourse={onOpenCourse}
       />
 
-      <div className="app-main" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <div style={{ background: "rgba(22,48,92,0.72)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", color: "#fff", padding: "11px 18px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+      <div className="app-main" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, position: "relative" }}>
+        <div style={{ background: "rgba(22,48,92,0.72)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", color: "#fff", padding: "11px 18px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid rgba(255,255,255,0.1)", position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}>
           {!sidebarOpen && (
             <button onClick={() => setSidebarOpen(true)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <Menu size={16} color="#fff" />
@@ -154,7 +154,7 @@ function MainApp() {
           </div>
         </div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, paddingTop: 76 }}>
           {me && !me.phone_verified && !phoneNoticeDismissed && (
             <PhoneVerifyBanner onVerified={() => setMe({ ...me, phone_verified: true })} onDismiss={dismissPhoneNotice} />
           )}
