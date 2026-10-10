@@ -122,7 +122,7 @@ function MainApp() {
   if (showCourse) return <Curso onBack={() => setShowCourse(false)} />;
 
   return (
-    <div style={{ height: "100vh", display: "flex", background: C.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: C.ink, overflow: "hidden" }}>
+    <div style={{ height: "100dvh", display: "flex", background: C.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: C.ink, overflow: "hidden" }}>
       <Sidebar
         open={sidebarOpen}
         onToggle={() => setSidebarOpen((o) => !o)}
@@ -185,7 +185,7 @@ function MainApp() {
           --amber: #E0AA4E; --amber-bg: #3A2E15; --red: #E27263; --red-bg: #3B1D1A;
         }
         .sidebar {
-          position: fixed; top: 0; left: 0; height: 100vh; width: 260px;
+          position: fixed; top: 0; left: 0; height: 100dvh; width: 260px;
           background: var(--surface); border-right: 1px solid var(--border);
           display: flex; flex-direction: column; z-index: 50;
           transition: transform .22s ease;
@@ -208,5 +208,5 @@ function MainApp() {
 }
 
 function Centered({ children }) {
-  return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.inkSoft, fontFamily: "-apple-system, sans-serif" }}>{children}</div>;
+  return <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", color: C.inkSoft, fontFamily: "-apple-system, sans-serif" }}>{children}</div>;
 }
